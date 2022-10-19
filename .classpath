@@ -23,7 +23,7 @@
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/delta-common-ui"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/delta-common"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/delta-lotro-data"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/delta-lotro-memory"/>
+	<classpathentry kind="lib" path="C:/Users/SIMON_2016/LotRO Companion/app/lib/delta-lotro-memory-5.9.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
@@ -31,6 +31,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
+			<attribute name="module" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
@@ -41,5 +42,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/delta-common-l10n"/>
+	<classpathentry kind="lib" path="C:/Users/SIMON_2016/LotRO Companion/app/lib/delta-lotro-dat-utils-8.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

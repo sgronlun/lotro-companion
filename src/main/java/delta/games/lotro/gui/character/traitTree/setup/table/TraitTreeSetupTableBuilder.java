@@ -120,7 +120,7 @@ public class TraitTreeSetupTableBuilder
       @Override
       public Integer getData(TraitTreeSetup setup)
       {
-        return 0; //Integer.valueOf(setup.getCost());
+        return Integer.valueOf(setup.getCost());
       }
     };
     DefaultTableColumnController<TraitTreeSetup,Integer> costColumn=new DefaultTableColumnController<TraitTreeSetup,Integer>(TraitTreeSetupColumnIds.COST.name(),"Cost",Integer.class,costCell);

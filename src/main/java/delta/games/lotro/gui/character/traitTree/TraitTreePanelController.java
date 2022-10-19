@@ -25,7 +25,7 @@ import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.CharacterData;
 import delta.games.lotro.character.classes.traitTree.TraitTree;
 import delta.games.lotro.character.classes.traitTree.TraitTreeBranch;
-import delta.games.lotro.character.status.traitTree.TraitTreeStatus;
+import delta.games.lotro.character.classes.traitTree.TraitTreeStatus;
 import delta.games.lotro.character.classes.traitTree.setup.TraitTreeSetup;
 import delta.games.lotro.character.classes.traitTree.setup.TraitTreeSetupsManager;
 import delta.games.lotro.character.traits.TraitDescription;
@@ -308,7 +308,7 @@ public class TraitTreePanelController
     TraitTreeStatus status=setup.getStatus();
     status.copyFrom(_status);
     // Cost
-    //setup.setCost(_status.getCost());
+    setup.setCost(_status.getCost());
     return setup;
   }
 

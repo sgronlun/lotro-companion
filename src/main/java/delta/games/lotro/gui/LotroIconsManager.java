@@ -148,7 +148,7 @@ public class LotroIconsManager
    */
   public static ImageIcon getRelicIcon(String iconFilename)
   {
-    String path="/relicIcons/"+iconFilename;
+    String path="/relics/"+iconFilename;
     return IconsManager.getIcon(path);
   }
 
@@ -159,7 +159,7 @@ public class LotroIconsManager
    */
   public static ImageIcon getBuffIcon(String iconFilename)
   {
-    if (iconFilename.startsWith("/traitIcons"))
+    if (iconFilename.startsWith("/traits"))
     {
       // Trait icon
       return IconsManager.getIcon(iconFilename);
@@ -184,7 +184,7 @@ public class LotroIconsManager
    */
   public static ImageIcon getTraitIcon(int traitIconId)
   {
-    String path="/traitIcons/"+traitIconId+".png";
+    String path="/traits/"+traitIconId+".png";
     return IconsManager.getIcon(path);
   }
 
@@ -209,7 +209,7 @@ public class LotroIconsManager
     if (virtue!=null)
     {
       int virtueIconId=virtue.getIconId();
-      String path="/virtueIcons/"+virtueIconId+".png";
+      String path="/traits/"+virtueIconId+".png";
       return IconsManager.getIcon(path);
     }
     return null;
@@ -283,8 +283,7 @@ public class LotroIconsManager
    */
   public static ImageIcon getMountIcon(int mountId)
   {
-    String path="/mountIcons/"+mountId+".png";
-    return IconsManager.getIcon(path);
+    return getSkillIcon(mountId);
   }
 
   /**
@@ -294,8 +293,7 @@ public class LotroIconsManager
    */
   public static ImageIcon getPetIcon(int petId)
   {
-    String path="/petIcons/"+petId+".png";
-    return IconsManager.getIcon(path);
+    return getSkillIcon(petId);
   }
 
   /**
@@ -317,7 +315,7 @@ public class LotroIconsManager
    */
   public static ImageIcon getSkillIcon(int skillIconId)
   {
-    String path="/skillIcons/"+skillIconId+".png";
+    String path="/skills/"+skillIconId+".png";
     return IconsManager.getIcon(path);
   }
 

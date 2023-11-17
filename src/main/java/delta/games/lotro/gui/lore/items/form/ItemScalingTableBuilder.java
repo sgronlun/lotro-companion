@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import delta.common.ui.swing.tables.CellDataProvider;
+import delta.common.ui.swing.tables.ColumnsUtils;
 import delta.common.ui.swing.tables.DataProvider;
 import delta.common.ui.swing.tables.DefaultTableColumnController;
 import delta.common.ui.swing.tables.GenericTableController;
@@ -22,11 +23,12 @@ import delta.games.lotro.common.stats.StatType;
 import delta.games.lotro.gui.lore.items.ItemColumnIds;
 import delta.games.lotro.gui.lore.items.ItemUiTools;
 import delta.games.lotro.gui.utils.MoneyCellRenderer;
-import delta.games.lotro.gui.utils.l10n.ColumnsUtils;
+import delta.games.lotro.gui.utils.l10n.StatColumnsUtils;
 import delta.games.lotro.gui.utils.l10n.StatRenderer;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.scaling.ItemScaling;
 import delta.games.lotro.lore.items.scaling.ItemScalingEntry;
+import delta.games.lotro.lore.items.scaling.WeaponScalingEntry;
 
 /**
  * Builder for a table that scaling data for an item.
@@ -90,6 +92,23 @@ public class ItemScalingTableBuilder
     columns.add(buildLevelColumn());
     // Item level column
     columns.add(buildItemLevelColumn());
+    // Weapon scaling?
+    boolean weaponScaling=false;
+    List<ItemScalingEntry> entries=scaling.getEntries();
+    if (!entries.isEmpty())
+    {
+      ItemScalingEntry firstEntry=entries.get(0);
+      weaponScaling=(firstEntry instanceof WeaponScalingEntry);
+    }
+    if (weaponScaling)
+    {
+      // DPS
+      columns.add(buildDPSColumn());
+      // Min damage
+      columns.add(buildMinDamageColumn());
+      // Max damage
+      columns.add(buildMaxDamageColumn());
+    }
     // Value
     columns.add(buildValueColumn());
     // Stat columns
@@ -191,7 +210,66 @@ public class ItemScalingTableBuilder
     }
     DefaultTableColumnController<ItemScalingEntry,Number> statColumn=new DefaultTableColumnController<ItemScalingEntry,Number>(id,name,valueClass,statCell);
     StatRenderer renderer=new StatRenderer(stat);
-    ColumnsUtils.configureStatValueColumn(statColumn,renderer,55);
+    StatColumnsUtils.configureStatValueColumn(statColumn,renderer,55);
     return statColumn;
+  }
+
+  /**
+   * Build a column for the DPS of an item.
+   * @return a column.
+   */
+  public static DefaultTableColumnController<ItemScalingEntry,Float> buildDPSColumn()
+  {
+    CellDataProvider<ItemScalingEntry,Float> valueCell=new CellDataProvider<ItemScalingEntry,Float>()
+    {
+      @Override
+      public Float getData(ItemScalingEntry item)
+      {
+        return Float.valueOf(((WeaponScalingEntry)item).getDPS());
+      }
+    };
+    DefaultTableColumnController<ItemScalingEntry,Float> valueColumn=new DefaultTableColumnController<ItemScalingEntry,Float>(ItemScalingColumnIds.DPS.name(),"DPS",Float.class,valueCell);
+    ColumnsUtils.configureFloatColumn(valueColumn,0,1,60);
+    return valueColumn;
+  }
+
+  /**
+   * Build a column for the minimum damage of a weapon.
+   * @return a column.
+   */
+  public static DefaultTableColumnController<ItemScalingEntry,Integer> buildMinDamageColumn()
+  {
+    CellDataProvider<ItemScalingEntry,Integer> valueCell=new CellDataProvider<ItemScalingEntry,Integer>()
+    {
+      @Override
+      public Integer getData(ItemScalingEntry item)
+      {
+        float minDamage=((WeaponScalingEntry)item).getMinDamage();
+        return Integer.valueOf(Math.round(minDamage));
+      }
+    };
+    DefaultTableColumnController<ItemScalingEntry,Integer> valueColumn=new DefaultTableColumnController<ItemScalingEntry,Integer>(ItemScalingColumnIds.MIN_DAMAGE.name(),"Min Damage",Integer.class,valueCell);
+    ColumnsUtils.configureIntegerColumn(valueColumn,50);
+    return valueColumn;
+  }
+
+  /**
+   * Build a column for the maximum damage of a weapon.
+   * @return a column.
+   */
+  public static DefaultTableColumnController<ItemScalingEntry,Integer> buildMaxDamageColumn()
+  {
+    CellDataProvider<ItemScalingEntry,Integer> valueCell=new CellDataProvider<ItemScalingEntry,Integer>()
+    {
+      @Override
+      public Integer getData(ItemScalingEntry item)
+      {
+        float maxDamage=((WeaponScalingEntry)item).getMaxDamage();
+        return Integer.valueOf(Math.round(maxDamage));
+      }
+    };
+    DefaultTableColumnController<ItemScalingEntry,Integer> valueColumn=new DefaultTableColumnController<ItemScalingEntry,Integer>(ItemScalingColumnIds.MAX_DAMAGE.name(),"Max Damage",Integer.class,valueCell);
+    ColumnsUtils.configureIntegerColumn(valueColumn,50);
+    return valueColumn;
   }
 }

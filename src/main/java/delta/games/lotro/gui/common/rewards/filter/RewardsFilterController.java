@@ -8,8 +8,10 @@ import java.awt.Insets;
 import javax.swing.JPanel;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.combobox.ItemSelectionListener;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.games.lotro.character.virtues.VirtueDescription;
 import delta.games.lotro.common.enums.BillingGroup;
 import delta.games.lotro.common.rewards.RewardsExplorer;
@@ -33,21 +35,20 @@ import delta.games.lotro.config.LotroCoreConfig;
 import delta.games.lotro.gui.common.rewards.RewardsUiUtils;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
 import delta.games.lotro.gui.utils.SharedUiUtils;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.reputation.Faction;
+import delta.games.lotro.lore.titles.TitleDescription;
 
 /**
  * Controller for a reward filter edition panel.
  * @author DAM
  */
-public class RewardsFilterController
+public class RewardsFilterController extends AbstractPanelController
 {
   // Data
   private RewardsFilter _filter;
   private FilterUpdateListener _filterUpdateListener;
   private RewardsUiUtils _uiUtils;
-
-  // GUI
-  private JPanel _panel;
 
   // Quest or deed?
   private boolean _quest;
@@ -61,7 +62,7 @@ public class RewardsFilterController
   private ComboBoxController<Boolean> _mountXp;
   private ComboBoxController<Boolean> _virtueXp;
   private ComboBoxController<String> _trait;
-  private ComboBoxController<String> _title;
+  private ComboBoxController<TitleDescription> _title;
   private ComboBoxController<VirtueDescription> _virtue;
   private ComboBoxController<String> _emote;
   private ComboBoxController<Integer> _item;
@@ -70,32 +71,33 @@ public class RewardsFilterController
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param filter Managed filter.
    * @param filterUpdateListener Filter update listener.
    * @param explorer Rewards explorer.
    * @param quest Indicates if this is for the quests filter or for the deeds filter.
    */
-  public RewardsFilterController(RewardsFilter filter, FilterUpdateListener filterUpdateListener, RewardsExplorer explorer, boolean quest)
+  public RewardsFilterController(AreaController parent, RewardsFilter filter, FilterUpdateListener filterUpdateListener, RewardsExplorer explorer, boolean quest)
   {
+    super(parent);
     _filter=filter;
     _filterUpdateListener=filterUpdateListener;
     _uiUtils=new RewardsUiUtils(explorer);
     _quest=quest;
+    JPanel panel=buildPanel();
+    setPanel(panel);
   }
 
   /**
    * Get the managed panel.
    * @return the managed panel.
    */
-  public JPanel getPanel()
+  public JPanel buildPanel()
   {
-    if (_panel==null)
-    {
-      _panel=buildRewardsPanel();
-      setFilter();
-      filterUpdated();
-    }
-    return _panel;
+    JPanel panel=buildRewardsPanel();
+    setFilter();
+    filterUpdated();
+    return panel;
   }
 
   /**
@@ -216,7 +218,7 @@ public class RewardsFilterController
     _trait.selectItem(trait);
     // Title
     TitleRewardFilter titleFilter=_filter.getTitleFilter();
-    String title=titleFilter.getTitle();
+    TitleDescription title=titleFilter.getTitle();
     _title.selectItem(title);
     // Virtue
     if (_virtue!=null)
@@ -259,17 +261,17 @@ public class RewardsFilterController
     {
       JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
       // Reputation
-      linePanel.add(GuiFactory.buildLabel("Reputation:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.reputation")));
       _reputation=buildReputationCombobox();
       linePanel.add(_reputation.getComboBox());
       // Title
-      linePanel.add(GuiFactory.buildLabel("Title:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.title")));
       _title=buildTitlesCombobox();
       linePanel.add(_title.getComboBox());
       // Virtue
       if ((!isLive) && (!_quest))
       {
-        linePanel.add(GuiFactory.buildLabel("Virtue:"));
+        linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.virtue")));
         _virtue=buildVirtuesCombobox();
         linePanel.add(_virtue.getComboBox());
       }
@@ -283,7 +285,7 @@ public class RewardsFilterController
     {
       JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
       // Billing Group
-      linePanel.add(GuiFactory.buildLabel("Account-wide token:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.accountWideToken")));
       linePanel.add(_billingGroup.getComboBox());
       c=new GridBagConstraints(0,y,1,1,1.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,0,0,0),0,0);
       panel.add(linePanel,c);
@@ -293,23 +295,23 @@ public class RewardsFilterController
     {
       JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
       // Traits
-      linePanel.add(GuiFactory.buildLabel("Trait:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.trait")));
       _trait=buildTraitsCombobox();
       linePanel.add(_trait.getComboBox());
       // Emotes
-      linePanel.add(GuiFactory.buildLabel("Emote:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.emote")));
       _emote=buildEmotesCombobox();
       linePanel.add(_emote.getComboBox());
       c=new GridBagConstraints(0,y,1,1,1.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,0,0,0),0,0);
       // Items
-      linePanel.add(GuiFactory.buildLabel("Item:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.item")));
       _item=buildItemsCombobox();
       linePanel.add(_item.getComboBox());
       // Relics
       _relic=buildRelicsCombobox();
       if (_relic!=null)
       {
-        linePanel.add(GuiFactory.buildLabel("Relic:"));
+        linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.relic")));
         linePanel.add(_relic.getComboBox());
       }
       panel.add(linePanel,c);
@@ -321,43 +323,43 @@ public class RewardsFilterController
       // LOTRO points
       if (isLive)
       {
-        line.add(GuiFactory.buildLabel("LOTRO points:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.lotroPoints")));
         _lotroPoints=buildLotroPointsCombobox();
         line.add(_lotroPoints.getComboBox());
         // Class point
-        line.add(GuiFactory.buildLabel("Class point:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.classPoints")));
         _classPoints=buildClassPointsCombobox();
         line.add(_classPoints.getComboBox());
       }
       // XP
-      line.add(GuiFactory.buildLabel("XP:"));
+      line.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.xp")));
       _xp=buildXpCombobox();
       line.add(_xp.getComboBox());
       // Item XP
       if ((_quest) && (isLive))
       {
-        line.add(GuiFactory.buildLabel("Item XP:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.itemXP")));
         _itemXp=buildItemXpCombobox();
         line.add(_itemXp.getComboBox());
       }
       // Mount XP
       if (isLive)
       {
-        line.add(GuiFactory.buildLabel("Mount XP:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.mountXP")));
         _mountXp=buildMountXpCombobox();
         line.add(_mountXp.getComboBox());
       }
       // Virtue XP
       if (isLive)
       {
-        line.add(GuiFactory.buildLabel("Virtue XP:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.virtueXP")));
         _virtueXp=buildVirtueXpCombobox();
         line.add(_virtueXp.getComboBox());
       }
       // Glory
       if ((_quest) && (isLive))
       {
-        line.add(GuiFactory.buildLabel("Renown/infamy:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("rewards.filter.renownOrInfamy")));
         _glory=buildGloryCombobox();
         line.add(_glory.getComboBox());
       }
@@ -494,12 +496,14 @@ public class RewardsFilterController
    */
   private ComboBoxController<Boolean> build3StatesBooleanCombobox()
   {
-    return SharedUiUtils.build3StatesBooleanCombobox("","With","Without");
+    String with=Labels.getLabel("shared.with");
+    String without=Labels.getLabel("shared.without");
+    return SharedUiUtils.build3StatesBooleanCombobox("",with,without);
   }
 
   private ComboBoxController<Faction> buildReputationCombobox()
   {
-    ComboBoxController<Faction> combo=SharedUiUtils.buildFactionCombo();
+    ComboBoxController<Faction> combo=SharedUiUtils.buildFactionCombo(this);
     ItemSelectionListener<Faction> listener=new ItemSelectionListener<Faction>()
     {
       @Override
@@ -531,13 +535,13 @@ public class RewardsFilterController
     return combo;
   }
 
-  private ComboBoxController<String> buildTitlesCombobox()
+  private ComboBoxController<TitleDescription> buildTitlesCombobox()
   {
-    ComboBoxController<String> combo=_uiUtils.buildTitlesCombo();
-    ItemSelectionListener<String> listener=new ItemSelectionListener<String>()
+    ComboBoxController<TitleDescription> combo=_uiUtils.buildTitlesCombo(this);
+    ItemSelectionListener<TitleDescription> listener=new ItemSelectionListener<TitleDescription>()
     {
       @Override
-      public void itemSelected(String title)
+      public void itemSelected(TitleDescription title)
       {
         TitleRewardFilter filter=_filter.getTitleFilter();
         filter.setTitle(title);
@@ -646,15 +650,10 @@ public class RewardsFilterController
    */
   public void dispose()
   {
+    super.dispose();
     // Data
     _filter=null;
     // Controllers
-    // GUI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
     if (_reputation!=null)
     {
       _reputation.dispose();

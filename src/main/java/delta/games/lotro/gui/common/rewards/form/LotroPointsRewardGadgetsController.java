@@ -5,6 +5,7 @@ import java.awt.Color;
 import javax.swing.Icon;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.icons.IconsManager;
 import delta.common.ui.swing.labels.LabelWithHalo;
 
@@ -16,12 +17,14 @@ public class LotroPointsRewardGadgetsController extends RewardGadgetsController
 {
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param count LOTRO points count.
    */
-  public LotroPointsRewardGadgetsController(int count)
+  public LotroPointsRewardGadgetsController(AreaController parent, int count)
   {
+    super(parent);
     // Label
-    String text=count+" LOTRO Points";
+    String text=count+" LOTRO Points"; // I18n
     Color color=Color.WHITE;
     _label=new LabelWithHalo();
     _label.setText(text);

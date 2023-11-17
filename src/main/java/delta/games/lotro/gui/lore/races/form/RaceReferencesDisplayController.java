@@ -10,11 +10,12 @@ import javax.swing.event.HyperlinkListener;
 
 import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.common.ui.swing.navigator.PageIdentifier;
-import delta.games.lotro.common.CharacterClass;
-import delta.games.lotro.common.Race;
+import delta.games.lotro.character.classes.ClassDescription;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
-import delta.games.lotro.lore.xrefs.races.RaceReference;
+import delta.games.lotro.lore.xrefs.Reference;
 import delta.games.lotro.lore.xrefs.races.RaceReferencesBuilder;
+import delta.games.lotro.lore.xrefs.races.RaceRole;
 import delta.games.lotro.utils.gui.HtmlUtils;
 
 /**
@@ -33,7 +34,7 @@ public class RaceReferencesDisplayController
    * @param parent Parent window (a navigator).
    * @param race Race to use.
    */
-  public RaceReferencesDisplayController(NavigatorWindowController parent, Race race)
+  public RaceReferencesDisplayController(NavigatorWindowController parent, RaceDescription race)
   {
     _parent=parent;
     _display=buildDetailsPane(race);
@@ -48,9 +49,9 @@ public class RaceReferencesDisplayController
     return _display;
   }
 
-  private JEditorPane buildDetailsPane(Race race)
+  private JEditorPane buildDetailsPane(RaceDescription race)
   {
-    List<RaceReference<?>> references=getReferences(race);
+    List<Reference<?,RaceRole>> references=getReferences(race);
     if (references.isEmpty())
     {
       return null;
@@ -85,14 +86,14 @@ public class RaceReferencesDisplayController
     return editor;
   }
 
-  private List<RaceReference<?>> getReferences(Race race)
+  private List<Reference<?,RaceRole>> getReferences(RaceDescription race)
   {
     RaceReferencesBuilder builder=new RaceReferencesBuilder();
-    List<RaceReference<?>> references=builder.inspectRace(race);
+    List<Reference<?,RaceRole>> references=builder.inspectRace(race);
     return references;
   }
 
-  private String getHtml(List<RaceReference<?>> references)
+  private String getHtml(List<Reference<?,RaceRole>> references)
   {
     StringBuilder sb=new StringBuilder();
     sb.append("<html><body>");
@@ -102,39 +103,39 @@ public class RaceReferencesDisplayController
   }
 
   @SuppressWarnings("unchecked")
-  private <T> List<RaceReference<T>> getReferences(List<RaceReference<?>> references, Class<T> clazz)
+  private <T> List<Reference<T,RaceRole>> getReferences(List<Reference<?,RaceRole>> references, Class<T> clazz)
   {
-    List<RaceReference<T>> ret=new ArrayList<RaceReference<T>>();
-    for(RaceReference<?> reference : references)
+    List<Reference<T,RaceRole>> ret=new ArrayList<Reference<T,RaceRole>>();
+    for(Reference<?,RaceRole> reference : references)
     {
       Object source=reference.getSource();
       if (clazz.isAssignableFrom(source.getClass()))
       {
-        ret.add((RaceReference<T>)reference);
+        ret.add((Reference<T,RaceRole>)reference);
       }
     }
     return ret;
   }
 
-  private void buildHtmlForClass(StringBuilder sb, List<RaceReference<?>> references)
+  private void buildHtmlForClass(StringBuilder sb, List<Reference<?,RaceRole>> references)
   {
-    List<RaceReference<CharacterClass>> classReferences=getReferences(references,CharacterClass.class);
+    List<Reference<ClassDescription,RaceRole>> classReferences=getReferences(references,ClassDescription.class);
     if (!classReferences.isEmpty())
     {
-      for(RaceReference<CharacterClass> classReference : classReferences)
+      for(Reference<ClassDescription,RaceRole> classReference : classReferences)
       {
-        CharacterClass characterClass=classReference.getSource();
+        ClassDescription characterClass=classReference.getSource();
         buildHtmlForClassReference(sb,characterClass);
       }
     }
   }
 
-  private void buildHtmlForClassReference(StringBuilder sb, CharacterClass cClass)
+  private void buildHtmlForClassReference(StringBuilder sb, ClassDescription characterClass)
   {
     sb.append("<p>Allowed class: ");
     sb.append("<b>");
-    PageIdentifier to=ReferenceConstants.getClassReference(cClass);
-    HtmlUtils.printLink(sb,to.getFullAddress(),cClass.getLabel());
+    PageIdentifier to=ReferenceConstants.getClassReference(characterClass);
+    HtmlUtils.printLink(sb,to.getFullAddress(),characterClass.getName());
     sb.append("</b></p>");
   }
 

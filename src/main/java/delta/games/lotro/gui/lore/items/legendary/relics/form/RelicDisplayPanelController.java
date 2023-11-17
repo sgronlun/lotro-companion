@@ -17,25 +17,23 @@ import javax.swing.JScrollPane;
 
 import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.labels.MultilineLabel2;
-import delta.common.ui.swing.navigator.NavigablePanelController;
+import delta.common.ui.swing.navigator.AbstractNavigablePanelController;
 import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.games.lotro.character.stats.BasicStatsSet;
+import delta.games.lotro.common.enums.RunicTier;
 import delta.games.lotro.common.stats.StatUtils;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.common.requirements.RequirementsUtils;
 import delta.games.lotro.lore.items.legendary.relics.Relic;
-import delta.games.lotro.lore.items.legendary.relics.RelicsCategory;
 
 /**
  * Controller for a relic display panel.
  * @author DAM
  */
-public class RelicDisplayPanelController implements NavigablePanelController
+public class RelicDisplayPanelController extends AbstractNavigablePanelController
 {
   // Data
   private Relic _relic;
-  // GUI
-  private JPanel _panel;
   // Controllers
   private RelicReferencesDisplayController _references;
 
@@ -46,24 +44,17 @@ public class RelicDisplayPanelController implements NavigablePanelController
    */
   public RelicDisplayPanelController(NavigatorWindowController parent, Relic relic)
   {
+    super(parent);
     _relic=relic;
     _references=new RelicReferencesDisplayController(parent,relic.getIdentifier());
+    JPanel panel=build();
+    setPanel(panel);
   }
 
   @Override
   public String getTitle()
   {
     return "Relic: "+_relic.getName();
-  }
-
-  @Override
-  public JPanel getPanel()
-  {
-    if (_panel==null)
-    {
-      _panel=build();
-    }
-    return _panel;
   }
 
   private JPanel build()
@@ -149,16 +140,16 @@ public class RelicDisplayPanelController implements NavigablePanelController
       c.gridy++;
     }
     // Category
-    RelicsCategory category=_relic.getCategory();
-    if (category!=null)
+    RunicTier tier=_relic.getTier();
+    if (tier!=null)
     {
       JPanel panelLine=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
       panel.add(panelLine,c);
       c.gridy++;
-      panelLine.add(GuiFactory.buildLabel("Category: "+category.getName()));
+      panelLine.add(GuiFactory.buildLabel("Tier: "+tier.getLabel()));
     }
     // Type(s)
-    String types=_relic.getTypesStr();
+    String types=_relic.getTypesForDisplay();
     if ((types!=null) && (types.length()>0))
     {
       JPanel panelLine=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
@@ -167,7 +158,7 @@ public class RelicDisplayPanelController implements NavigablePanelController
       panelLine.add(GuiFactory.buildLabel("Type: "+types));
     }
     // Allowed slot(s)
-    String slots=_relic.getAllowedSlotsStr();
+    String slots=_relic.getAllowedSlotsForUI();
     if ((slots!=null) && (slots.length()>0))
     {
       JPanel panelLine=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
@@ -176,7 +167,7 @@ public class RelicDisplayPanelController implements NavigablePanelController
       panelLine.add(GuiFactory.buildLabel("Slot: "+slots));
     }
     // Requirements
-    String requirements=RequirementsUtils.buildRequirementString(_relic.getUsageRequirement());
+    String requirements=RequirementsUtils.buildRequirementString(this,_relic.getUsageRequirement());
     if (requirements.length()>0)
     {
       JPanel panelLine=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
@@ -197,6 +188,7 @@ public class RelicDisplayPanelController implements NavigablePanelController
   @Override
   public void dispose()
   {
+    super.dispose();
     // Data
     _relic=null;
     // Controllers
@@ -204,12 +196,6 @@ public class RelicDisplayPanelController implements NavigablePanelController
     {
       _references.dispose();
       _references=null;
-    }
-    // UI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
     }
   }
 }

@@ -1,5 +1,6 @@
 package delta.games.lotro.gui.lore.items.essences;
 
+import java.awt.Cursor;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,9 +15,10 @@ import delta.common.ui.swing.icons.IconsManager;
 import delta.common.ui.swing.labels.MultilineLabel;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.BasicCharacterAttributes;
+import delta.games.lotro.common.enums.SocketType;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.lore.items.ItemUiTools;
-import delta.games.lotro.lore.items.Item;
+import delta.games.lotro.lore.items.essences.Essence;
 
 /**
  * Controller for the UI items of a single essence.
@@ -26,8 +28,9 @@ public class SimpleSingleEssenceEditionController
 {
   // Data
   private BasicCharacterAttributes _attrs;
-  private Item _essence;
+  private Essence _essence;
   private int _linesCount;
+  private SocketType _type;
   // Controllers
   private WindowController _parent;
   // UI
@@ -42,18 +45,21 @@ public class SimpleSingleEssenceEditionController
    * @param parent Parent window.
    * @param linesCount Number of lines to display the essence name.
    * @param attrs Attributes of toon to use.
+   * @param type Socket type.
    */
-  public SimpleSingleEssenceEditionController(WindowController parent, int linesCount, BasicCharacterAttributes attrs)
+  public SimpleSingleEssenceEditionController(WindowController parent, int linesCount, BasicCharacterAttributes attrs, SocketType type)
   {
+    _parent=parent;
     _essence=null;
     _linesCount=linesCount;
     _attrs=attrs;
-    _parent=parent;
+    _type=type;
     // Button
     _essenceIconButton=GuiFactory.buildButton("");
     _essenceIconButton.setOpaque(false);
     _essenceIconButton.setBorderPainted(false);
     _essenceIconButton.setMargin(new Insets(0,0,0,0));
+    _essenceIconButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
     ActionListener listener=new ActionListener()
     {
       @Override
@@ -89,7 +95,7 @@ public class SimpleSingleEssenceEditionController
   {
     if (button==_essenceIconButton)
     {
-      Item essence=EssenceChoice.chooseEssence(_parent,_attrs);
+      Essence essence=EssenceChoice.chooseEssence(_parent,_attrs,_type);
       if (essence!=null)
       {
         setEssence(essence);
@@ -113,7 +119,7 @@ public class SimpleSingleEssenceEditionController
    * Get the managed essence.
    * @return the managed essence.
    */
-  public Item getEssence()
+  public Essence getEssence()
   {
     return _essence;
   }
@@ -122,7 +128,7 @@ public class SimpleSingleEssenceEditionController
    * Set current essence.
    * @param essence Essence to set.
    */
-  public void setEssence(Item essence)
+  public void setEssence(Essence essence)
   {
     // Store essence
     _essence=essence;
@@ -134,7 +140,7 @@ public class SimpleSingleEssenceEditionController
     }
     else
     {
-      icon=LotroIconsManager.getDefaultItemIcon();
+      icon=LotroIconsManager.getDefaultEssenceIcon(_type.getCode());
     }
     _essenceIconButton.setIcon(icon);
     // Text

@@ -14,10 +14,13 @@ import delta.games.lotro.character.CharacterFile;
 import delta.games.lotro.character.CharacterSummary;
 import delta.games.lotro.character.details.CharacterDetails;
 import delta.games.lotro.common.Duration;
+import delta.games.lotro.common.geo.Position;
+import delta.games.lotro.common.geo.PositionUtils;
 import delta.games.lotro.common.money.Money;
 import delta.games.lotro.common.money.comparator.MoneyComparator;
+import delta.games.lotro.config.LotroCoreConfig;
 import delta.games.lotro.gui.utils.MoneyCellRenderer;
-import delta.games.lotro.gui.utils.l10n.ColumnsUtils;
+import delta.games.lotro.gui.utils.l10n.StatColumnsUtils;
 import delta.games.lotro.lore.crafting.CraftingData;
 import delta.games.lotro.lore.crafting.CraftingSystem;
 import delta.games.lotro.lore.crafting.Vocation;
@@ -25,6 +28,7 @@ import delta.games.lotro.lore.maps.Zone;
 import delta.games.lotro.lore.maps.ZoneUtils;
 import delta.games.lotro.lore.titles.TitleDescription;
 import delta.games.lotro.lore.titles.TitlesManager;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Builds column definitions for CharacterFile data.
@@ -81,8 +85,8 @@ public class CharacterFileColumnsBuilder
           return Long.valueOf(data.getXp());
         }
       };
-      DefaultTableColumnController<CharacterFile,Long> xpColumn=new DefaultTableColumnController<CharacterFile,Long>(ToonsTableColumnIds.XP.name(),"XP",Long.class,xpCell);
-      ColumnsUtils.configureLongColumn(xpColumn);
+      DefaultTableColumnController<CharacterFile,Long> xpColumn=new DefaultTableColumnController<CharacterFile,Long>(ToonsTableColumnIds.XP.name(),"XP",Long.class,xpCell); // I18n
+      StatColumnsUtils.configureLongColumn(xpColumn);
       ret.add(xpColumn);
     }
     // In-game time column
@@ -96,7 +100,7 @@ public class CharacterFileColumnsBuilder
           return Integer.valueOf(data.getIngameTime());
         }
       };
-      DefaultTableColumnController<CharacterFile,Integer> cooldownColumn=new DefaultTableColumnController<CharacterFile,Integer>(ToonsTableColumnIds.INGAME_TIME.name(),"In-game Time",Integer.class,cooldownCell);
+      DefaultTableColumnController<CharacterFile,Integer> cooldownColumn=new DefaultTableColumnController<CharacterFile,Integer>(ToonsTableColumnIds.INGAME_TIME.name(),"In-game Time",Integer.class,cooldownCell); // I18n
       cooldownColumn.setWidthSpecs(120,120,120);
       DefaultTableCellRenderer renderer=new DefaultTableCellRenderer()
       {
@@ -121,7 +125,7 @@ public class CharacterFileColumnsBuilder
           return data.getMoney();
         }
       };
-      DefaultTableColumnController<CharacterFile,Money> moneyColumn=new DefaultTableColumnController<CharacterFile,Money>(ToonsTableColumnIds.MONEY.name(),"Money",Money.class,moneyCell);
+      DefaultTableColumnController<CharacterFile,Money> moneyColumn=new DefaultTableColumnController<CharacterFile,Money>(ToonsTableColumnIds.MONEY.name(),"Money",Money.class,moneyCell); // I18n
       moneyColumn.setWidthSpecs(180,180,180);
       moneyColumn.setCellRenderer(new MoneyCellRenderer());
       moneyColumn.setComparator(new MoneyComparator());
@@ -137,8 +141,8 @@ public class CharacterFileColumnsBuilder
           return data.getLastLogoutDate();
         }
       };
-      DefaultTableColumnController<CharacterFile,Long> lastLogoutColumn=new DefaultTableColumnController<CharacterFile,Long>(ToonsTableColumnIds.LAST_LOGOUT_DATE.name(),"Last logout",Long.class,lastLogoutCell);
-      ColumnsUtils.configureDateTimeColumn(lastLogoutColumn);
+      DefaultTableColumnController<CharacterFile,Long> lastLogoutColumn=new DefaultTableColumnController<CharacterFile,Long>(ToonsTableColumnIds.LAST_LOGOUT_DATE.name(),"Last logout",Long.class,lastLogoutCell); // I18n
+      StatColumnsUtils.configureDateTimeColumn(lastLogoutColumn);
       ret.add(lastLogoutColumn);
     }
     // Title column
@@ -155,13 +159,13 @@ public class CharacterFileColumnsBuilder
             TitleDescription title=TitlesManager.getInstance().getTitle(titleId.intValue());
             if (title!=null)
             {
-              titleName=title.getName();
+              titleName=ContextRendering.render(file.getSummary(),title.getRawName());
             }
           }
           return titleName;
         }
       };
-      DefaultTableColumnController<CharacterFile,String> titleColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.TITLE.name(),"Title",String.class,titleCell);
+      DefaultTableColumnController<CharacterFile,String> titleColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.TITLE.name(),"Title",String.class,titleCell); // I18n
       titleColumn.setWidthSpecs(100,-1,200);
       ret.add(titleColumn);
     }
@@ -185,7 +189,7 @@ public class CharacterFileColumnsBuilder
           return zoneName;
         }
       };
-      DefaultTableColumnController<CharacterFile,String> areaColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.AREA.name(),"Area",String.class,areaCell);
+      DefaultTableColumnController<CharacterFile,String> areaColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.AREA.name(),"Area",String.class,areaCell); // I18n
       areaColumn.setWidthSpecs(80,250,250);
       ret.add(areaColumn);
     }
@@ -209,11 +213,12 @@ public class CharacterFileColumnsBuilder
           return zoneName;
         }
       };
-      DefaultTableColumnController<CharacterFile,String> dungeonColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.DUNGEON.name(),"Dungeon",String.class,dungeonCell);
+      DefaultTableColumnController<CharacterFile,String> dungeonColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.DUNGEON.name(),"Dungeon",String.class,dungeonCell); // I18n
       dungeonColumn.setWidthSpecs(80,250,250);
       ret.add(dungeonColumn);
     }
     // Vocation column
+    if (!LotroCoreConfig.isLive())
     {
       CellDataProvider<CharacterFile,String> vocationCell=new CellDataProvider<CharacterFile,String>()
       {
@@ -228,17 +233,39 @@ public class CharacterFileColumnsBuilder
             Vocation vocation=craftingData.getVocationsRegistry().getVocationById(vocationId.intValue());
             if (vocation!=null)
             {
-              vocationName=vocation.getName();
+              vocationName=ContextRendering.render(file.getSummary(),vocation.getName());
             }
           }
           return vocationName;
         }
       };
-      DefaultTableColumnController<CharacterFile,String> vocationColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.VOCATION.name(),"Vocation",String.class,vocationCell);
-      vocationColumn.setWidthSpecs(100,-1,200);
+      DefaultTableColumnController<CharacterFile,String> vocationColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.VOCATION.name(),"Vocation",String.class,vocationCell); // I18n
+      vocationColumn.setWidthSpecs(100,100,100);
       ret.add(vocationColumn);
     }
-
+    // Position
+    ret.add(getPositionColumn());
     return ret;
+  }
+
+  private static DefaultTableColumnController<CharacterFile,String> getPositionColumn()
+  {
+    CellDataProvider<CharacterFile,String> positionCell=new CellDataProvider<CharacterFile,String>()
+    {
+      @Override
+      public String getData(CharacterFile file)
+      {
+        String positionStr=null;
+        Position position=file.getDetails().getPosition();
+        if (position!=null)
+        {
+          positionStr=PositionUtils.getLabel(position);
+        }
+        return positionStr;
+      }
+    };
+    DefaultTableColumnController<CharacterFile,String> positionColumn=new DefaultTableColumnController<CharacterFile,String>(ToonsTableColumnIds.POSITION.name(),"Position",String.class,positionCell); // I18n
+    positionColumn.setWidthSpecs(100,200,200);
+    return positionColumn;
   }
 }

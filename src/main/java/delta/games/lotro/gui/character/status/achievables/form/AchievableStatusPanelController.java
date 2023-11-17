@@ -21,6 +21,7 @@ import javax.swing.ScrollPaneConstants;
 import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.editors.numbers.ProgressAndNumberEditorController;
 import delta.common.ui.swing.icons.IconsManager;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.common.ui.swing.text.NumberEditionController;
 import delta.common.ui.swing.text.NumberListener;
 import delta.common.ui.swing.text.dates.DateEditionController;
@@ -47,7 +48,7 @@ import delta.games.lotro.lore.quests.QuestDescription;
  * Controller for a panel to edit the status of an achievable.
  * @author DAM
  */
-public class AchievableStatusPanelController implements GeoPointChangeListener
+public class AchievableStatusPanelController extends AbstractPanelController implements GeoPointChangeListener
 {
   // Data
   private AchievableStatus _status;
@@ -59,8 +60,6 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
   private DateEditionController _completionDate;
   private JLabel _completionCount;
   private AchievableGeoStatusEditionController _geoController;
-  // UI
-  private JPanel _panel;
 
   /**
    * Constructor.
@@ -70,23 +69,16 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
    */
   public AchievableStatusPanelController(WindowController parent, AchievableStatus status, AchievableFormConfig config)
   {
+    super(parent);
     _status=status;
     _config=config;
-    _panel=build(parent);
+    JPanel panel=build(parent);
+    setPanel(panel);
     if (_config.isEditable())
     {
       setupCallbacks();
     }
     updateOwnUi();
-  }
-
-  /**
-   * Get the managed panel.
-   * @return the managed panel.
-   */
-  public JPanel getPanel()
-  {
-    return _panel;
   }
 
   private JPanel build(WindowController parent)
@@ -163,7 +155,7 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
     if (useCompletionCount())
     {
       panel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
-      panel.add(GuiFactory.buildLabel("Completion count:"));
+      panel.add(GuiFactory.buildLabel("Completion count:")); // I18n
       _completionCount=GuiFactory.buildLabel("-");
       panel.add(_completionCount);
     }
@@ -189,7 +181,7 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
     if (mode==AchievableUIMode.DEED)
     {
       panel=GuiFactory.buildPanel(new FlowLayout());
-      panel.add(GuiFactory.buildLabel("Completion date:"));
+      panel.add(GuiFactory.buildLabel("Completion date:")); // I18n
       _completionDate=new DateEditionController(DateFormat.getDateTimeCodec());
       panel.add(_completionDate.getTextField());
     }
@@ -204,7 +196,7 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
     _objectiveStatusEditors=new ArrayList<ObjectiveStatusEditionPanelController>();
     for(AchievableObjectiveStatus objectiveStatus : _status.getObjectiveStatuses())
     {
-      ObjectiveStatusEditionPanelController editor=new ObjectiveStatusEditionPanelController(objectiveStatus,icon,_config);
+      ObjectiveStatusEditionPanelController editor=new ObjectiveStatusEditionPanelController(this,objectiveStatus,icon,_config);
       _objectiveStatusEditors.add(editor);
       ret.add(editor.getPanel(),c);
       c.gridy++;
@@ -221,7 +213,7 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
     {
       AchievableGeoStatusManager geoStatusManager=new AchievableGeoStatusManager(_status,this);
       _geoController=new AchievableGeoStatusEditionController(parent,geoStatusManager,_config.isEditable());
-      toggleMap=GuiFactory.buildButton("Map");
+      toggleMap=GuiFactory.buildButton("Map"); // I18n
       ActionListener mapActionListener=new ActionListener()
       {
         @Override
@@ -430,6 +422,7 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
    */
   public void dispose()
   {
+    super.dispose();
     // Data
     _status=null;
     // Controllers
@@ -461,12 +454,6 @@ public class AchievableStatusPanelController implements GeoPointChangeListener
     {
       _geoController.dispose();
       _geoController=null;
-    }
-    // UI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
     }
   }
 }

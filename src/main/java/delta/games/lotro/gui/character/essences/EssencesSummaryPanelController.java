@@ -13,10 +13,10 @@ import javax.swing.border.TitledBorder;
 
 import delta.common.ui.swing.GuiFactory;
 import delta.games.lotro.character.CharacterData;
+import delta.games.lotro.character.classes.ClassDescription;
 import delta.games.lotro.character.stats.BasicStatsSet;
 import delta.games.lotro.character.stats.base.DerivedStatsContributionsMgr;
 import delta.games.lotro.character.stats.base.io.DerivedStatContributionsIO;
-import delta.games.lotro.common.CharacterClass;
 import delta.games.lotro.gui.character.essences.EssencesSummary.EssenceCount;
 import delta.games.lotro.gui.common.stats.StatsPanel;
 import delta.games.lotro.gui.lore.items.ItemUiTools;
@@ -59,20 +59,20 @@ public class EssencesSummaryPanelController
     panel.add(_total,c);
     // Counts
     _countsPanel=GuiFactory.buildPanel(new GridBagLayout());
-    TitledBorder countsBorder=GuiFactory.buildTitledBorder("Essence usage");
+    TitledBorder countsBorder=GuiFactory.buildTitledBorder("Essence usage"); // I18n
     _countsPanel.setBorder(countsBorder);
     c=new GridBagConstraints(0,1,1,1,0.0,0.0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(_countsPanel,c);
     // Stats
     // - raw
     _rawStatsPanel=GuiFactory.buildPanel(new GridBagLayout());
-    TitledBorder rawBorder=GuiFactory.buildTitledBorder("Raw stats");
+    TitledBorder rawBorder=GuiFactory.buildTitledBorder("Raw stats"); // I18n
     _rawStatsPanel.setBorder(rawBorder);
     c=new GridBagConstraints(1,1,1,1,0.0,0.0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(_rawStatsPanel,c);
     // - cumulated
     _cumulatedStatsPanel=GuiFactory.buildPanel(new GridBagLayout());
-    TitledBorder cumulatedBorder=GuiFactory.buildTitledBorder("Cumulated stats");
+    TitledBorder cumulatedBorder=GuiFactory.buildTitledBorder("Cumulated stats"); // I18n
     _cumulatedStatsPanel.setBorder(cumulatedBorder);
     c=new GridBagConstraints(2,1,1,1,0.0,0.0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(_cumulatedStatsPanel,c);
@@ -130,7 +130,7 @@ public class EssencesSummaryPanelController
     StatsPanel.fillStatsPanel(_rawStatsPanel,raw,_toon.getStats());
     // Cumulated
     DerivedStatsContributionsMgr derivedStatsMgr=DerivedStatContributionsIO.load();
-    CharacterClass characterClass=_toon.getCharacterClass();
+    ClassDescription characterClass=_toon.getCharacterClass();
     BasicStatsSet derivated=derivedStatsMgr.getContribution(characterClass,raw);
     BasicStatsSet cumulated=new BasicStatsSet();
     cumulated.addStats(raw);

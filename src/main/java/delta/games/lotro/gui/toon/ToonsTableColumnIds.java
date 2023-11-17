@@ -43,6 +43,10 @@ public enum ToonsTableColumnIds
    */
   ACCOUNT,
   /**
+   * Subscription.
+   */
+  SUBSCRIPTION,
+  /**
    * XP
    */
   XP,
@@ -74,6 +78,10 @@ public enum ToonsTableColumnIds
    * Dungeon.
    */
   DUNGEON,
+  /**
+   * Position.
+   */
+  POSITION,
   /**
    * Kinship.
    */

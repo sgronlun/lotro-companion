@@ -17,6 +17,7 @@ import delta.common.ui.swing.tables.TableColumnsChooserController;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.gui.lore.collections.pets.PetsTableController;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.collections.pets.CosmeticPetDescription;
 
 /**
@@ -60,7 +61,7 @@ public class PetsExplorerPanelController implements FilterUpdateListener
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildPanel(new BorderLayout());
-    TitledBorder border=GuiFactory.buildTitledBorder("Pets");
+    TitledBorder border=GuiFactory.buildTitledBorder("Pets"); // 18n
     panel.setBorder(border);
 
     // Table
@@ -71,7 +72,7 @@ public class PetsExplorerPanelController implements FilterUpdateListener
     JPanel statsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
     _statsLabel=GuiFactory.buildLabel("-");
     statsPanel.add(_statsLabel);
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     ActionListener al=new ActionListener()
     {
       @Override
@@ -100,15 +101,7 @@ public class PetsExplorerPanelController implements FilterUpdateListener
   {
     int nbFiltered=_tableController.getNbFilteredItems();
     int nbItems=_tableController.getNbItems();
-    String label="";
-    if (nbFiltered==nbItems)
-    {
-      label="Pets(s): "+nbItems;
-    }
-    else
-    {
-      label="Pet(s): "+nbFiltered+"/"+nbItems;
-    }
+    String label=Labels.getCountLabel("Pet(s)",nbFiltered,nbItems); // I18n
     _statsLabel.setText(label);
   }
 

@@ -16,6 +16,7 @@ import delta.games.lotro.account.Account;
 import delta.games.lotro.account.AccountSummary;
 import delta.games.lotro.account.events.AccountEvent;
 import delta.games.lotro.account.events.AccountEventType;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.utils.events.EventsManager;
 import delta.games.lotro.utils.events.GenericEventsListener;
 
@@ -32,7 +33,7 @@ public class AccountSummaryPanelController implements GenericEventsListener<Acco
   private WindowController _parent;
   // UI
   private JPanel _panel;
-  private JLabel _nameLabel;
+  private JLabel _accountNameLabel;
 
   /**
    * Constructor.
@@ -66,10 +67,11 @@ public class AccountSummaryPanelController implements GenericEventsListener<Acco
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,1.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(2,2,2,2),0,0);
 
     // Name
-    _nameLabel=GuiFactory.buildLabel("",28.0f);
-    panel.add(_nameLabel,c);
+    _accountNameLabel=GuiFactory.buildLabel("",28.0f);
+    panel.add(_accountNameLabel,c);
     // Edit...
-    JButton edit=GuiFactory.buildButton("Edit...");
+    String editLabel=Labels.getLabel("account.summary.buttons.edit");
+    JButton edit=GuiFactory.buildButton(editLabel);
     ActionListener al=new ActionListener()
     {
       @Override
@@ -123,9 +125,9 @@ public class AccountSummaryPanelController implements GenericEventsListener<Acco
   {
     if (_summary!=null)
     {
-      // Name
+      // Account name
       String name=_summary.getName();
-      _nameLabel.setText(name);
+      _accountNameLabel.setText(name);
     }
   }
 

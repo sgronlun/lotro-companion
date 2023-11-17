@@ -1,19 +1,25 @@
 package delta.games.lotro.gui;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import delta.common.ui.swing.icons.ApplicationIcons;
+import delta.common.ui.swing.icons.IconWithText;
 import delta.common.ui.swing.icons.IconsManager;
+import delta.games.lotro.character.races.RaceDescription;
+import delta.games.lotro.character.races.RaceGender;
 import delta.games.lotro.character.virtues.VirtueDescription;
-import delta.games.lotro.common.CharacterClass;
 import delta.games.lotro.common.CharacterSex;
-import delta.games.lotro.common.Race;
+import delta.games.lotro.common.Genders;
 import delta.games.lotro.common.stats.StatDescription;
+import delta.games.lotro.config.LotroCoreConfig;
 import delta.games.lotro.gui.utils.icons.ItemIconBuilder;
+import delta.games.lotro.gui.utils.icons.SocketIconBuilder;
 import delta.games.lotro.lore.crafting.Profession;
 import delta.games.lotro.lore.deeds.DeedType;
 import delta.games.lotro.utils.IconsUtils;
@@ -26,32 +32,17 @@ public class LotroIconsManager
 {
   private static final String ITEM_WITH_NO_ICON="/resources/gui/items/itemNoIcon.png";
 
-  /**
-   * Compact size.
-   */
-  public static final String COMPACT_SIZE="compact";
-  /**
-   * Small size.
-   */
-  public static final String SMALL_SIZE="small";
-
   private static ItemIconBuilder _itemIconBuilder=new ItemIconBuilder();
 
   /**
    * Get an icon for a character class.
-   * @param cClass Character class.
-   * @param size Icon size. Use <code>MEDIUM</code> or <code>SMALL</code>.
+   * @param iconID Icon identifier.
    * @return An icon or <code>null</code> if not found.
    */
-  public static ImageIcon getClassIcon(CharacterClass cClass, String size)
+  public static ImageIcon getClassIcon(int iconID)
   {
-    ImageIcon ret=null;
-    if (cClass!=null)
-    {
-      String classIconPath=cClass.getIconPath();
-      String iconPath="/resources/gui/classes/"+size+"/"+classIconPath+".png";
-      ret=IconsManager.getIcon(iconPath);
-    }
+    String iconPath="/classes/"+iconID+".png";
+    ImageIcon ret=IconsManager.getIcon(iconPath);
     return ret;
   }
 
@@ -61,17 +52,21 @@ public class LotroIconsManager
    * @param sex Character sex.
    * @return An icon or <code>null</code> if not found.
    */
-  public static ImageIcon getCharacterIcon(Race race, CharacterSex sex)
+  public static ImageIcon getCharacterIcon(RaceDescription race, CharacterSex sex)
   {
     ImageIcon ret=null;
     if (race!=null)
     {
       if (sex==null)
       {
-        sex=CharacterSex.MALE;
+        sex=Genders.MALE;
       }
-      String iconPath=race.getIconPath()+"_"+sex.getKey().toLowerCase();
-      ret=IconsManager.getIcon("/resources/gui/races/"+iconPath+".png");
+      RaceGender gender=(sex==Genders.MALE)?race.getMaleGender():race.getFemaleGender();
+      if (gender!=null)
+      {
+        int iconID=gender.getLargeIconId();
+        ret=IconsManager.getIcon("/races/"+iconID+".png");
+      }
     }
     return ret;
   }
@@ -120,13 +115,50 @@ public class LotroIconsManager
   }
 
   /**
-   * Get the icon for a title.
-   * @param titleId Title identifier.
+   * Get the default icon for essences.
+   * @param socketType Socket type code.
+   * @return An icon.
+   */
+  public static ImageIcon getDefaultEssenceIcon(int socketType)
+  {
+    return getSocketBackgroundIcon(socketType);
+  }
+
+  /**
+   * Get the background icon for a given socket type.
+   * @param socketType Socket type code.
+   * @return An icon.
+   */
+  private static ImageIcon getSocketBackgroundIcon(int socketType)
+  {
+    String path="/sockets/background-"+socketType+".png";
+    return IconsManager.getIcon(path);
+  }
+
+  /**
+   * Get the icon for an empty socket icon.
+   * @param socketType Socket type.
    * @return An icon or <code>null</code> if not found.
    */
-  public static ImageIcon getTitleIcon(int titleId)
+  public static ImageIcon getEmptySocketIcon(int socketType)
   {
-    String path="/titleIcons/"+titleId+".png";
+    ImageIcon icon=null;
+    BufferedImage image=SocketIconBuilder.getEmptySocketIcon(socketType);
+    if (image!=null)
+    {
+      icon=new ImageIcon(image);
+    }
+    return icon;
+  }
+
+  /**
+   * Get the icon for a title.
+   * @param iconID Title icon identifier.
+   * @return An icon or <code>null</code> if not found.
+   */
+  public static ImageIcon getTitleIcon(int iconID)
+  {
+    String path="/titleIcons/"+iconID+".png";
     return IconsManager.getIcon(path);
   }
 
@@ -204,15 +236,51 @@ public class LotroIconsManager
    * @param virtue Virtue.
    * @return An icon.
    */
-  public static ImageIcon getVirtueIcon(VirtueDescription virtue)
+  public static Icon getVirtueIcon(VirtueDescription virtue)
   {
-    if (virtue!=null)
+    if (virtue==null)
+    {
+      return null;
+    }
+    boolean isLive=LotroCoreConfig.isLive();
+    if (isLive)
     {
       int virtueIconId=virtue.getIconId();
       String path="/traits/"+virtueIconId+".png";
       return IconsManager.getIcon(path);
     }
-    return null;
+    return getVirtueIcon(virtue,1);
+  }
+
+  /**
+   * Get icon for a virtue.
+   * @param virtue Virtue.
+   * @param count Count.
+   * @return An icon.
+   */
+  public static Icon getVirtueIcon(VirtueDescription virtue, int count)
+  {
+    if (virtue==null)
+    {
+      return null;
+    }
+    Icon virtueIcon=null;
+    boolean isLive=LotroCoreConfig.isLive();
+    if (isLive)
+    {
+      virtueIcon=LotroIconsManager.getVirtueIcon(virtue);
+      if (count>0)
+      {
+        virtueIcon=new IconWithText(virtueIcon,String.valueOf(count),Color.WHITE);
+      }
+    }
+    else
+    {
+      String virtueKey=virtue.getKey();
+      String path="/traits/"+virtueKey+"-"+count+".png";
+      virtueIcon=IconsManager.getIcon(path);
+    }
+    return virtueIcon;
   }
 
   /**
@@ -245,7 +313,7 @@ public class LotroIconsManager
    */
   public static ImageIcon getDeedTypeIcon(DeedType type)
   {
-    String filename=type.name().toLowerCase();
+    String filename=type.getKey().toLowerCase();
     String path="/resources/gui/deeds/"+filename+".png";
     ImageIcon ret=IconsManager.getIcon(path);
     return ret;

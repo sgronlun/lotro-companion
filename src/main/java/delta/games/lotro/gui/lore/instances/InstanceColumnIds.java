@@ -37,5 +37,13 @@ public enum InstanceColumnIds
   /**
    * Level scaling.
    */
-  LEVEL_SCALING
+  LEVEL_SCALING,
+  /**
+   * Scalable.
+   */
+  SCALABLE,
+  /**
+   * Group.
+   */
+  GROUP_NAME
 }

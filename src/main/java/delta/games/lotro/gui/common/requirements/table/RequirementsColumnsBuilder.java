@@ -5,8 +5,8 @@ import java.util.List;
 
 import delta.common.ui.swing.tables.CellDataProvider;
 import delta.common.ui.swing.tables.DefaultTableColumnController;
-import delta.games.lotro.common.CharacterClass;
-import delta.games.lotro.common.Race;
+import delta.games.lotro.character.classes.AbstractClassDescription;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.common.requirements.UsageRequirement;
 
 /**
@@ -24,29 +24,29 @@ public class RequirementsColumnsBuilder
     List<DefaultTableColumnController<UsageRequirement,?>> ret=new ArrayList<DefaultTableColumnController<UsageRequirement,?>>();
     // Class column
     {
-      CellDataProvider<UsageRequirement,CharacterClass> classCell=new CellDataProvider<UsageRequirement,CharacterClass>()
+      CellDataProvider<UsageRequirement,AbstractClassDescription> classCell=new CellDataProvider<UsageRequirement,AbstractClassDescription>()
       {
         @Override
-        public CharacterClass getData(UsageRequirement requirement)
+        public AbstractClassDescription getData(UsageRequirement requirement)
         {
           return requirement.getRequiredClass();
         }
       };
-      DefaultTableColumnController<UsageRequirement,CharacterClass> classColumn=new DefaultTableColumnController<UsageRequirement,CharacterClass>(RequirementColumnIds.REQUIRED_CLASS.name(),"Class",CharacterClass.class,classCell);
+      DefaultTableColumnController<UsageRequirement,AbstractClassDescription> classColumn=new DefaultTableColumnController<UsageRequirement,AbstractClassDescription>(RequirementColumnIds.REQUIRED_CLASS.name(),"Class",AbstractClassDescription.class,classCell); // I18n
       classColumn.setWidthSpecs(80,100,80);
       ret.add(classColumn);
     }
     // Race column
     {
-      CellDataProvider<UsageRequirement,Race> raceCell=new CellDataProvider<UsageRequirement,Race>()
+      CellDataProvider<UsageRequirement,RaceDescription> raceCell=new CellDataProvider<UsageRequirement,RaceDescription>()
       {
         @Override
-        public Race getData(UsageRequirement requirement)
+        public RaceDescription getData(UsageRequirement requirement)
         {
           return requirement.getRequiredRace();
         }
       };
-      DefaultTableColumnController<UsageRequirement,Race> raceColumn=new DefaultTableColumnController<UsageRequirement,Race>(RequirementColumnIds.REQUIRED_RACE.name(),"Race",Race.class,raceCell);
+      DefaultTableColumnController<UsageRequirement,RaceDescription> raceColumn=new DefaultTableColumnController<UsageRequirement,RaceDescription>(RequirementColumnIds.REQUIRED_RACE.name(),"Race",RaceDescription.class,raceCell); // I18n
       raceColumn.setWidthSpecs(80,100,80);
       ret.add(raceColumn);
     }
@@ -60,7 +60,7 @@ public class RequirementsColumnsBuilder
           return requirement.getMinLevel();
         }
       };
-      DefaultTableColumnController<UsageRequirement,Integer> minLevelColumn=new DefaultTableColumnController<UsageRequirement,Integer>(RequirementColumnIds.REQUIRED_LEVEL.name(),"Min Level",Integer.class,minLevelCell);
+      DefaultTableColumnController<UsageRequirement,Integer> minLevelColumn=new DefaultTableColumnController<UsageRequirement,Integer>(RequirementColumnIds.REQUIRED_LEVEL.name(),"Min Level",Integer.class,minLevelCell); // I18n
       minLevelColumn.setWidthSpecs(40,40,40);
       ret.add(minLevelColumn);
     }
@@ -74,7 +74,7 @@ public class RequirementsColumnsBuilder
           return requirement.getMaxLevel();
         }
       };
-      DefaultTableColumnController<UsageRequirement,Integer> maxLevelColumn=new DefaultTableColumnController<UsageRequirement,Integer>(RequirementColumnIds.MAX_LEVEL.name(),"Max Level",Integer.class,maxLevelCell);
+      DefaultTableColumnController<UsageRequirement,Integer> maxLevelColumn=new DefaultTableColumnController<UsageRequirement,Integer>(RequirementColumnIds.MAX_LEVEL.name(),"Max Level",Integer.class,maxLevelCell); // I18n
       maxLevelColumn.setWidthSpecs(40,40,40);
       ret.add(maxLevelColumn);
     }

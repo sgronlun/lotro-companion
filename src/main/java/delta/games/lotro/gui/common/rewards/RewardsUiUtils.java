@@ -2,11 +2,14 @@ package delta.games.lotro.gui.common.rewards;
 
 import java.util.List;
 
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.games.lotro.common.enums.BillingGroup;
 import delta.games.lotro.common.rewards.RewardsExplorer;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.legendary.relics.Relic;
+import delta.games.lotro.lore.titles.TitleDescription;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Utility methods for reward-related UIs.
@@ -61,18 +64,22 @@ public class RewardsUiUtils
 
   /**
    * Build a combo-box controller to choose a title.
+   * @param parent Parent controller.
    * @return A new combo-box controller.
    */
-  public ComboBoxController<String> buildTitlesCombo()
+  public ComboBoxController<TitleDescription> buildTitlesCombo(AreaController parent)
   {
-    ComboBoxController<String> ctrl=new ComboBoxController<String>();
+    ComboBoxController<TitleDescription> ctrl=new ComboBoxController<TitleDescription>();
     ctrl.addEmptyItem("");
-    List<String> titles=_rewardsExplorer.getTitles();
-    for(String title : titles)
+    List<TitleDescription> titles=_rewardsExplorer.getTitles();
+    for(TitleDescription title : titles)
     {
-      String displayedTitle=getDisplayedTitle(title);
+      String rawTitleName=title.getRawName();
+      String titleName=ContextRendering.render(parent,rawTitleName);
+      String displayedTitle=getDisplayedTitle(titleName);
       ctrl.addItem(title,displayedTitle);
     }
+    ctrl.sort();
     ctrl.selectItem(null);
     return ctrl;
   }
@@ -145,7 +152,7 @@ public class RewardsUiUtils
     }
     ComboBoxController<BillingGroup> ctrl=new ComboBoxController<BillingGroup>();
     ctrl.addEmptyItem("");
-    ctrl.addItem(BillingGroup.ANY,"(any)");
+    ctrl.addItem(BillingGroup.ANY,"(any)"); // I18n
     for(BillingGroup billingGroup : billingGroups)
     {
       ctrl.addItem(billingGroup,billingGroup.getLabel());

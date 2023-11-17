@@ -12,18 +12,16 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import delta.common.ui.swing.GuiFactory;
-import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.ui.swing.tables.GenericTableController;
 import delta.common.ui.swing.windows.DefaultWindowController;
 import delta.common.ui.swing.windows.WindowController;
-import delta.common.ui.swing.windows.WindowsManager;
 import delta.common.utils.misc.TypedProperties;
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
 import delta.games.lotro.gui.lore.deeds.filter.DeedFilterController;
 import delta.games.lotro.gui.lore.deeds.table.DeedsTableController;
 import delta.games.lotro.gui.main.GlobalPreferences;
-import delta.games.lotro.gui.navigation.NavigatorFactory;
+import delta.games.lotro.gui.utils.NavigationUtils;
 import delta.games.lotro.lore.deeds.DeedDescription;
 import delta.games.lotro.lore.deeds.filters.DeedFilter;
 
@@ -42,7 +40,6 @@ public class DeedsExplorerWindowController extends DefaultWindowController
   private DeedExplorerPanelController _panelController;
   private DeedsTableController _tableController;
   private DeedFilter _filter;
-  private WindowsManager _deedWindows;
 
   /**
    * Constructor.
@@ -52,14 +49,13 @@ public class DeedsExplorerWindowController extends DefaultWindowController
   {
     super(parent);
     _filter=new DeedFilter();
-    _deedWindows=new WindowsManager();
   }
 
   @Override
   protected JFrame build()
   {
     JFrame frame=super.build();
-    frame.setTitle("Deeds explorer");
+    frame.setTitle("Deeds explorer"); // 18n
     frame.setMinimumSize(new Dimension(400,300));
     frame.setSize(950,700);
     return frame;
@@ -86,9 +82,9 @@ public class DeedsExplorerWindowController extends DefaultWindowController
     _panelController=new DeedExplorerPanelController(this,_tableController);
     JPanel tablePanel=_panelController.getPanel();
     // Filter
-    _filterController=new DeedFilterController(_filter,_panelController,true);
+    _filterController=new DeedFilterController(this,_filter,_panelController,true);
     JPanel filterPanel=_filterController.getPanel();
-    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter");
+    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter"); // 18n
     filterPanel.setBorder(filterBorder);
     // Whole panel
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
@@ -101,7 +97,7 @@ public class DeedsExplorerWindowController extends DefaultWindowController
   private void initDeedsTable()
   {
     TypedProperties prefs=GlobalPreferences.getGlobalProperties("DeedsExplorer");
-    _tableController=new DeedsTableController(prefs,_filter);
+    _tableController=new DeedsTableController(this,prefs,_filter);
     ActionListener al=new ActionListener()
     {
       @Override
@@ -120,12 +116,8 @@ public class DeedsExplorerWindowController extends DefaultWindowController
 
   private void showDeed(DeedDescription deed)
   {
-    int id=_deedWindows.getAll().size();
-    NavigatorWindowController window=NavigatorFactory.buildNavigator(DeedsExplorerWindowController.this,id);
     PageIdentifier ref=ReferenceConstants.getAchievableReference(deed);
-    window.navigateTo(ref);
-    window.show(false);
-    _deedWindows.registerWindow(window);
+    NavigationUtils.navigateTo(ref,this);
   }
 
   /**
@@ -136,11 +128,6 @@ public class DeedsExplorerWindowController extends DefaultWindowController
   {
     saveBoundsPreferences();
     super.dispose();
-    if (_deedWindows!=null)
-    {
-      _deedWindows.disposeAll();
-      _deedWindows=null;
-    }
     if (_tableController!=null)
     {
       _tableController.dispose();

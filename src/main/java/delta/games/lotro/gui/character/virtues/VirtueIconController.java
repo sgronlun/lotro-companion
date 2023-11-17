@@ -2,7 +2,7 @@ package delta.games.lotro.gui.character.virtues;
 
 import java.awt.Color;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 
 import delta.common.ui.swing.GuiFactory;
@@ -122,7 +122,7 @@ public class VirtueIconController
    */
   private IconWithText buildVirtueIcon(VirtueDescription virtue)
   {
-    ImageIcon icon=null;
+    Icon icon=null;
     if (virtue!=null)
     {
       icon=LotroIconsManager.getVirtueIcon(virtue);
@@ -143,11 +143,11 @@ public class VirtueIconController
     if (_active)
     {
       BasicStatsSet stats=virtuesMgr.getContribution(virtue,_tier+_bonus,false);
-      sb.append("Active:").append(EndOfLine.NATIVE_EOL);
+      sb.append("Active:").append(EndOfLine.NATIVE_EOL); // I18n
       addStatsTooltipText(stats,sb);
     }
     BasicStatsSet passiveStats=virtuesMgr.getContribution(virtue,_tier,true);
-    sb.append("Passive:").append(EndOfLine.NATIVE_EOL);
+    sb.append("Passive:").append(EndOfLine.NATIVE_EOL); // I18n
     addStatsTooltipText(passiveStats,sb);
     String text=sb.toString().trim();
     String html="<html>"+text.replace(EndOfLine.NATIVE_EOL,"<br>")+"</html>";

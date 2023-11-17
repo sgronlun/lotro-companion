@@ -6,11 +6,13 @@ import delta.common.ui.swing.windows.WindowController;
 import delta.common.utils.collections.filters.Filter;
 import delta.common.utils.misc.TypedProperties;
 import delta.games.lotro.character.BasicCharacterAttributes;
+import delta.games.lotro.common.enums.SocketType;
 import delta.games.lotro.gui.lore.items.chooser.ItemChooser;
 import delta.games.lotro.gui.lore.items.chooser.ItemFilterConfiguration;
 import delta.games.lotro.gui.lore.items.chooser.ItemFilterController;
 import delta.games.lotro.lore.items.Item;
-import delta.games.lotro.lore.items.ItemsManager;
+import delta.games.lotro.lore.items.essences.Essence;
+import delta.games.lotro.lore.items.essences.EssencesManager;
 import delta.games.lotro.utils.gui.chooser.ObjectChoiceWindowController;
 
 /**
@@ -28,11 +30,12 @@ public class EssenceChoice
    * Choose an essence.
    * @param parent Parent controller.
    * @param attrs Attributes of toon to use.
+   * @param type Type of essence.
    * @return An essence item or <code>null</code>.
    */
-  public static Item chooseEssence(WindowController parent, BasicCharacterAttributes attrs)
+  public static Essence chooseEssence(WindowController parent, BasicCharacterAttributes attrs, SocketType type)
   {
-    List<Item> essences=ItemsManager.getInstance().getEssences();
+    List<Essence> essences=EssencesManager.getInstance().getAllEssenceItems(type);
     ItemFilterConfiguration cfg=new ItemFilterConfiguration();
     cfg.initFromItems(essences);
     cfg.forEssenceFilter();
@@ -53,7 +56,7 @@ public class EssenceChoice
     }
     Filter<Item> filter=filterController.getFilter();
     ObjectChoiceWindowController<Item> chooser=ItemChooser.buildChooser(parent,prefs,essences,filter,filterController);
-    Item ret=chooser.editModal();
+    Essence ret=(Essence)chooser.editModal();
     return ret;
   }
 }

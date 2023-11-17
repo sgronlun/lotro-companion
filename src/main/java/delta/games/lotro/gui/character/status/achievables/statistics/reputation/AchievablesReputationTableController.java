@@ -2,6 +2,7 @@ package delta.games.lotro.gui.character.status.achievables.statistics.reputation
 
 import java.util.List;
 
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.tables.CellDataProvider;
 import delta.common.ui.swing.tables.DefaultTableColumnController;
 import delta.common.ui.swing.tables.GenericTableController;
@@ -24,12 +25,13 @@ public class AchievablesReputationTableController extends ReputationTableControl
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param stats Stats to show.
    * @param mode UI mode.
    */
-  public AchievablesReputationTableController(AchievablesReputationStats stats, AchievableUIMode mode)
+  public AchievablesReputationTableController(AreaController parent, AchievablesReputationStats stats, AchievableUIMode mode)
   {
-    super(stats);
+    super(parent,stats);
     _mode=mode;
   }
 
@@ -38,7 +40,7 @@ public class AchievablesReputationTableController extends ReputationTableControl
     super.defineColumns(table);
     // Achievables count column
     {
-      String name=(_mode==AchievableUIMode.DEED)?"Deeds":"Quests";
+      String name=(_mode==AchievableUIMode.DEED)?"Deeds":"Quests"; // I18n
       CellDataProvider<AchievablesFactionStats,Integer> countCell=new CellDataProvider<AchievablesFactionStats,Integer>()
       {
         @Override
@@ -64,7 +66,7 @@ public class AchievablesReputationTableController extends ReputationTableControl
           return count;
         }
       };
-      DefaultTableColumnController<AchievablesFactionStats,Integer> completionsCountColumn=new DefaultTableColumnController<AchievablesFactionStats,Integer>(COMPLETIONS_COUNT,"Completions",Integer.class,completionsCountCell);
+      DefaultTableColumnController<AchievablesFactionStats,Integer> completionsCountColumn=new DefaultTableColumnController<AchievablesFactionStats,Integer>(COMPLETIONS_COUNT,"Completions",Integer.class,completionsCountCell); // I18n
       completionsCountColumn.setWidthSpecs(60,60,60);
       table.addColumnController(completionsCountColumn);
     }

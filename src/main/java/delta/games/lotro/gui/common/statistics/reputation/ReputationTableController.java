@@ -6,24 +6,28 @@ import java.util.List;
 
 import javax.swing.JTable;
 
+import delta.common.ui.swing.area.AbstractAreaController;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.tables.CellDataProvider;
 import delta.common.ui.swing.tables.DefaultTableColumnController;
 import delta.common.ui.swing.tables.GenericTableController;
 import delta.common.ui.swing.tables.ListDataProvider;
 import delta.common.ui.swing.tables.TableColumnsManager;
+import delta.games.lotro.common.Named;
+import delta.games.lotro.common.comparators.NamedComparator;
 import delta.games.lotro.common.statistics.FactionStats;
 import delta.games.lotro.common.statistics.ReputationStats;
 import delta.games.lotro.lore.reputation.Faction;
-import delta.games.lotro.lore.reputation.FactionNameComparator;
 import delta.games.lotro.utils.DataProvider;
 import delta.games.lotro.utils.comparators.DelegatingComparator;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Controller for a table that shows some reputations.
  * @author DAM
  * @param <T> Type of managed faction stats entries.
  */
-public abstract class ReputationTableController<T extends FactionStats>
+public abstract class ReputationTableController<T extends FactionStats> extends AbstractAreaController
 {
   private static final String FACTION="FACTION";
   private static final String AMOUNT="AMOUNT";
@@ -36,10 +40,12 @@ public abstract class ReputationTableController<T extends FactionStats>
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param stats Stats to show.
    */
-  public ReputationTableController(ReputationStats<T> stats)
+  public ReputationTableController(AreaController parent, ReputationStats<T> stats)
   {
+    super(parent);
     _stats=stats;
     _tableController=buildTable();
   }
@@ -67,10 +73,13 @@ public abstract class ReputationTableController<T extends FactionStats>
         @Override
         public String getData(T item)
         {
-          return item.getFaction().getName();
+          Faction faction=item.getFaction();
+          String rawFactionName=faction.getName();
+          String factionName=ContextRendering.render(ReputationTableController.this,rawFactionName);
+          return factionName;
         }
       };
-      DefaultTableColumnController<T,String> factionColumn=new DefaultTableColumnController<T,String>(FACTION,"Faction",String.class,factionCell);
+      DefaultTableColumnController<T,String> factionColumn=new DefaultTableColumnController<T,String>(FACTION,"Faction",String.class,factionCell); // I18n
       factionColumn.setWidthSpecs(200,-1,200);
       table.addColumnController(factionColumn);
     }
@@ -85,7 +94,7 @@ public abstract class ReputationTableController<T extends FactionStats>
           return amount;
         }
       };
-      DefaultTableColumnController<T,Integer> amountColumn=new DefaultTableColumnController<T,Integer>(AMOUNT,"Points",Integer.class,amountCell);
+      DefaultTableColumnController<T,Integer> amountColumn=new DefaultTableColumnController<T,Integer>(AMOUNT,"Points",Integer.class,amountCell); // I18n
       amountColumn.setWidthSpecs(60,60,60);
       table.addColumnController(amountColumn);
     }
@@ -122,14 +131,14 @@ public abstract class ReputationTableController<T extends FactionStats>
 
   private void sortFactionStatsByName(List<T> factionStats)
   {
-    DataProvider<T,Faction> provider=new DataProvider<T,Faction>()
+    DataProvider<T,Named> provider=new DataProvider<T,Named>()
     {
-      public Faction getData(T p)
+      public Named getData(T p)
       {
         return p.getFaction();
       }
     };
-    DelegatingComparator<T,Faction> c=new DelegatingComparator<T,Faction>(provider,new FactionNameComparator());
+    DelegatingComparator<T,Named> c=new DelegatingComparator<T,Named>(provider,new NamedComparator());
     Collections.sort(factionStats,c);
   }
 
@@ -147,6 +156,7 @@ public abstract class ReputationTableController<T extends FactionStats>
    */
   public void dispose()
   {
+    super.dispose();
     // GUI
     if (_tableController!=null)
     {

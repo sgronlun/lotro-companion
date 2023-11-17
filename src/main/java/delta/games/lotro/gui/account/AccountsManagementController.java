@@ -21,6 +21,7 @@ import delta.games.lotro.account.Account;
 import delta.games.lotro.account.AccountsManager;
 import delta.games.lotro.account.events.AccountEvent;
 import delta.games.lotro.account.events.AccountEventType;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.utils.events.EventsManager;
 import delta.games.lotro.utils.events.GenericEventsListener;
 
@@ -144,8 +145,7 @@ public class AccountsManagementController implements ActionListener,GenericEvent
 
   private void showAccount(Account account)
   {
-    String accountName=account.getName();
-    String id=AccountWindowController.getIdentifier(accountName);
+    String id=AccountWindowController.getIdentifier(account.getSummary());
     WindowController controller=_mainWindowsManager.getWindow(id);
     if (controller==null)
     {
@@ -172,12 +172,14 @@ public class AccountsManagementController implements ActionListener,GenericEvent
     Account account=controller.getSelectedItem();
     if (account!=null)
     {
-      String accountName=account.getName();
+      String accountName=account.getDisplayName();
       // Check deletion
-      int result=GuiFactory.showQuestionDialog(_parentController.getWindow(),"Do you really want to delete account " + accountName + "?","Delete?",JOptionPane.YES_NO_OPTION);
+      String text=Labels.getLabel("accounts.management.deleteQuestion",new Object[]{accountName});
+      String title=Labels.getLabel("accounts.management.delete.title");
+      int result=GuiFactory.showQuestionDialog(_parentController.getWindow(),text,title,JOptionPane.YES_NO_OPTION);
       if (result==JOptionPane.OK_OPTION)
       {
-        String id=AccountWindowController.getIdentifier(accountName);
+        String id=AccountWindowController.getIdentifier(account.getSummary());
         WindowController windowController=_mainWindowsManager.getWindow(id);
         if (windowController!=null)
         {

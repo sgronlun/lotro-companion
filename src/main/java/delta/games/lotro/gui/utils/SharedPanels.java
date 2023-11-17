@@ -14,13 +14,16 @@ import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.BasicCharacterAttributes;
 import delta.games.lotro.character.CharacterFile;
+import delta.games.lotro.character.classes.ClassDescription;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.character.skills.SkillDescription;
 import delta.games.lotro.character.traits.TraitDescription;
-import delta.games.lotro.common.CharacterClass;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
 import delta.games.lotro.lore.emotes.EmoteDescription;
 import delta.games.lotro.lore.hobbies.HobbyDescription;
+import delta.games.lotro.lore.titles.TitleDescription;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Factory for shared panels.
@@ -113,6 +116,49 @@ public class SharedPanels
   }
 
   /**
+   * Build a race link panel controller.
+   * @param parent Parent window.
+   * @param race Race to show.
+   * @return A panel.
+   */
+  public static IconAndLinkPanelController buildRacePanel(WindowController parent, RaceDescription race)
+  {
+    if (race==null)
+    {
+      return null;
+    }
+    // Icon
+    IconController iconCtrl=IconControllerFactory.buildRaceIcon(parent,race);
+    // Link
+    PageIdentifier pageId=ReferenceConstants.getRaceReference(race);
+    String text=race.getName();
+    HyperLinkController linkCtrl=NavigationUtils.buildNavigationLink(parent,text,pageId);
+    return new IconAndLinkPanelController(iconCtrl,linkCtrl);
+  }
+
+  /**
+   * Build a title link panel controller.
+   * @param parent Parent window.
+   * @param title Title to show.
+   * @return A panel.
+   */
+  public static IconAndLinkPanelController buildTitlePanel(WindowController parent, TitleDescription title)
+  {
+    if (title==null)
+    {
+      return null;
+    }
+    // Icon
+    IconController iconCtrl=IconControllerFactory.buildTitleIcon(parent,title);
+    // Link
+    PageIdentifier pageId=ReferenceConstants.getTitleReference(title.getIdentifier());
+    String rawTitleName=title.getName();
+    String text=ContextRendering.render(parent,rawTitleName);
+    HyperLinkController linkCtrl=NavigationUtils.buildNavigationLink(parent,text,pageId);
+    return new IconAndLinkPanelController(iconCtrl,linkCtrl);
+  }
+
+  /**
    * Build a panel suitable for the header of a character column.
    * @param toon Targeted character.
    * @return A new panel.
@@ -126,8 +172,8 @@ public class SharedPanels
     BasicCharacterAttributes attrs=toon.getSummary();
     if (attrs!=null)
     {
-      CharacterClass cClass=attrs.getCharacterClass();
-      classIcon=LotroIconsManager.getClassIcon(cClass,LotroIconsManager.COMPACT_SIZE);
+      ClassDescription characterClass=attrs.getCharacterClass();
+      classIcon=LotroIconsManager.getClassIcon(characterClass.getIconId());
     }
     JLabel classLabel;
     if (classIcon!=null)

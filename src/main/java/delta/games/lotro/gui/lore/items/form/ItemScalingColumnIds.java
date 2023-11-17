@@ -17,5 +17,17 @@ public enum ItemScalingColumnIds
   /**
    * Value.
    */
-  VALUE
+  VALUE,
+  /**
+   * DPS.
+   */
+  DPS,
+  /**
+   * Minimum Damage.
+   */
+  MIN_DAMAGE,
+  /**
+   * Maximum damage.
+   */
+  MAX_DAMAGE
 }

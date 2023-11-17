@@ -13,9 +13,9 @@ import delta.games.lotro.account.AccountOnServer;
 import delta.games.lotro.account.events.AccountEvent;
 import delta.games.lotro.account.events.AccountEventProperties;
 import delta.games.lotro.account.events.AccountEventType;
-import delta.games.lotro.character.social.friends.FriendsManager;
-import delta.games.lotro.character.social.friends.filters.FriendFilter;
-import delta.games.lotro.character.social.friends.io.xml.FriendsIO;
+import delta.games.lotro.account.status.friends.FriendsManager;
+import delta.games.lotro.account.status.friends.filters.FriendFilter;
+import delta.games.lotro.account.status.friends.io.xml.FriendsIO;
 import delta.games.lotro.gui.friends.filter.FriendFilterController;
 import delta.games.lotro.gui.main.GlobalPreferences;
 import delta.games.lotro.utils.events.EventsManager;
@@ -69,12 +69,12 @@ public class FriendsPanelController implements GenericEventsListener<AccountEven
     JPanel panel=GuiFactory.buildBackgroundPanel(new BorderLayout());
     // Characters table
     JPanel tablePanel=buildTablePanel();
-    tablePanel.setBorder(GuiFactory.buildTitledBorder("Friends"));
+    tablePanel.setBorder(GuiFactory.buildTitledBorder("Friends")); // I18n
     panel.add(tablePanel,BorderLayout.CENTER);
     // Top panel
     _filterController=new FriendFilterController(_filter,_membersPanel);
     JPanel filterPanel=_filterController.getPanel();
-    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter");
+    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter"); // I18n
     filterPanel.setBorder(filterBorder);
     panel.add(filterPanel,BorderLayout.NORTH);
     return panel;

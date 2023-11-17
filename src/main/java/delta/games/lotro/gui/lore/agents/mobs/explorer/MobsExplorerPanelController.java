@@ -17,6 +17,7 @@ import delta.common.ui.swing.tables.TableColumnsChooserController;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.gui.lore.agents.mobs.MobsTableController;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.agents.mobs.MobDescription;
 
 /**
@@ -60,7 +61,7 @@ public class MobsExplorerPanelController implements FilterUpdateListener
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildPanel(new BorderLayout());
-    TitledBorder border=GuiFactory.buildTitledBorder("Mobs");
+    TitledBorder border=GuiFactory.buildTitledBorder("Mobs"); // 18n
     panel.setBorder(border);
 
     // Table
@@ -71,7 +72,7 @@ public class MobsExplorerPanelController implements FilterUpdateListener
     JPanel statsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
     _statsLabel=GuiFactory.buildLabel("-");
     statsPanel.add(_statsLabel);
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     ActionListener al=new ActionListener()
     {
       @Override
@@ -100,15 +101,7 @@ public class MobsExplorerPanelController implements FilterUpdateListener
   {
     int nbFiltered=_tableController.getNbFilteredItems();
     int nbItems=_tableController.getNbItems();
-    String label="";
-    if (nbFiltered==nbItems)
-    {
-      label="Mob(s): "+nbItems;
-    }
-    else
-    {
-      label="Mob(s): "+nbFiltered+"/"+nbItems;
-    }
+    String label=Labels.getCountLabel("Mob(s)",nbFiltered,nbItems); // I18n
     _statsLabel.setText(label);
   }
 

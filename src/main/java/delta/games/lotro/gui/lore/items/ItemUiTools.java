@@ -11,28 +11,31 @@ import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
+import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.icons.IconWithText;
 import delta.common.ui.swing.icons.IconWithText.Position;
 import delta.common.ui.swing.labels.HyperLinkController;
 import delta.common.ui.swing.labels.LocalHyperlinkAction;
-import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.ui.swing.windows.WindowController;
-import delta.common.ui.swing.windows.WindowsManager;
 import delta.common.utils.text.EndOfLine;
 import delta.games.lotro.character.stats.BasicStatsSet;
+import delta.games.lotro.common.enums.Genus;
 import delta.games.lotro.common.enums.ItemClass;
 import delta.games.lotro.common.enums.comparator.LotroEnumEntryNameComparator;
 import delta.games.lotro.common.stats.StatUtils;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
-import delta.games.lotro.gui.navigation.NavigatorFactory;
+import delta.games.lotro.gui.utils.NavigationUtils;
 import delta.games.lotro.lore.items.ArmourType;
+import delta.games.lotro.lore.items.DamageType;
 import delta.games.lotro.lore.items.EquipmentLocation;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.ItemInstance;
+import delta.games.lotro.lore.items.ItemQualities;
 import delta.games.lotro.lore.items.ItemQuality;
 import delta.games.lotro.lore.items.ItemsManager;
 import delta.games.lotro.lore.items.WeaponType;
@@ -90,6 +93,18 @@ public class ItemUiTools
    */
   public static HyperLinkController buildItemLink(final WindowController parent, final Item item)
   {
+    return buildItemLink(parent,item,GuiFactory.buildLabel(""));
+  }
+
+  /**
+   * Build an item link controller.
+   * @param parent Parent window.
+   * @param item Item to use.
+   * @param label Label to use.
+   * @return a new controller.
+   */
+  public static HyperLinkController buildItemLink(final WindowController parent, final Item item, JLabel label)
+  {
     ActionListener al=new ActionListener()
     {
       @Override
@@ -100,7 +115,7 @@ public class ItemUiTools
     };
     String text=(item!=null)?item.getName():"???";
     LocalHyperlinkAction action=new LocalHyperlinkAction(text,al);
-    HyperLinkController controller=new HyperLinkController(action);
+    HyperLinkController controller=new HyperLinkController(action,label);
     return controller;
   }
 
@@ -134,21 +149,8 @@ public class ItemUiTools
    */
   public static void showItemForm(WindowController parent, Item item)
   {
-    NavigatorWindowController window=null;
-    if (parent instanceof NavigatorWindowController)
-    {
-      window=(NavigatorWindowController)parent;
-    }
-    else
-    {
-      WindowsManager windows=(parent!=null)?parent.getWindowsManager():new WindowsManager();
-      int id=windows.getAll().size();
-      window=NavigatorFactory.buildNavigator(parent,id);
-      windows.registerWindow(window);
-    }
     PageIdentifier ref=ReferenceConstants.getItemReference(item.getIdentifier());
-    window.navigateTo(ref);
-    window.show(false);
+    NavigationUtils.navigateTo(ref,parent);
   }
 
   /**
@@ -170,7 +172,7 @@ public class ItemUiTools
   {
     ComboBoxController<ItemQuality> ctrl=new ComboBoxController<ItemQuality>();
     ctrl.addEmptyItem("");
-    for(ItemQuality quality : ItemQuality.ALL)
+    for(ItemQuality quality : ItemQualities.ALL)
     {
       ctrl.addItem(quality,quality.getMeaning());
     }
@@ -207,15 +209,6 @@ public class ItemUiTools
 
   /**
    * Build a controller for a combo box to choose a weapon type.
-   * @return A new controller.
-   */
-  public static ComboBoxController<WeaponType> buildWeaponTypeCombo()
-  {
-    return buildWeaponTypeCombo(WeaponType.getAll());
-  }
-
-  /**
-   * Build a controller for a combo box to choose a weapon type.
    * @param weaponTypes Weapon types to use.
    * @return A new controller.
    */
@@ -225,19 +218,44 @@ public class ItemUiTools
     ctrl.addEmptyItem("");
     for(WeaponType weaponType : weaponTypes)
     {
-      ctrl.addItem(weaponType,weaponType.getName());
+      ctrl.addItem(weaponType,weaponType.getLabel());
     }
     ctrl.selectItem(null);
     return ctrl;
   }
 
   /**
-   * Build a controller for a combo box to choose a armour type.
+   * Build a controller for a combo box to choose a damage type.
+   * @param damageTypes Damage types to use.
    * @return A new controller.
    */
-  public static ComboBoxController<ArmourType> buildArmourTypeCombo()
+  public static ComboBoxController<DamageType> buildDamageTypeCombo(Iterable<DamageType> damageTypes)
   {
-    return buildArmourTypeCombo(ArmourType.getAll());
+    ComboBoxController<DamageType> ctrl=new ComboBoxController<DamageType>();
+    ctrl.addEmptyItem("");
+    for(DamageType damageType : damageTypes)
+    {
+      ctrl.addItem(damageType,damageType.getLabel());
+    }
+    ctrl.selectItem(null);
+    return ctrl;
+  }
+
+  /**
+   * Build a controller for a combo box to choose a genus.
+   * @param genuses Genuses to use.
+   * @return A new controller.
+   */
+  public static ComboBoxController<Genus> buildGenus(Iterable<Genus> genuses)
+  {
+    ComboBoxController<Genus> ctrl=new ComboBoxController<Genus>();
+    ctrl.addEmptyItem("");
+    for(Genus genus : genuses)
+    {
+      ctrl.addItem(genus,genus.getLabel());
+    }
+    ctrl.selectItem(null);
+    return ctrl;
   }
 
   /**
@@ -249,9 +267,9 @@ public class ItemUiTools
   {
     ComboBoxController<ArmourType> ctrl=new ComboBoxController<ArmourType>();
     ctrl.addEmptyItem("");
-    for(ArmourType quality : armourTypes)
+    for(ArmourType armourType : armourTypes)
     {
-      ctrl.addItem(quality,quality.getName());
+      ctrl.addItem(armourType,armourType.getLabel());
     }
     ctrl.selectItem(null);
     return ctrl;
@@ -313,11 +331,11 @@ public class ItemUiTools
   public static Color getColorFromQuality(ItemQuality quality, Color defaultColor)
   {
     Color ret=defaultColor;
-    if (quality==ItemQuality.LEGENDARY) ret=new Color(223,178,0); // Gold
-    if (quality==ItemQuality.INCOMPARABLE) ret=new Color(0,165,218); // Teal
-    if (quality==ItemQuality.RARE) ret=new Color(244,74,178); // Mauve (Pink)
-    if (quality==ItemQuality.UNCOMMON) ret=new Color(111,145,2); // Yellow
-    if (quality==ItemQuality.COMMON) ret=defaultColor; // Default
+    if (quality==ItemQualities.LEGENDARY) ret=new Color(223,178,0); // Gold
+    if (quality==ItemQualities.INCOMPARABLE) ret=new Color(0,165,218); // Teal
+    if (quality==ItemQualities.RARE) ret=new Color(244,74,178); // Mauve (Pink)
+    if (quality==ItemQualities.UNCOMMON) ret=new Color(111,145,2); // Yellow
+    if (quality==ItemQualities.COMMON) ret=defaultColor; // Default
     return ret;
   }
 

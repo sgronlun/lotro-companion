@@ -48,7 +48,7 @@ public class ReputationSynopsisPanelController implements GenericEventsListener<
     _parent=parentController;
     _filter=new FactionFilter();
     _filterController=new ReputationSynopsisFilterController(_filter,this);
-    _tableController=new ReputationSynopsisTableController(_filter);
+    _tableController=new ReputationSynopsisTableController(parentController,_filter);
     EventsManager.addListener(CharacterEvent.class,this);
   }
 
@@ -103,12 +103,12 @@ public class ReputationSynopsisPanelController implements GenericEventsListener<
 
     // Filter
     JPanel filterPanel=_filterController.getPanel();
-    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter");
+    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter"); // I18n
     filterPanel.setBorder(filterBorder);
     panel.add(filterPanel,c);
 
     // Choose toons button
-    JButton chooser=GuiFactory.buildButton("Choose characters...");
+    JButton chooser=GuiFactory.buildButton("Choose characters..."); // I18n
     ActionListener al=new ActionListener()
     {
       @Override
@@ -126,7 +126,7 @@ public class ReputationSynopsisPanelController implements GenericEventsListener<
   private JPanel buildStatsPanel()
   {
     JPanel panel=GuiFactory.buildPanel(new BorderLayout());
-    TitledBorder border=GuiFactory.buildTitledBorder("Reputation synopsis");
+    TitledBorder border=GuiFactory.buildTitledBorder("Reputation synopsis"); // I18n
     panel.setBorder(border);
 
     // Table

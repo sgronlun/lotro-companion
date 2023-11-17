@@ -15,7 +15,8 @@ import delta.common.ui.swing.tables.GenericTableController;
 import delta.common.ui.swing.tables.ListDataProvider;
 import delta.common.ui.swing.tables.TableColumnController;
 import delta.common.ui.swing.windows.WindowController;
-import delta.games.lotro.common.CharacterClass;
+import delta.games.lotro.character.classes.AbstractClassDescription;
+import delta.games.lotro.common.enums.RunicTier;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.lore.items.ItemColumnIds;
 import delta.games.lotro.lore.items.legendary.relics.Relic;
@@ -86,15 +87,15 @@ public class RelicsTableBuilder
     }
     // Category column
     {
-      CellDataProvider<Relic,String> categoryCell=new CellDataProvider<Relic,String>()
+      CellDataProvider<Relic,RunicTier> categoryCell=new CellDataProvider<Relic,RunicTier>()
       {
         @Override
-        public String getData(Relic item)
+        public RunicTier getData(Relic item)
         {
-          return item.getCategory().getName();
+          return item.getTier();
         }
       };
-      DefaultTableColumnController<Relic,String> categoryColumn=new DefaultTableColumnController<Relic,String>(RelicColumnIds.CATEGORY.name(),"Category",String.class,categoryCell);
+      DefaultTableColumnController<Relic,RunicTier> categoryColumn=new DefaultTableColumnController<Relic,RunicTier>(RelicColumnIds.CATEGORY.name(),"Category",RunicTier.class,categoryCell);
       categoryColumn.setWidthSpecs(80,100,100);
       columns.add(categoryColumn);
     }
@@ -114,15 +115,15 @@ public class RelicsTableBuilder
     }
     // Class column
     {
-      CellDataProvider<Relic,CharacterClass> classCell=new CellDataProvider<Relic,CharacterClass>()
+      CellDataProvider<Relic,AbstractClassDescription> classCell=new CellDataProvider<Relic,AbstractClassDescription>()
       {
         @Override
-        public CharacterClass getData(Relic item)
+        public AbstractClassDescription getData(Relic item)
         {
           return item.getUsageRequirement().getRequiredClass();
         }
       };
-      DefaultTableColumnController<Relic,CharacterClass> classColumn=new DefaultTableColumnController<Relic,CharacterClass>(RelicColumnIds.CLASS.name(),"Class",CharacterClass.class,classCell);
+      DefaultTableColumnController<Relic,AbstractClassDescription> classColumn=new DefaultTableColumnController<Relic,AbstractClassDescription>(RelicColumnIds.CLASS.name(),"Class",AbstractClassDescription.class,classCell);
       classColumn.setWidthSpecs(100,100,100);
       columns.add(classColumn);
     }

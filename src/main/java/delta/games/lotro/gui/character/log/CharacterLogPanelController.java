@@ -10,6 +10,7 @@ import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.games.lotro.gui.utils.l10n.Labels;
 
 /**
  * Controller the character log panel.
@@ -48,7 +49,7 @@ public class CharacterLogPanelController
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildPanel(new BorderLayout());
-    TitledBorder logFrameBorder=GuiFactory.buildTitledBorder("Log");
+    TitledBorder logFrameBorder=GuiFactory.buildTitledBorder("Log"); // I18n
     panel.setBorder(logFrameBorder);
 
     // Table
@@ -76,15 +77,7 @@ public class CharacterLogPanelController
   {
     int nbFiltered=_tableController.getNbFilteredItems();
     int nbItems=_tableController.getNbItems();
-    String label="";
-    if (nbFiltered==nbItems)
-    {
-      label="Item(s): "+nbItems;
-    }
-    else
-    {
-      label="Item(s): "+nbFiltered+"/"+nbItems;
-    }
+    String label=Labels.getCountLabel(nbFiltered,nbItems);
     _statsLabel.setText(label);
   }
 

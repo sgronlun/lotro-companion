@@ -9,6 +9,8 @@ import javax.swing.Icon;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+import delta.common.ui.swing.area.AbstractAreaController;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.icons.IconWithText;
 import delta.common.ui.swing.icons.IconsManager;
 import delta.common.ui.swing.tables.CellDataProvider;
@@ -27,12 +29,13 @@ import delta.games.lotro.lore.trade.barter.BarterEntry;
 import delta.games.lotro.lore.trade.barter.BarterEntryElement;
 import delta.games.lotro.lore.trade.barter.ItemBarterEntryElement;
 import delta.games.lotro.lore.trade.barter.ReputationBarterEntryElement;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Controller for a table that shows barter entries.
  * @author DAM
  */
-public class BarterEntriesTableController
+public class BarterEntriesTableController extends AbstractAreaController
 {
   // Data
   private TypedProperties _prefs;
@@ -43,12 +46,14 @@ public class BarterEntriesTableController
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param prefs Preferences.
    * @param filter Managed filter.
    * @param entries Entries to show.
    */
-  public BarterEntriesTableController(TypedProperties prefs, Filter<BarterEntry> filter, List<BarterEntry> entries)
+  public BarterEntriesTableController(AreaController parent, TypedProperties prefs, Filter<BarterEntry> filter, List<BarterEntry> entries)
   {
+    super(parent);
     _prefs=prefs;
     _barterEntries=new ArrayList<BarterEntry>(entries);
     _tableController=buildTable();
@@ -91,7 +96,7 @@ public class BarterEntriesTableController
           if (toReceive instanceof ItemBarterEntryElement)
           {
             ItemBarterEntryElement itemEntry=(ItemBarterEntryElement)toReceive;
-            Item item=itemEntry.getItemProxy().getObject();
+            Item item=itemEntry.getItem();
             int quantity=itemEntry.getQuantity();
             Icon icon=ItemUiTools.buildItemIcon(item,quantity);
             return icon;
@@ -125,13 +130,14 @@ public class BarterEntriesTableController
           if (toReceive instanceof ItemBarterEntryElement)
           {
             ItemBarterEntryElement itemEntry=(ItemBarterEntryElement)toReceive;
-            name=itemEntry.getItemProxy().getName();
+            name=itemEntry.getItem().getName();
           }
           else if (toReceive instanceof ReputationBarterEntryElement)
           {
             ReputationBarterEntryElement reputationEntry=(ReputationBarterEntryElement)toReceive;
             Faction faction=reputationEntry.getFaction();
-            name=faction.getName();
+            String rawFactionName=faction.getName();
+            name=ContextRendering.render(BarterEntriesTableController.this,rawFactionName);
           }
           return name;
         }
@@ -272,6 +278,7 @@ public class BarterEntriesTableController
    */
   public void dispose()
   {
+    super.dispose();
     // Preferences
     if (_prefs!=null)
     {

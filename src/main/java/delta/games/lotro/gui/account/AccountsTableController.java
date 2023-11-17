@@ -17,7 +17,8 @@ import delta.games.lotro.account.AccountType;
 import delta.games.lotro.account.AccountsManager;
 import delta.games.lotro.account.events.AccountEvent;
 import delta.games.lotro.account.events.AccountEventType;
-import delta.games.lotro.gui.utils.l10n.ColumnsUtils;
+import delta.games.lotro.gui.utils.l10n.StatColumnsUtils;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.utils.events.EventsManager;
 import delta.games.lotro.utils.events.GenericEventsListener;
 
@@ -53,7 +54,7 @@ public class AccountsTableController implements GenericEventsListener<AccountEve
     ListDataProvider<Account> provider=new ListDataProvider<Account>(_accounts);
     GenericTableController<Account> table=new GenericTableController<Account>(provider);
 
-    // Name column
+    // Account name column
     {
       CellDataProvider<Account,String> nameCell=new CellDataProvider<Account,String>()
       {
@@ -64,9 +65,26 @@ public class AccountsTableController implements GenericEventsListener<AccountEve
           return data.getName();
         }
       };
-      DefaultTableColumnController<Account,String> nameColumn=new DefaultTableColumnController<Account,String>("Name",String.class,nameCell);
+      String title=Labels.getLabel("accounts.table.column.name");
+      DefaultTableColumnController<Account,String> nameColumn=new DefaultTableColumnController<Account,String>(AccountColumnIds.NAME.name(),title,String.class,nameCell);
       nameColumn.setWidthSpecs(100,100,100);
       table.addColumnController(nameColumn);
+    }
+    // Subscription key column
+    {
+      CellDataProvider<Account,String> subscriptionCell=new CellDataProvider<Account,String>()
+      {
+        @Override
+        public String getData(Account item)
+        {
+          AccountSummary data=item.getSummary();
+          return data.getSubscriptionKey();
+        }
+      };
+      String title=Labels.getLabel("accounts.table.column.subscription");
+      DefaultTableColumnController<Account,String> subscriptionColumn=new DefaultTableColumnController<Account,String>(AccountColumnIds.SUBSCRIPTION.name(),title,String.class,subscriptionCell);
+      subscriptionColumn.setWidthSpecs(230,230,230);
+      table.addColumnController(subscriptionColumn);
     }
     // Signup date
     {
@@ -80,8 +98,9 @@ public class AccountsTableController implements GenericEventsListener<AccountEve
           return (signupDate!=null)?new Date(signupDate.longValue()):null;
         }
       };
-      DefaultTableColumnController<Account,Date> signupDateColumn=new DefaultTableColumnController<Account,Date>("Signup Date",Date.class,signupDateCell);
-      ColumnsUtils.configureDateColumn(signupDateColumn);
+      String title=Labels.getLabel("accounts.table.column.signupDate");
+      DefaultTableColumnController<Account,Date> signupDateColumn=new DefaultTableColumnController<Account,Date>(AccountColumnIds.SIGNUP_DATE.name(),title,Date.class,signupDateCell);
+      StatColumnsUtils.configureDateColumn(signupDateColumn);
       table.addColumnController(signupDateColumn);
     }
     // Account type
@@ -95,9 +114,26 @@ public class AccountsTableController implements GenericEventsListener<AccountEve
           return data.getAccountType();
         }
       };
-      DefaultTableColumnController<Account,AccountType> accountTypeColumn=new DefaultTableColumnController<Account,AccountType>("Type",AccountType.class,accountTypeCell);
+      String title=Labels.getLabel("accounts.table.column.type");
+      DefaultTableColumnController<Account,AccountType> accountTypeColumn=new DefaultTableColumnController<Account,AccountType>(AccountColumnIds.TYPE.name(),title,AccountType.class,accountTypeCell);
       accountTypeColumn.setWidthSpecs(100,100,100);
       table.addColumnController(accountTypeColumn);
+    }
+    // User data
+    {
+      CellDataProvider<Account,String> userDataCell=new CellDataProvider<Account,String>()
+      {
+        @Override
+        public String getData(Account item)
+        {
+          AccountSummary data=item.getSummary();
+          return data.getUserData();
+        }
+      };
+      String title=Labels.getLabel("accounts.table.column.comments");
+      DefaultTableColumnController<Account,String> userDataColumn=new DefaultTableColumnController<Account,String>(AccountColumnIds.USER_DATA.name(),title,String.class,userDataCell);
+      userDataColumn.setWidthSpecs(100,-1,200);
+      table.addColumnController(userDataColumn);
     }
     return table;
   }

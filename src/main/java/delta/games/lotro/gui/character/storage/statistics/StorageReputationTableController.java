@@ -2,6 +2,7 @@ package delta.games.lotro.gui.character.storage.statistics;
 
 import java.util.List;
 
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.tables.CellDataProvider;
 import delta.common.ui.swing.tables.DefaultTableColumnController;
 import delta.common.ui.swing.tables.GenericTableController;
@@ -19,11 +20,12 @@ public class StorageReputationTableController extends ReputationTableController<
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param stats Stats to show.
    */
-  public StorageReputationTableController(StorageReputationStats stats)
+  public StorageReputationTableController(AreaController parent, StorageReputationStats stats)
   {
-    super(stats);
+    super(parent,stats);
   }
 
   protected void defineColumns(GenericTableController<StorageFactionStats> table)
@@ -40,7 +42,7 @@ public class StorageReputationTableController extends ReputationTableController<
           return count;
         }
       };
-      DefaultTableColumnController<StorageFactionStats,Integer> countColumn=new DefaultTableColumnController<StorageFactionStats,Integer>(COUNT,"Items",Integer.class,countCell);
+      DefaultTableColumnController<StorageFactionStats,Integer> countColumn=new DefaultTableColumnController<StorageFactionStats,Integer>(COUNT,"Items",Integer.class,countCell); // I18n
       countColumn.setWidthSpecs(60,60,60);
       table.addColumnController(countColumn);
     }

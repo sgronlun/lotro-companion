@@ -15,7 +15,9 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.labels.MultilineLabel2;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.BasicCharacterAttributes;
+import delta.games.lotro.common.enums.SocketType;
 import delta.games.lotro.lore.items.Item;
+import delta.games.lotro.lore.items.essences.Essence;
 import delta.games.lotro.lore.items.essences.EssencesSet;
 
 /**
@@ -26,7 +28,8 @@ public class EssencesEditionPanelController implements ActionListener
 {
   // Data
   private BasicCharacterAttributes _attrs;
-  private List<Item> _essences;
+  private List<Essence> _essences;
+  private Item _item;
   // GUI
   private JPanel _panel;
   // Controllers
@@ -37,13 +40,15 @@ public class EssencesEditionPanelController implements ActionListener
    * Constructor.
    * @param parent Parent controller.
    * @param attrs Attributes of toon to use.
+   * @param item Item to add essences to.
    */
-  public EssencesEditionPanelController(WindowController parent, BasicCharacterAttributes attrs)
+  public EssencesEditionPanelController(WindowController parent, BasicCharacterAttributes attrs, Item item)
   {
     _parent=parent;
     _attrs=attrs;
+    _item=item;
     _essenceControllers=new ArrayList<SingleEssenceEditionController>();
-    _essences=new ArrayList<Item>();
+    _essences=new ArrayList<Essence>();
     _panel=build();
   }
 
@@ -64,9 +69,10 @@ public class EssencesEditionPanelController implements ActionListener
     int nbSlots=essences.getSize();
     for(int i=0;i<nbSlots;i++)
     {
-      Item essence=essences.getEssence(i);
+      Essence essence=essences.getEssence(i);
       _essences.add(essence);
-      SingleEssenceEditionController ctrl=new SingleEssenceEditionController();
+      SocketType type=essences.getType(i);
+      SingleEssenceEditionController ctrl=new SingleEssenceEditionController(type);
       ctrl.setEssence(essence);
       _essenceControllers.add(ctrl);
     }
@@ -122,7 +128,8 @@ public class EssencesEditionPanelController implements ActionListener
       JButton iconButton=editor.getIcon();
       if (source==iconButton)
       {
-        Item essence=EssenceChoice.chooseEssence(_parent,_attrs);
+        SocketType type=_item.getEssenceSlotsSetup().getSlotType(index);
+        Essence essence=EssenceChoice.chooseEssence(_parent,_attrs,type);
         if (essence!=null)
         {
           editor.setEssence(essence);
@@ -150,7 +157,7 @@ public class EssencesEditionPanelController implements ActionListener
     int nbSlots=_essences.size();
     for(int i=0;i<nbSlots;i++)
     {
-      Item essence=_essences.get(i);
+      Essence essence=_essences.get(i);
       essencesSet.setEssence(i,essence);
     }
   }
@@ -176,5 +183,6 @@ public class EssencesEditionPanelController implements ActionListener
       _essenceControllers=null;
     }
     _essences=null;
+    _item=null;
   }
 }

@@ -10,9 +10,9 @@ import delta.common.ui.swing.tables.DataProvider;
 import delta.common.ui.swing.tables.DefaultTableColumnController;
 import delta.common.ui.swing.tables.GenericTableController;
 import delta.common.ui.swing.tables.ListDataProvider;
+import delta.games.lotro.character.classes.ClassDescription;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.character.stats.buffs.Buff;
-import delta.games.lotro.common.CharacterClass;
-import delta.games.lotro.common.Race;
 import delta.games.lotro.gui.LotroIconsManager;
 
 /**
@@ -43,7 +43,7 @@ public class BuffsTableBuilder
           return icon;
         }
       };
-      DefaultTableColumnController<Buff,ImageIcon> iconColumn=new DefaultTableColumnController<Buff,ImageIcon>("Icon",ImageIcon.class,iconCell);
+      DefaultTableColumnController<Buff,ImageIcon> iconColumn=new DefaultTableColumnController<Buff,ImageIcon>("Icon",ImageIcon.class,iconCell); // I18n
       iconColumn.setWidthSpecs(50,50,50);
       iconColumn.setSortable(false);
       table.addColumnController(iconColumn);
@@ -58,35 +58,35 @@ public class BuffsTableBuilder
           return buff.getLabel();
         }
       };
-      DefaultTableColumnController<Buff,String> nameColumn=new DefaultTableColumnController<Buff,String>("Name",String.class,nameCell);
+      DefaultTableColumnController<Buff,String> nameColumn=new DefaultTableColumnController<Buff,String>("Name",String.class,nameCell); // I18n
       nameColumn.setWidthSpecs(100,-1,210);
       table.addColumnController(nameColumn);
     }
     // Class column
     {
-      CellDataProvider<Buff,CharacterClass> classCell=new CellDataProvider<Buff,CharacterClass>()
+      CellDataProvider<Buff,ClassDescription> classCell=new CellDataProvider<Buff,ClassDescription>()
       {
         @Override
-        public CharacterClass getData(Buff buff)
+        public ClassDescription getData(Buff buff)
         {
           return buff.getRequiredClass();
         }
       };
-      DefaultTableColumnController<Buff,CharacterClass> classColumn=new DefaultTableColumnController<Buff,CharacterClass>("Class",CharacterClass.class,classCell);
+      DefaultTableColumnController<Buff,ClassDescription> classColumn=new DefaultTableColumnController<Buff,ClassDescription>("Class",ClassDescription.class,classCell); // I18n
       classColumn.setWidthSpecs(100,100,50);
       table.addColumnController(classColumn);
     }
     // Race column
     {
-      CellDataProvider<Buff,Race> classCell=new CellDataProvider<Buff,Race>()
+      CellDataProvider<Buff,RaceDescription> classCell=new CellDataProvider<Buff,RaceDescription>()
       {
         @Override
-        public Race getData(Buff buff)
+        public RaceDescription getData(Buff buff)
         {
           return buff.getRequiredRace();
         }
       };
-      DefaultTableColumnController<Buff,Race> classColumn=new DefaultTableColumnController<Buff,Race>("Race",Race.class,classCell);
+      DefaultTableColumnController<Buff,RaceDescription> classColumn=new DefaultTableColumnController<Buff,RaceDescription>("Race",RaceDescription.class,classCell); // I18n
       classColumn.setWidthSpecs(100,100,50);
       table.addColumnController(classColumn);
     }

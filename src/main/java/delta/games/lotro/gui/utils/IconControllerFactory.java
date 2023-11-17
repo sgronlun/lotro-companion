@@ -3,16 +3,21 @@ package delta.games.lotro.gui.utils;
 import javax.swing.Icon;
 
 import delta.common.ui.swing.windows.WindowController;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.character.skills.SkillDescription;
 import delta.games.lotro.character.traits.TraitDescription;
+import delta.games.lotro.character.virtues.VirtueDescription;
+import delta.games.lotro.common.Genders;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
-import delta.games.lotro.gui.lore.items.ItemUiTools;
 import delta.games.lotro.gui.lore.items.legendary.relics.RelicUiTools;
+import delta.games.lotro.gui.utils.items.ItemIconController;
 import delta.games.lotro.lore.emotes.EmoteDescription;
 import delta.games.lotro.lore.hobbies.HobbyDescription;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.legendary.relics.Relic;
+import delta.games.lotro.lore.titles.TitleDescription;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Factory of icon controllers.
@@ -27,32 +32,11 @@ public class IconControllerFactory
    * @param count Count.
    * @return A new controller.
    */
-  public static IconController buildItemIcon(WindowController parent, Item item, int count)
+  public static ItemIconController buildItemIcon(WindowController parent, Item item, int count)
   {
-    IconController ret=new IconController(parent);
-    if (item!=null)
-    {
-      updateItemIcon(ret,item,count);
-    }
-    else
-    {
-      ret.clear(LotroIconsManager.getDefaultItemIcon());
-    }
+    ItemIconController ret=new ItemIconController(parent);
+    ret.setItem(item,count);
     return ret;
-  }
-
-  /**
-   * Update an item icon.
-   * @param iconController Targeted controller.
-   * @param item Item to show.
-   * @param count Count.
-   */
-  public static void updateItemIcon(IconController iconController, Item item, int count)
-  {
-    Icon icon=ItemUiTools.buildItemIcon(item,count);
-    iconController.setIcon(icon);
-    iconController.setPageId(ReferenceConstants.getItemReference(item.getIdentifier()));
-    iconController.setTooltipText(item.getName());
   }
 
   /**
@@ -114,6 +98,26 @@ public class IconControllerFactory
   }
 
   /**
+   * Build a virtue icon.
+   * @param parent Parent window.
+   * @param virtue Virtue to use.
+   * @param count Count.
+   * @return A new controller.
+   */
+  public static IconController buildVirtueIcon(WindowController parent, VirtueDescription virtue, int count)
+  {
+    IconController ret=new IconController(parent);
+    if (virtue!=null)
+    {
+      Icon virtueIcon=LotroIconsManager.getVirtueIcon(virtue,count);
+      ret.setIcon(virtueIcon);
+      ret.setPageId(ReferenceConstants.getVirtueReference(virtue.getIdentifier()));
+      ret.setTooltipText(virtue.getName());
+    }
+    return ret;
+  }
+
+  /**
    * Build an emote icon.
    * @param parent Parent window.
    * @param emote Emote to use.
@@ -147,6 +151,46 @@ public class IconControllerFactory
       ret.setIcon(icon);
       ret.setPageId(ReferenceConstants.getHobbyReference(hobby.getIdentifier()));
       ret.setTooltipText(hobby.getName());
+    }
+    return ret;
+  }
+
+  /**
+   * Build a race icon.
+   * @param parent Parent window.
+   * @param race Race to use.
+   * @return A new controller.
+   */
+  public static IconController buildRaceIcon(WindowController parent, RaceDescription race)
+  {
+    IconController ret=new IconController(parent);
+    if (race!=null)
+    {
+      Icon icon=LotroIconsManager.getCharacterIcon(race,Genders.MALE);
+      ret.setIcon(icon);
+      ret.setPageId(ReferenceConstants.getRaceReference(race));
+      ret.setTooltipText(race.getName());
+    }
+    return ret;
+  }
+
+  /**
+   * Build a title icon.
+   * @param parent Parent window.
+   * @param title Title to use.
+   * @return A new controller.
+   */
+  public static IconController buildTitleIcon(WindowController parent, TitleDescription title)
+  {
+    IconController ret=new IconController(parent);
+    if (title!=null)
+    {
+      Icon icon=LotroIconsManager.getTitleIcon(title.getIconId());
+      ret.setIcon(icon);
+      ret.setPageId(ReferenceConstants.getTitleReference(title.getIdentifier()));
+      String rawTitleName=title.getName();
+      String titleName=ContextRendering.render(parent,rawTitleName);
+      ret.setTooltipText(titleName);
     }
     return ret;
   }

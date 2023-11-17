@@ -11,8 +11,11 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.labels.MultilineLabel2;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.stats.BasicStatsSet;
+import delta.games.lotro.common.enums.Genus;
+import delta.games.lotro.common.enums.LegendaryTitleTier;
 import delta.games.lotro.common.stats.StatUtils;
 import delta.games.lotro.lore.items.DamageType;
+import delta.games.lotro.lore.items.DamageTypes;
 import delta.games.lotro.lore.items.legendary.titles.LegendaryTitle;
 
 /**
@@ -121,23 +124,23 @@ public class SingleTitleEditionController
     {
       boolean useTier=false;
       DamageType damageType=_legendaryTitle.getDamageType();
-      if ((damageType!=null) && (damageType!=DamageType.COMMON))
+      if ((damageType!=null) && (damageType!=DamageTypes.COMMON))
       {
         String damageStr=damageType.getName();
         complementSb.append(damageStr).append(" damage");
         useTier=true;
       }
-      String slayerType=_legendaryTitle.getSlayerGenusType();
-      if ((slayerType!=null) && (slayerType.length()>0))
+      Genus slayerType=_legendaryTitle.getSlayerGenusType();
+      if (slayerType!=null)
       {
         if (complementSb.length()>0) complementSb.append(", ");
-        complementSb.append(slayerType).append(" slayer");
+        complementSb.append(slayerType.getLabel()).append(" slayer");
         useTier=true;
       }
       if (useTier)
       {
-        int tier=_legendaryTitle.getTier();
-        complementSb.append(", tier ").append(tier);
+        LegendaryTitleTier tier=_legendaryTitle.getTier();
+        complementSb.append(", ").append(tier);
       }
       _complement.setText(complementSb.toString());
     }

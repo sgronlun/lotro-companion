@@ -27,6 +27,7 @@ import delta.games.lotro.gui.common.navigation.ReferenceConstants;
 import delta.games.lotro.lore.billingGroups.BillingGroupDescription;
 import delta.games.lotro.lore.titles.TitleDescription;
 import delta.games.lotro.utils.gui.HtmlUtils;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Controller for a billing group display panel.
@@ -61,7 +62,7 @@ public class BillingGroupDisplayPanelController implements NavigablePanelControl
   @Override
   public String getTitle()
   {
-    return "Account feature: "+_billingGroup.getName();
+    return "Account feature: "+_billingGroup.getName(); // 18n
   }
 
   /**
@@ -103,7 +104,7 @@ public class BillingGroupDisplayPanelController implements NavigablePanelControl
     {
       panel=GuiFactory.buildPanel(new BorderLayout());
       panel.add(references,BorderLayout.CENTER);
-      panel.setBorder(GuiFactory.buildTitledBorder("References"));
+      panel.setBorder(GuiFactory.buildTitledBorder("References")); // 18n
     }
     return panel;
   }
@@ -127,7 +128,7 @@ public class BillingGroupDisplayPanelController implements NavigablePanelControl
     // Details
     _details=buildDetailsPane();
     JScrollPane detailsPane=GuiFactory.buildScrollPane(_details);
-    detailsPane.setBorder(GuiFactory.buildTitledBorder("Titles"));
+    detailsPane.setBorder(GuiFactory.buildTitledBorder("Titles")); // 18n
     c.fill=GridBagConstraints.BOTH;
     c.weightx=1.0;
     c.weighty=1.0;
@@ -178,11 +179,13 @@ public class BillingGroupDisplayPanelController implements NavigablePanelControl
 
   private void buildHtmlForTitleReference(StringBuilder sb, TitleDescription title)
   {
-    sb.append("<p>Gives title: ");
+    sb.append("<p>Gives title: "); // 18n
     sb.append("<b>");
     int titleID=title.getIdentifier();
     PageIdentifier to=ReferenceConstants.getTitleReference(titleID);
-    HtmlUtils.printLink(sb,to.getFullAddress(),title.getName());
+    String rawTitleName=title.getRawName();
+    String titleName=ContextRendering.render(this,rawTitleName);
+    HtmlUtils.printLink(sb,to.getFullAddress(),titleName);
     sb.append("</b></p>");
   }
 

@@ -37,6 +37,7 @@ import delta.games.lotro.character.events.CharacterEventType;
 import delta.games.lotro.character.io.xml.CharacterXMLParser;
 import delta.games.lotro.gui.character.CharacterFileWindowController;
 import delta.games.lotro.gui.main.GlobalPreferences;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.utils.events.EventsManager;
 import delta.games.lotro.utils.events.GenericEventsListener;
 import delta.games.lotro.utils.gui.filechooser.FileChooserController;
@@ -101,7 +102,7 @@ public class ToonsManagementController implements ActionListener,GenericEventsLi
     // Toolbar
     _toolbar=buildToolBar();
     // Columns chooser
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     {
       ActionListener al=new ActionListener()
       {
@@ -115,7 +116,7 @@ public class ToonsManagementController implements ActionListener,GenericEventsLi
       choose.addActionListener(al);
     }
     // Characters chooser
-    JButton chooseCharacters=GuiFactory.buildButton("Choose characters...");
+    JButton chooseCharacters=GuiFactory.buildButton("Choose characters..."); // I18n
     {
       ActionListener al=new ActionListener()
       {
@@ -186,16 +187,16 @@ public class ToonsManagementController implements ActionListener,GenericEventsLi
     ToolbarModel model=controller.getModel();
     // New icon
     String newIconPath=getToolbarIconPath("new");
-    ToolbarIconItem newIconItem=new ToolbarIconItem(NEW_TOON_ID,newIconPath,NEW_TOON_ID,"Create a new character...","New");
+    ToolbarIconItem newIconItem=new ToolbarIconItem(NEW_TOON_ID,newIconPath,NEW_TOON_ID,"Create a new character...","New"); // I18n
     model.addToolbarIconItem(newIconItem);
     // Remove icon
     String deleteIconPath=getToolbarIconPath("delete");
-    ToolbarIconItem deleteIconItem=new ToolbarIconItem(REMOVE_TOON_ID,deleteIconPath,REMOVE_TOON_ID,"Remove the selected character...","Remove");
+    ToolbarIconItem deleteIconItem=new ToolbarIconItem(REMOVE_TOON_ID,deleteIconPath,REMOVE_TOON_ID,"Remove the selected character...","Remove"); // I18n
     model.addToolbarIconItem(deleteIconItem);
     controller.addActionListener(this);
     // Import icon
     String importIconPath=getToolbarIconPath("import");
-    ToolbarIconItem importIconItem=new ToolbarIconItem(IMPORT_TOON_ID,importIconPath,IMPORT_TOON_ID,"Import a character...","Import");
+    ToolbarIconItem importIconItem=new ToolbarIconItem(IMPORT_TOON_ID,importIconPath,IMPORT_TOON_ID,"Import a character...","Import"); // I18n
     model.addToolbarIconItem(importIconItem);
     return controller;
   }
@@ -261,7 +262,7 @@ public class ToonsManagementController implements ActionListener,GenericEventsLi
       String serverName=file.getServerName();
       String toonName=file.getName();
       // Check deletion
-      int result=GuiFactory.showQuestionDialog(_parentController.getWindow(),"Do you really want to delete " + toonName+"@"+ serverName + "?","Delete?",JOptionPane.YES_NO_OPTION);
+      int result=GuiFactory.showQuestionDialog(_parentController.getWindow(),"Do you really want to delete " + toonName+"@"+ serverName + "?","Delete?",JOptionPane.YES_NO_OPTION); // I18n
       if (result==JOptionPane.OK_OPTION)
       {
         String id=CharacterFileWindowController.getIdentifier(serverName,toonName);
@@ -278,7 +279,7 @@ public class ToonsManagementController implements ActionListener,GenericEventsLi
 
   private void importToon()
   {
-    FileChooserController ctrl=new FileChooserController("import", "Import character...");
+    FileChooserController ctrl=new FileChooserController("import", "Import character..."); // I18n
     Window window=_parentController.getWindow();
     File fromFile=ctrl.chooseFile(window,"Import");
     if (fromFile!=null)
@@ -291,16 +292,16 @@ public class ToonsManagementController implements ActionListener,GenericEventsLi
         ok=importData(data);
         if (ok)
         {
-          GuiFactory.showInformationDialog(window,"Import OK!","OK!");
+          GuiFactory.showInformationDialog(window,"Import OK!","OK!"); // I18n
         }
         else
         {
-          GuiFactory.showErrorDialog(window,"Import failed!","Error!");
+          GuiFactory.showErrorDialog(window,"Import failed!","Error!"); // I18n
         }
       }
       else
       {
-        GuiFactory.showErrorDialog(window,"Import failed (bad XML file)!","Error!");
+        GuiFactory.showErrorDialog(window,"Import failed (bad XML file)!","Error!"); // I18n
       }
     }
   }

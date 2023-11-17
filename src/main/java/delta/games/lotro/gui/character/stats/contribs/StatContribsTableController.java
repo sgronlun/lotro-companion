@@ -14,7 +14,7 @@ import delta.common.ui.swing.tables.ListDataProvider;
 import delta.common.ui.swing.tables.TableColumnsManager;
 import delta.games.lotro.character.stats.contribs.ContribsByStat;
 import delta.games.lotro.character.stats.contribs.StatContribution;
-import delta.games.lotro.gui.utils.l10n.ColumnsUtils;
+import delta.games.lotro.gui.utils.l10n.StatColumnsUtils;
 import delta.games.lotro.gui.utils.l10n.StatRenderer;
 
 /**
@@ -83,7 +83,7 @@ public class StatContribsTableController
           return item.getSource().getLabel();
         }
       };
-      DefaultTableColumnController<StatContribution,String> sourceColumn=new DefaultTableColumnController<StatContribution,String>("Source",String.class,sourceCell);
+      DefaultTableColumnController<StatContribution,String> sourceColumn=new DefaultTableColumnController<StatContribution,String>("Source",String.class,sourceCell); // I18n
       sourceColumn.setWidthSpecs(150,-1,150);
       columnsManager.addColumnController(sourceColumn,true);
     }
@@ -97,8 +97,8 @@ public class StatContribsTableController
           return item.getValue();
         }
       };
-      DefaultTableColumnController<StatContribution,Number> statColumn=new DefaultTableColumnController<StatContribution,Number>("Value",Number.class,statCell);
-      ColumnsUtils.configureStatValueColumn(statColumn,_renderer,70);
+      DefaultTableColumnController<StatContribution,Number> statColumn=new DefaultTableColumnController<StatContribution,Number>("Value",Number.class,statCell); // I18n
+      StatColumnsUtils.configureStatValueColumn(statColumn,_renderer,70);
       columnsManager.addColumnController(statColumn,true);
     }
   }

@@ -15,6 +15,8 @@ import javax.swing.JScrollPane;
 
 import delta.common.ui.swing.GuiFactory;
 import delta.common.utils.text.EndOfLine;
+import delta.games.lotro.common.enums.MountType;
+import delta.games.lotro.common.enums.SkillCharacteristicSubCategory;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.lore.collections.mounts.MountDescription;
 
@@ -80,22 +82,22 @@ public class MountDisplayPanelController
       panelLine.add(_name);
     }
     // Category
-    _category=buildLabelLine(panel,c,"Category: ");
+    _category=buildLabelLine(panel,c,"Category: "); // 18n
     // Mount type
-    _mountType=buildLabelLine(panel,c,"Mount type: ");
+    _mountType=buildLabelLine(panel,c,"Mount type: "); // 18n
     // Initial name
-    _initialName=buildLabelLine(panel,c,"Initial name: ");
+    _initialName=buildLabelLine(panel,c,"Initial name: "); // 18n
     // Morale
-    _morale=buildLabelLine(panel,c,"Morale: ");
+    _morale=buildLabelLine(panel,c,"Morale: "); // 18n
     // Speed
-    _speed=buildLabelLine(panel,c,"Speed: ");
+    _speed=buildLabelLine(panel,c,"Speed: "); // 18n
     // Tall
-    _size=buildLabelLine(panel,c,"Size: ");
+    _size=buildLabelLine(panel,c,"Size: "); // 18n
 
     // Description
     _details=buildDescriptionPane();
     JScrollPane detailsPane=GuiFactory.buildScrollPane(_details);
-    detailsPane.setBorder(GuiFactory.buildTitledBorder("Description"));
+    detailsPane.setBorder(GuiFactory.buildTitledBorder("Description")); // 18n
     c.fill=GridBagConstraints.BOTH;
     c.weightx=1.0;
     c.weighty=1.0;
@@ -166,11 +168,13 @@ public class MountDisplayPanelController
     ImageIcon icon=LotroIconsManager.getMountIcon(_mount.getIconId());
     _icon.setIcon(icon);
     // Category
-    String category=_mount.getCategory();
-    _category.setText(category);
+    SkillCharacteristicSubCategory category=_mount.getMountCategory();
+    String categoryText=(category!=null)?category.getLabel():"";
+    _category.setText(categoryText);
     // Mount type
-    String mountType=_mount.getMountType();
-    _mountType.setText(mountType);
+    MountType mountType=_mount.getMountType();
+    String mountTypeText=(mountType!=null)?mountType.getLabel():"";
+    _mountType.setText(mountTypeText);
     // Initial name
     String initialName=_mount.getInitialName();
     _initialName.setText(initialName);
@@ -183,7 +187,7 @@ public class MountDisplayPanelController
     _speed.setText(speedStr);
     // Size
     boolean tall=_mount.isTall();
-    _size.setText(tall?"Tall":"Short");
+    _size.setText(tall?"Tall":"Short"); // 18n
     // Details
     _details.setText(buildHtml());
     _details.setCaretPosition(0);

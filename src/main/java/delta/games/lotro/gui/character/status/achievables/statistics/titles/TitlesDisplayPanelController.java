@@ -17,6 +17,7 @@ import delta.common.ui.swing.tables.TableColumnsChooserController;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.status.achievables.statistics.AchievablesStatistics;
 import delta.games.lotro.character.status.achievables.statistics.titles.TitleEvent;
+import delta.games.lotro.gui.utils.l10n.Labels;
 
 /**
  * Controller for the titles display panel.
@@ -61,7 +62,7 @@ public class TitlesDisplayPanelController
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildBackgroundPanel(new BorderLayout());
-    TitledBorder itemsFrameBorder=GuiFactory.buildTitledBorder("Titles");
+    TitledBorder itemsFrameBorder=GuiFactory.buildTitledBorder("Titles"); // I18n
     panel.setBorder(itemsFrameBorder);
 
     // Table
@@ -72,7 +73,7 @@ public class TitlesDisplayPanelController
     JPanel statsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
     _statsLabel=GuiFactory.buildLabel("-");
     statsPanel.add(_statsLabel);
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     ActionListener al=new ActionListener()
     {
       @Override
@@ -100,7 +101,7 @@ public class TitlesDisplayPanelController
   private void updateStatsLabel()
   {
     int nbItems=_stats.getTitles().size();
-    String label="Title(s): "+nbItems;
+    String label="Title(s): "+nbItems; // I18n
     _statsLabel.setText(label);
   }
 

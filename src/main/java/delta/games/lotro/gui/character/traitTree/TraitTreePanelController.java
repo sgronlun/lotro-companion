@@ -47,7 +47,6 @@ public class TraitTreePanelController
   private List<TraitTreeBranchPanelController> _branches;
   private ComboBoxController<TraitTreeBranch> _branchCombo;
   // Data
-  private String _traitTreeKey;
   private TraitTree _tree;
   private TraitTreeStatus _status;
 
@@ -60,7 +59,6 @@ public class TraitTreePanelController
   public TraitTreePanelController(WindowController parent,CharacterData toon,TraitTreeStatus status)
   {
     _parent=parent;
-    _traitTreeKey=toon.getCharacterClass().getKey();
     _tree=status.getTraitTree();
     _status=status;
     _side=new TraitTreeSidePanelController(toon,_tree,status);
@@ -79,6 +77,7 @@ public class TraitTreePanelController
   {
     ComboBoxController<TraitTreeBranch> ret=new ComboBoxController<TraitTreeBranch>();
     List<TraitTreeBranch> branches=_tree.getBranches();
+    ret.addEmptyItem("(none)"); // I18n
     for(TraitTreeBranch branch : branches)
     {
       ret.addItem(branch,branch.getName());
@@ -220,12 +219,12 @@ public class TraitTreePanelController
     JPanel ret=GuiFactory.buildPanel(new GridBagLayout());
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
     // Branch chooser
-    JLabel label=GuiFactory.buildLabel("Main branch:");
+    JLabel label=GuiFactory.buildLabel("Main branch:"); // I18n
     ret.add(label,c);
     c.gridx++;
     ret.add(_branchCombo.getComboBox(),c);
     // Points cost
-    JLabel pointsLabel=GuiFactory.buildLabel("Cost: ");
+    JLabel pointsLabel=GuiFactory.buildLabel("Cost: "); // I18n
     c.gridx++;
     ret.add(pointsLabel,c);
     _points=GuiFactory.buildLabel("");
@@ -242,7 +241,7 @@ public class TraitTreePanelController
     c.fill=GridBagConstraints.NONE;
     // Buttons
     // - load
-    JButton load=GuiFactory.buildButton("Load from template...");
+    JButton load=GuiFactory.buildButton("Load from template..."); // I18n
     ActionListener alLoad=new ActionListener()
     {
       @Override
@@ -255,7 +254,7 @@ public class TraitTreePanelController
     ret.add(load,c);
     c.gridx++;
     // - save
-    JButton save=GuiFactory.buildButton("Save as template...");
+    JButton save=GuiFactory.buildButton("Save as template..."); // I18n
     ActionListener alSave=new ActionListener()
     {
       @Override
@@ -286,7 +285,7 @@ public class TraitTreePanelController
 
   private TraitTreeSetup chooseSetup()
   {
-    TraitTreeSetup setup=TraitTreeSetupChooser.chooseTraitTreeSetup(_parent,_traitTreeKey);
+    TraitTreeSetup setup=TraitTreeSetupChooser.chooseTraitTreeSetup(_parent,_tree.getType());
     return setup;
   }
 
@@ -362,6 +361,5 @@ public class TraitTreePanelController
       _branchCombo.dispose();
       _branchCombo=null;
     }
-    _traitTreeKey=null;
   }
 }

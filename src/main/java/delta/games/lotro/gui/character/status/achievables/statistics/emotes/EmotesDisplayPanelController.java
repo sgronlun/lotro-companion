@@ -17,6 +17,7 @@ import delta.common.ui.swing.tables.TableColumnsChooserController;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.status.achievables.statistics.AchievablesStatistics;
 import delta.games.lotro.character.status.achievables.statistics.emotes.EmoteEvent;
+import delta.games.lotro.gui.utils.l10n.Labels;
 
 /**
  * Controller for the emotes display panel.
@@ -61,7 +62,7 @@ public class EmotesDisplayPanelController
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildBackgroundPanel(new BorderLayout());
-    TitledBorder border=GuiFactory.buildTitledBorder("Emotes");
+    TitledBorder border=GuiFactory.buildTitledBorder("Emotes"); // I18n
     panel.setBorder(border);
 
     // Table
@@ -72,7 +73,7 @@ public class EmotesDisplayPanelController
     JPanel statsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
     _statsLabel=GuiFactory.buildLabel("-");
     statsPanel.add(_statsLabel);
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     ActionListener al=new ActionListener()
     {
       @Override

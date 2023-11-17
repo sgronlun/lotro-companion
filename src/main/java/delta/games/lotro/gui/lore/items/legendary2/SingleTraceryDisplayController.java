@@ -11,7 +11,7 @@ import delta.games.lotro.common.stats.StatUtils;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.lore.items.ItemUiTools;
 import delta.games.lotro.gui.lore.items.utils.IconControllerNameStatsBundle;
-import delta.games.lotro.gui.utils.IconControllerFactory;
+import delta.games.lotro.gui.utils.items.ItemIconController;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.legendary2.SocketEntryInstance;
 import delta.games.lotro.lore.items.legendary2.Tracery;
@@ -21,18 +21,22 @@ import delta.games.lotro.utils.ContextPropertyNames;
  * Controller for the UI items to display a single tracery.
  * @author DAM
  */
-public class SingleTraceryDisplayController extends IconControllerNameStatsBundle
+public class SingleTraceryDisplayController extends IconControllerNameStatsBundle<ItemIconController>
 {
   // Data
   private int _characterLevel;
+  private SocketType _type;
 
   /**
    * Constructor.
    * @param parent Parent window.
+   * @param type Socket type.
    */
-  public SingleTraceryDisplayController(WindowController parent)
+  public SingleTraceryDisplayController(WindowController parent, SocketType type)
   {
-    super(parent);
+    super();
+    _type=type;
+    setIconController(new ItemIconController(parent));
     Integer characterLevel=parent.getContextProperty(ContextPropertyNames.CHARACTER_LEVEL,Integer.class);
     _characterLevel=(characterLevel!=null)?characterLevel.intValue():Config.getInstance().getMaxCharacterLevel();
     // Initialize with nothing slotted
@@ -52,11 +56,12 @@ public class SingleTraceryDisplayController extends IconControllerNameStatsBundl
     if (tracery!=null)
     {
       item=tracery.getItem();
-      IconControllerFactory.updateItemIcon(_icon,item,1);
+      _icon.setItem(item,1);
     }
     else
     {
-      _icon.clear(LotroIconsManager.getDefaultItemIcon());
+      int socketTypeCode=_type.getCode();
+      _icon.clear(LotroIconsManager.getEmptySocketIcon(socketTypeCode));
     }
     // Color
     Color foreground=Color.BLACK;
@@ -98,6 +103,17 @@ public class SingleTraceryDisplayController extends IconControllerNameStatsBundl
     else
     {
       setStats(new String[]{});
+    }
+  }
+
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (_icon!=null)
+    {
+      _icon.dispose();
+      _icon=null;
     }
   }
 }

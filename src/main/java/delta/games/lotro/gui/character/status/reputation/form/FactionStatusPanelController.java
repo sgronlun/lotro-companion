@@ -7,6 +7,8 @@ import java.awt.Insets;
 import javax.swing.JPanel;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.games.lotro.character.status.reputation.FactionStatus;
 
 /**
@@ -18,38 +20,36 @@ import delta.games.lotro.character.status.reputation.FactionStatus;
  * </ul>
  * @author DAM
  */
-public class FactionStatusPanelController
+public class FactionStatusPanelController extends AbstractPanelController
 {
   // Controllers
   private FactionStatusEditionPanelController _statusController;
   private FactionHistoryEditionPanelController _historyController;
   private FactionHistoryChartPanelController _chartController;
 
-  // UI
-  private JPanel _panel;
-
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param status Faction status to display.
    */
-  public FactionStatusPanelController(FactionStatus status)
+  public FactionStatusPanelController(AreaController parent, FactionStatus status)
   {
-    _statusController=new FactionStatusEditionPanelController(status);
-    _chartController=new FactionHistoryChartPanelController(status);
-    _historyController=new FactionHistoryEditionPanelController(status,_chartController);
+    super(parent);
+    _statusController=new FactionStatusEditionPanelController(this,status);
+    _chartController=new FactionHistoryChartPanelController(this,status);
+    _historyController=new FactionHistoryEditionPanelController(this,status,_chartController);
   }
 
-  /**
-   * Get the managed panel.
-   * @return a panel.
-   */
+  @Override
   public JPanel getPanel()
   {
-    if (_panel==null)
+    JPanel panel=super.getPanel();
+    if (panel==null)
     {
-      _panel=buildPanel();
+      panel=buildPanel();
+      setPanel(panel);
     }
-    return _panel;
+    return panel;
   }
 
   private JPanel buildPanel()
@@ -57,15 +57,15 @@ public class FactionStatusPanelController
     JPanel panel=GuiFactory.buildBackgroundPanel(new GridBagLayout());
     GridBagConstraints c=new GridBagConstraints(0,0,2,1,0.0,0.0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
     JPanel statusPanel=_statusController.getPanel();
-    statusPanel.setBorder(GuiFactory.buildTitledBorder("Current reputation"));
+    statusPanel.setBorder(GuiFactory.buildTitledBorder("Current reputation")); // I18n
     panel.add(statusPanel,c);
     c=new GridBagConstraints(0,1,1,1,0.0,0.0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
     JPanel historyPanel=_historyController.getPanel();
-    historyPanel.setBorder(GuiFactory.buildTitledBorder("History"));
+    historyPanel.setBorder(GuiFactory.buildTitledBorder("History")); // I18n
     panel.add(historyPanel,c);
     c=new GridBagConstraints(1,1,1,1,1.0,1.0,GridBagConstraints.NORTHWEST,GridBagConstraints.BOTH,new Insets(5,5,5,5),0,0);
     JPanel chartPanel=_chartController.getPanel();
-    chartPanel.setBorder(GuiFactory.buildTitledBorder("History chart"));
+    chartPanel.setBorder(GuiFactory.buildTitledBorder("History chart")); // I18n
     panel.add(chartPanel,c);
     return panel;
   }
@@ -81,13 +81,10 @@ public class FactionStatusPanelController
   /**
    * Release all managed resources.
    */
+  @Override
   public void dispose()
   {
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
+    super.dispose();
     if (_statusController!=null)
     {
       _statusController.dispose();

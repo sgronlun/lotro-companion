@@ -5,6 +5,7 @@ import java.awt.Color;
 import javax.swing.Icon;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.icons.IconsManager;
 import delta.common.ui.swing.labels.LabelWithHalo;
 
@@ -16,15 +17,17 @@ public class ClassPointRewardGadgetsController extends RewardGadgetsController
 {
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param count Class points count.
    */
-  public ClassPointRewardGadgetsController(int count)
+  public ClassPointRewardGadgetsController(AreaController parent, int count)
   {
+    super(parent);
     // Label
-    String text="Class Point";
+    String text="Class Point"; // I18n
     if (count>1)
     {
-      text=String.valueOf(count)+" Class Points";
+      text=String.valueOf(count)+" Class Points"; // I18n
     }
     Color color=Color.WHITE;
     _label=new LabelWithHalo();

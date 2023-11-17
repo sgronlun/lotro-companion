@@ -6,9 +6,9 @@ import java.util.List;
 import delta.common.ui.swing.tables.CellDataProvider;
 import delta.common.ui.swing.tables.DefaultTableColumnController;
 import delta.common.ui.swing.tables.TableColumnController;
-import delta.games.lotro.character.social.friends.Friend;
+import delta.games.lotro.account.status.friends.Friend;
 import delta.games.lotro.gui.toon.CharacterSummaryColumnsBuilder;
-import delta.games.lotro.gui.utils.l10n.ColumnsUtils;
+import delta.games.lotro.gui.utils.l10n.StatColumnsUtils;
 
 /**
  * Build for columns of the friends tables.
@@ -38,7 +38,7 @@ public class FriendColumnsBuilder
           return friend.getVocation();
         }
       };
-      DefaultTableColumnController<Friend,String> vocationColumn=new DefaultTableColumnController<Friend,String>(FriendsColumnIds.VOCATION.name(),"Vocation",String.class,vocationCell);
+      DefaultTableColumnController<Friend,String> vocationColumn=new DefaultTableColumnController<Friend,String>(FriendsColumnIds.VOCATION.name(),"Vocation",String.class,vocationCell); // I18n
       vocationColumn.setWidthSpecs(80,80,80);
       ret.add(vocationColumn);
     }
@@ -51,8 +51,8 @@ public class FriendColumnsBuilder
           return friend.getLastLogoutDate();
         }
       };
-      DefaultTableColumnController<Friend,Long> lastLogoutColumn=new DefaultTableColumnController<Friend,Long>(FriendsColumnIds.LAST_LOGOUT_DATE.name(),"Last logout",Long.class,lastLogoutCell);
-      ColumnsUtils.configureDateTimeColumn(lastLogoutColumn);
+      DefaultTableColumnController<Friend,Long> lastLogoutColumn=new DefaultTableColumnController<Friend,Long>(FriendsColumnIds.LAST_LOGOUT_DATE.name(),"Last logout",Long.class,lastLogoutCell); // I18n
+      StatColumnsUtils.configureDateTimeColumn(lastLogoutColumn);
       ret.add(lastLogoutColumn);
     }
     // Area
@@ -65,7 +65,7 @@ public class FriendColumnsBuilder
           return friend.getArea();
         }
       };
-      DefaultTableColumnController<Friend,String> areaColumn=new DefaultTableColumnController<Friend,String>(FriendsColumnIds.AREA.name(),"Area",String.class,areaCell);
+      DefaultTableColumnController<Friend,String> areaColumn=new DefaultTableColumnController<Friend,String>(FriendsColumnIds.AREA.name(),"Area",String.class,areaCell); // I18n
       areaColumn.setWidthSpecs(80,250,250);
       ret.add(areaColumn);
     }
@@ -79,7 +79,7 @@ public class FriendColumnsBuilder
           return friend.getNote();
         }
       };
-      DefaultTableColumnController<Friend,String> notesColumn=new DefaultTableColumnController<Friend,String>(FriendsColumnIds.NOTES.name(),"Notes",String.class,notesCell);
+      DefaultTableColumnController<Friend,String> notesColumn=new DefaultTableColumnController<Friend,String>(FriendsColumnIds.NOTES.name(),"Notes",String.class,notesCell); // I18n
       notesColumn.setWidthSpecs(100,-1,200);
       ret.add(notesColumn);
     }

@@ -15,7 +15,7 @@ import delta.games.lotro.character.CharacterFile;
 import delta.games.lotro.character.CharacterInfosManager;
 import delta.games.lotro.character.events.CharacterEvent;
 import delta.games.lotro.character.events.CharacterEventType;
-import delta.games.lotro.gui.utils.l10n.ColumnsUtils;
+import delta.games.lotro.gui.utils.l10n.StatColumnsUtils;
 import delta.games.lotro.utils.events.EventsManager;
 import delta.games.lotro.utils.events.GenericEventsListener;
 
@@ -89,8 +89,8 @@ public class CharacterDataTableController implements GenericEventsListener<Chara
           return (timestamp!=null)?new Date(timestamp.longValue()):null;
         }
       };
-      DefaultTableColumnController<CharacterData,Date> lastUpdateColumn=new DefaultTableColumnController<CharacterData,Date>(DATE,"Date",Date.class,lastUpdateCell);
-      ColumnsUtils.configureDateTimeColumn(lastUpdateColumn);
+      DefaultTableColumnController<CharacterData,Date> lastUpdateColumn=new DefaultTableColumnController<CharacterData,Date>(DATE,"Date",Date.class,lastUpdateCell); // I18n
+      StatColumnsUtils.configureDateTimeColumn(lastUpdateColumn);
       table.addColumnController(lastUpdateColumn);
     }
     // Level column
@@ -103,7 +103,7 @@ public class CharacterDataTableController implements GenericEventsListener<Chara
           return Integer.valueOf(item.getLevel());
         }
       };
-      DefaultTableColumnController<CharacterData,Integer> serverColumn=new DefaultTableColumnController<CharacterData,Integer>(LEVEL,"Level",Integer.class,levelCell);
+      DefaultTableColumnController<CharacterData,Integer> serverColumn=new DefaultTableColumnController<CharacterData,Integer>(LEVEL,"Level",Integer.class,levelCell); // I18n
       serverColumn.setWidthSpecs(80,80,80);
       table.addColumnController(serverColumn);
     }
@@ -117,7 +117,7 @@ public class CharacterDataTableController implements GenericEventsListener<Chara
           return item.getShortDescription();
         }
       };
-      DefaultTableColumnController<CharacterData,String> descriptionColumn=new DefaultTableColumnController<CharacterData,String>(DESCRIPTION,"Description",String.class,descriptionCell);
+      DefaultTableColumnController<CharacterData,String> descriptionColumn=new DefaultTableColumnController<CharacterData,String>(DESCRIPTION,"Description",String.class,descriptionCell); // I18n
       descriptionColumn.setWidthSpecs(100,-1,100);
       table.addColumnController(descriptionColumn);
     }

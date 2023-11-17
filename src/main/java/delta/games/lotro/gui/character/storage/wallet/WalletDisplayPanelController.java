@@ -20,6 +20,8 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.storage.wallet.Wallet;
 import delta.games.lotro.common.comparators.NamedComparator;
+import delta.games.lotro.common.enums.PaperItemCategory;
+import delta.games.lotro.gui.common.status.StatusMetadataPanelController;
 import delta.games.lotro.gui.utils.IconController;
 import delta.games.lotro.gui.utils.IconControllerFactory;
 import delta.games.lotro.lore.items.CountedItem;
@@ -43,6 +45,7 @@ public class WalletDisplayPanelController
   private JPanel _elementsPanel;
   // Controllers
   private WindowController _parent;
+  private StatusMetadataPanelController _status;
   private List<IconController> _iconControllers;
 
   /**
@@ -101,10 +104,23 @@ public class WalletDisplayPanelController
 
   private JPanel buildPanel()
   {
+    // Status date
+    _status=new StatusMetadataPanelController();
+    _status.setData(_wallet.getStatusMetadata());
+    JPanel statusPanel=_status.getPanel();
+    statusPanel.setBorder(GuiFactory.buildTitledBorder("Status")); // I18n
+    // Elements
     _elementsPanel=GuiFactory.buildPanel(new GridBagLayout());
     JScrollPane scrollPane=GuiFactory.buildScrollPane(_elementsPanel);
-    JPanel ret=GuiFactory.buildPanel(new BorderLayout());
-    ret.add(scrollPane,BorderLayout.CENTER);
+
+    // Assembly
+    JPanel ret=GuiFactory.buildPanel(new GridBagLayout());
+    GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
+    ret.add(statusPanel,c);
+    c=new GridBagConstraints(0,1,1,1,1.0,1.0,GridBagConstraints.NORTHWEST,GridBagConstraints.BOTH,new Insets(0,0,0,0),0,0);
+    ret.add(scrollPane,c);
+
+    // Set values
     fillPanel();
     return ret;
   }
@@ -113,9 +129,9 @@ public class WalletDisplayPanelController
   {
     _elementsPanel.removeAll();
     PaperItemsManager paperItemsMgr=PaperItemsManager.getInstance();
-    List<String> categories=paperItemsMgr.getCategories(_paperItems);
+    List<PaperItemCategory> categories=paperItemsMgr.getCategories(_paperItems);
     int y=0;
-    for(String category : categories)
+    for(PaperItemCategory category : categories)
     {
       JPanel categoryPanel=buildPanelForCategory(category);
       if (categoryPanel==null)
@@ -123,7 +139,7 @@ public class WalletDisplayPanelController
         continue;
       }
       GridBagConstraints c=new GridBagConstraints(0,y,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
-      categoryPanel.setBorder(GuiFactory.buildTitledBorder(category));
+      categoryPanel.setBorder(GuiFactory.buildTitledBorder(category.getLabel()));
       _elementsPanel.add(categoryPanel,c);
       y++;
     }
@@ -131,7 +147,7 @@ public class WalletDisplayPanelController
     _elementsPanel.add(GuiFactory.buildPanel(new BorderLayout()),c);
   }
 
-  private JPanel buildPanelForCategory(String category)
+  private JPanel buildPanelForCategory(PaperItemCategory category)
   {
     JPanel ret=GuiFactory.buildPanel(new GridBagLayout());
     int y=0;
@@ -229,6 +245,11 @@ public class WalletDisplayPanelController
     }
     // Controllers
     _parent=null;
+    if (_status!=null)
+    {
+      _status.dispose();
+      _status=null;
+    }
     if (_iconControllers!=null)
     {
       for(IconController ctrl : _iconControllers)

@@ -61,7 +61,7 @@ public class AggregatedGeoItemsMapWindowController extends DefaultDisplayDialogC
   protected JDialog build()
   {
     JDialog ret=super.build();
-    ret.setTitle("Aggregated geographic items map");
+    ret.setTitle("Aggregated geographic items map"); // I18n
     ret.setMinimumSize(new Dimension(400,300));
     ret.pack();
     return ret;
@@ -101,7 +101,7 @@ public class AggregatedGeoItemsMapWindowController extends DefaultDisplayDialogC
   private JPanel buildChooserPanel()
   {
     JPanel ret=GuiFactory.buildPanel(new FlowLayout());
-    ret.add(GuiFactory.buildLabel("Map: "));
+    ret.add(GuiFactory.buildLabel("Map: ")); // I18n
     ret.add(_mapChooser.getComboBox());
     return ret;
   }
@@ -191,7 +191,7 @@ public class AggregatedGeoItemsMapWindowController extends DefaultDisplayDialogC
     if (aggregatedMap!=null)
     {
       MapDescription map=aggregatedMap.getMap();
-      _mapPanelCtrl=new AchievableGeoPointsMapPanelController(map,aggregatedMap.getPoints(),false,null);
+      _mapPanelCtrl=new AchievableGeoPointsMapPanelController(this,map,aggregatedMap.getPoints(),false,null);
       _mapPanel.add(_mapPanelCtrl.getMapComponent(),BorderLayout.CENTER);
       _mapPanelCtrl.updateUi();
     }

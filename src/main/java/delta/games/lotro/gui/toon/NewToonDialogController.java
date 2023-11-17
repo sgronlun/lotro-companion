@@ -19,27 +19,28 @@ import delta.common.ui.swing.windows.DefaultFormDialogController;
 import delta.common.ui.swing.windows.WindowController;
 import delta.common.utils.misc.TypedProperties;
 import delta.games.lotro.Config;
+import delta.games.lotro.account.Account;
+import delta.games.lotro.account.AccountReference;
 import delta.games.lotro.character.CharacterData;
 import delta.games.lotro.character.CharacterFactory;
 import delta.games.lotro.character.CharacterFile;
 import delta.games.lotro.character.CharacterSummary;
 import delta.games.lotro.character.CharactersManager;
 import delta.games.lotro.character.classes.ClassDescription;
-import delta.games.lotro.character.classes.ClassesManager;
-import delta.games.lotro.character.classes.InitialGearDefinition;
+import delta.games.lotro.character.classes.initialGear.InitialGearDefinition;
+import delta.games.lotro.character.classes.initialGear.InitialGearManager;
 import delta.games.lotro.character.gear.CharacterGear;
 import delta.games.lotro.character.gear.GearSlot;
 import delta.games.lotro.character.gear.GearSlotContents;
+import delta.games.lotro.character.gear.GearSlotUtils;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.character.stats.CharacterStatsComputer;
-import delta.games.lotro.common.CharacterClass;
 import delta.games.lotro.common.CharacterSex;
-import delta.games.lotro.common.Race;
 import delta.games.lotro.gui.character.summary.CharacterUiUtils;
 import delta.games.lotro.lore.items.EquipmentLocation;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.ItemFactory;
 import delta.games.lotro.lore.items.ItemInstance;
-import delta.games.lotro.lore.items.ItemsManager;
 
 /**
  * Controller for the "new toon" dialog.
@@ -52,9 +53,9 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
   private static final int TOON_NAME_SIZE=32;
   private JTextField _toonName;
   private ComboBoxController<String> _server;
-  private ComboBoxController<String> _account;
+  private ComboBoxController<Account> _account;
   private CharacterClassController _class;
-  private ComboBoxController<Race> _race;
+  private ComboBoxController<RaceDescription> _race;
   private ComboBoxController<CharacterSex> _sex;
 
   /**
@@ -70,7 +71,7 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
   protected JDialog build()
   {
     JDialog dialog=super.build();
-    dialog.setTitle("New character...");
+    dialog.setTitle("New character..."); // I18n
     dialog.setResizable(false);
     return dialog;
   }
@@ -79,7 +80,7 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
   protected JPanel buildFormPanel()
   {
     JPanel dataPanel=buildNewToonPanel();
-    TitledBorder pathsBorder=GuiFactory.buildTitledBorder("Character");
+    TitledBorder pathsBorder=GuiFactory.buildTitledBorder("Character"); // I18n
     dataPanel.setBorder(pathsBorder);
     return dataPanel;
   }
@@ -104,10 +105,10 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
     _class=new CharacterClassController();
     // Race
     _race=CharacterUiUtils.buildRaceCombo(false);
-    ItemSelectionListener<Race> listener=new ItemSelectionListener<Race>()
+    ItemSelectionListener<RaceDescription> listener=new ItemSelectionListener<RaceDescription>()
     {
       @Override
-      public void itemSelected(Race race)
+      public void itemSelected(RaceDescription race)
       {
         _class.setRace(race);
       }
@@ -118,17 +119,17 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
 
     Insets insets=new Insets(5,5,5,5);
     GridBagConstraints gbc=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0);
-    panel.add(GuiFactory.buildLabel("Name:"),gbc);
+    panel.add(GuiFactory.buildLabel("Name:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Server:"),gbc);
+    panel.add(GuiFactory.buildLabel("Server:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Account:"),gbc);
+    panel.add(GuiFactory.buildLabel("Account:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Race:"),gbc);
+    panel.add(GuiFactory.buildLabel("Race:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Class:"),gbc);
+    panel.add(GuiFactory.buildLabel("Class:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Sex:"),gbc);
+    panel.add(GuiFactory.buildLabel("Sex:"),gbc); // I18n
     gbc.gridx=1; gbc.gridy=0;
     gbc.weightx=1.0; gbc.fill=GridBagConstraints.HORIZONTAL;
     panel.add(_toonName,gbc);
@@ -150,16 +151,17 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
   {
     String toonName=_toonName.getText();
     String server=_server.getSelectedItem();
-    String account=_account.getSelectedItem();
-    CharacterClass cClass=_class.getComboBoxController().getSelectedItem();
-    Race race=_race.getSelectedItem();
+    Account account=_account.getSelectedItem();
+    ClassDescription characterClass=_class.getComboBoxController().getSelectedItem();
+    RaceDescription race=_race.getSelectedItem();
     CharacterSex sex=_sex.getSelectedItem();
     CharacterSummary summary=new CharacterSummary();
     summary.setName(toonName);
     summary.setServer(server);
-    summary.setAccountName(account);
+    AccountReference accountID=(account!=null)?account.getID():null;
+    summary.setAccountID(accountID);
     summary.setCharacterSex(sex);
-    summary.setCharacterClass(cClass);
+    summary.setCharacterClass(characterClass);
     summary.setRace(race);
     summary.setNationality(null);
     summary.setLevel(1);
@@ -168,7 +170,7 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
     CharacterFile toon=manager.addToon(summary);
     if (toon==null)
     {
-      showErrorMessage("Character creation failed!");
+      showErrorMessage("Character creation failed!"); // I18n
       return;
     }
 
@@ -184,36 +186,31 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
 
   private void setInitialGear(CharacterData info)
   {
-    Race race=info.getRace();
-    CharacterClass characterClass=info.getCharacterClass();
-    ClassDescription description=ClassesManager.getInstance().getClassDescription(characterClass);
+    RaceDescription race=info.getRace();
+    ClassDescription description=info.getCharacterClass();
     if (description!=null)
     {
       CharacterGear gear=info.getEquipment();
-      ItemsManager itemsMgr=ItemsManager.getInstance();
-      InitialGearDefinition initialGear=description.getInitialGear();
-      List<Integer> itemIds=initialGear.getItems(race);
-      for(Integer itemId : itemIds)
+      InitialGearDefinition initialGear=InitialGearManager.getInstance().getByKey(description.getKey());
+      List<Item> items=initialGear.getItems(race);
+      for(Item item : items)
       {
-        Item item=itemsMgr.getItem(itemId.intValue());
-        if (item!=null)
+        EquipmentLocation itemLocation=item.getEquipmentLocation();
+        for(GearSlot slot : GearSlot.getAll())
         {
-          EquipmentLocation location=item.getEquipmentLocation();
-          for(GearSlot slot : GearSlot.values())
+          EquipmentLocation slotLocation=GearSlotUtils.getEquipmentSlot(slot);
+          if (slotLocation==itemLocation)
           {
-            if (slot.getLocation()==location)
+            GearSlotContents contents=gear.getSlotContents(slot,true);
+            ItemInstance<? extends Item> old=contents.getItem();
+            ItemInstance<? extends Item> itemInstance=ItemFactory.buildInstance(item);
+            if (old==null)
             {
-              GearSlotContents contents=gear.getSlotContents(slot,true);
-              ItemInstance<? extends Item> old=contents.getItem();
-              ItemInstance<? extends Item> itemInstance=ItemFactory.buildInstance(item);
-              if (old==null)
-              {
-                contents.setItem(itemInstance);
-              }
-              else
-              {
-                LOGGER.warn("Would have overriden "+old+" by "+itemInstance);
-              }
+              contents.setItem(itemInstance);
+            }
+            else
+            {
+              LOGGER.warn("Would have overriden "+old+" by "+itemInstance);
             }
           }
         }
@@ -240,19 +237,19 @@ public class NewToonDialogController extends DefaultFormDialogController<Object>
     String toonName=_toonName.getText();
     if ((toonName==null) || (toonName.trim().length()==0))
     {
-      errorMsg="Invalid toon name!";
+      errorMsg="Invalid toon name!"; // I18n
     }
     String server=_server.getSelectedItem();
     if ((server==null) || (server.trim().length()==0))
     {
-      errorMsg="Invalid server name!";
+      errorMsg="Invalid server name!"; // I18n
     }
     return errorMsg;
   }
 
   private void showErrorMessage(String errorMsg)
   {
-    String title="Character creation";
+    String title="Character creation"; // I18n
     JDialog dialog=getDialog();
     GuiFactory.showErrorDialog(dialog,errorMsg,title);
   }

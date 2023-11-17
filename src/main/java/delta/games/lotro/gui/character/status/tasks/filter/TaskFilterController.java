@@ -17,20 +17,25 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.combobox.ItemSelectionListener;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.games.lotro.character.status.achievables.filter.QuestStatusFilter;
 import delta.games.lotro.character.status.tasks.filter.TaskStatusFilter;
+import delta.games.lotro.common.comparators.NamedComparator;
+import delta.games.lotro.common.filters.NamedFilter;
 import delta.games.lotro.common.rewards.ReputationReward;
 import delta.games.lotro.common.rewards.Rewards;
 import delta.games.lotro.common.rewards.filters.ReputationRewardFilter;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.SharedUiUtils;
+import delta.games.lotro.gui.utils.l10n.Labels;
+import delta.games.lotro.lore.quests.QuestDescription;
 import delta.games.lotro.lore.quests.filter.QuestFilter;
-import delta.games.lotro.lore.quests.filter.QuestNameFilter;
 import delta.games.lotro.lore.reputation.Faction;
-import delta.games.lotro.lore.reputation.FactionNameComparator;
 import delta.games.lotro.lore.tasks.Task;
 import delta.games.lotro.lore.tasks.TasksRegistry;
 
@@ -38,12 +43,11 @@ import delta.games.lotro.lore.tasks.TasksRegistry;
  * Controller for a task filter edition panel.
  * @author DAM
  */
-public class TaskFilterController implements ActionListener
+public class TaskFilterController extends AbstractPanelController implements ActionListener
 {
   // Data
   private TaskStatusFilter _filter;
   // GUI
-  private JPanel _panel;
   private JButton _reset;
   // Name
   private JTextField _contains;
@@ -55,13 +59,17 @@ public class TaskFilterController implements ActionListener
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param filter Managed filter.
    * @param filterUpdateListener Filter update listener.
    */
-  public TaskFilterController(TaskStatusFilter filter, FilterUpdateListener filterUpdateListener)
+  public TaskFilterController(AreaController parent, TaskStatusFilter filter, FilterUpdateListener filterUpdateListener)
   {
+    super(parent);
     _filter=filter;
     _filterUpdateListener=filterUpdateListener;
+    JPanel panel=buildPanel();
+    setPanel(panel);
   }
 
   /**
@@ -73,19 +81,12 @@ public class TaskFilterController implements ActionListener
     return _filter;
   }
 
-  /**
-   * Get the managed panel.
-   * @return the managed panel.
-   */
-  public JPanel getPanel()
+  private JPanel buildPanel()
   {
-    if (_panel==null)
-    {
-      _panel=build();
-      setFilter();
-      filterUpdated();
-    }
-    return _panel;
+    JPanel panel=build();
+    setFilter();
+    filterUpdated();
+    return panel;
   }
 
   /**
@@ -112,7 +113,7 @@ public class TaskFilterController implements ActionListener
     QuestStatusFilter questStatusFilter=_filter.getQuestStatusFilter();
     QuestFilter questFilter=questStatusFilter.getQuestFilter();
     // Name
-    QuestNameFilter nameFilter=questFilter.getNameFilter();
+    NamedFilter<QuestDescription> nameFilter=questFilter.getNameFilter();
     String contains=nameFilter.getPattern();
     if (contains!=null)
     {
@@ -132,12 +133,12 @@ public class TaskFilterController implements ActionListener
 
     // Task attributes
     JPanel taskPanel=buildTaskPanel();
-    taskPanel.setBorder(GuiFactory.buildTitledBorder("Task"));
+    taskPanel.setBorder(GuiFactory.buildTitledBorder("Task")); // I18n
     GridBagConstraints c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(taskPanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,y,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,0),0,0);
     panel.add(_reset,c);
@@ -154,7 +155,7 @@ public class TaskFilterController implements ActionListener
     JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,0,0));
     // Label filter
     JPanel containsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
-    containsPanel.add(GuiFactory.buildLabel("Name filter:"));
+    containsPanel.add(GuiFactory.buildLabel("Name filter:")); // I18n
     _contains=GuiFactory.buildTextField("");
     _contains.setColumns(20);
     containsPanel.add(_contains);
@@ -166,7 +167,7 @@ public class TaskFilterController implements ActionListener
         if (newText.length()==0) newText=null;
         QuestStatusFilter questStatusFilter=_filter.getQuestStatusFilter();
         QuestFilter questFilter=questStatusFilter.getQuestFilter();
-        QuestNameFilter nameFilter=questFilter.getNameFilter();
+        NamedFilter<QuestDescription> nameFilter=questFilter.getNameFilter();
         nameFilter.setPattern(newText);
         filterUpdated();
       }
@@ -175,7 +176,7 @@ public class TaskFilterController implements ActionListener
     linePanel.add(containsPanel);
     JPanel repPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Reputation
-    repPanel.add(GuiFactory.buildLabel("Reputation:"));
+    repPanel.add(GuiFactory.buildLabel("Reputation:")); // I18n
     _reputation=buildReputationCombobox();
     repPanel.add(_reputation.getComboBox());
     linePanel.add(repPanel);
@@ -188,7 +189,8 @@ public class TaskFilterController implements ActionListener
 
   private ComboBoxController<Faction> buildReputationCombobox()
   {
-    ComboBoxController<Faction> combo=buildFactionCombo();
+    List<Faction> factions=buildFactions();
+    ComboBoxController<Faction> combo=SharedUiUtils.buildFactionCombo(this,factions);
     ItemSelectionListener<Faction> listener=new ItemSelectionListener<Faction>()
     {
       @Override
@@ -203,23 +205,6 @@ public class TaskFilterController implements ActionListener
     };
     combo.addListener(listener);
     return combo;
-  }
-
-  /**
-   * Build a combo-box controller to choose a faction.
-   * @return A new combo-box controller.
-   */
-  private static ComboBoxController<Faction> buildFactionCombo()
-  {
-    ComboBoxController<Faction> ctrl=new ComboBoxController<Faction>();
-    ctrl.addEmptyItem("");
-    List<Faction> factions=buildFactions();
-    for(Faction faction : factions)
-    {
-      ctrl.addItem(faction,faction.getName());
-    }
-    ctrl.selectItem(null);
-    return ctrl;
   }
 
   private static List<Faction> buildFactions()
@@ -239,7 +224,7 @@ public class TaskFilterController implements ActionListener
       }
     }
     List<Faction> ret=new ArrayList<Faction>(factions);
-    Collections.sort(ret,new FactionNameComparator());
+    Collections.sort(ret,new NamedComparator());
     return ret;
   }
 
@@ -248,14 +233,9 @@ public class TaskFilterController implements ActionListener
    */
   public void dispose()
   {
+    super.dispose();
     // Data
     _filter=null;
-    // GUI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
     // Controllers
     if (_textController!=null)
     {

@@ -99,8 +99,8 @@ public class CraftingHistoryChartController
     }
     updateData();
     JFreeChart jfreechart = ChartFactory.createXYStepChart(title,
-                        "Time",
-                        "Tier",
+                        "Time", // I18n
+                        "Tier", // I18n
                         _data,
                         PlotOrientation.VERTICAL,
                         true,
@@ -121,26 +121,9 @@ public class CraftingHistoryChartController
       @Override
       public String generateLabelString(XYDataset dataset, int series, int item)
       {
-        String label;
         int tier=(int)dataset.getYValue(series,item);
-        if (tier==0)
-        {
-          label="Started profession";
-        }
-        else
-        {
-          CraftingLevel level=profession.getByTier(tier);
-          if (level!=null)
-          {
-            if (series==0) label=level.getMastery().getLabel();
-            else if (series==1) label=level.getProficiency().getLabel();
-            else label="???";
-          }
-          else
-          {
-            label="???";
-          }
-        }
+        CraftingLevel level=profession.getByTier(tier);
+        String label=level.getCraftTier().getLabel();
         double timestamp=dataset.getXValue(series,item);
         String date=Formats.getDateString(Long.valueOf((long)timestamp));
         return label+" ("+date+")";
@@ -169,7 +152,7 @@ public class CraftingHistoryChartController
       private String format(int number)
       {
         CraftingLevel level=profession.getByTier(number);
-        String ret=(level!=null)?level.getProficiency().getLabel():"???";
+        String ret=(level!=null)?level.getCraftTier().getLabel():"???";
         return ret;
       }
 
@@ -206,8 +189,10 @@ public class CraftingHistoryChartController
   {
     _data.removeAllSeries();
     Long lastItemDate=_stats.getValidityDate();
+    long lastProficiency=0;
+    long lastMastery=0;
 
-    XYSeries proficiencySeries = new XYSeries("Proficiency");
+    XYSeries proficiencySeries = new XYSeries("Proficiency"); // I18n
     Profession profession=_stats.getProfession();
     CraftingLevel maxLevel=profession.getMaximumLevel();
     int maxTier=maxLevel.getTier();
@@ -217,25 +202,39 @@ public class CraftingHistoryChartController
       if (date!=0)
       {
         proficiencySeries.add(date,i);
+        if (lastProficiency<date)
+        {
+          lastProficiency=date;
+        }
       }
     }
-    XYSeries masterySeries = new XYSeries("Mastery");
+    XYSeries masterySeries = new XYSeries("Mastery"); // I18n
     for(int i=0;i<=maxTier;i++)
     {
       long date=_stats.getLevelStatus(i).getMastery().getCompletionDate();
       if (date!=0)
       {
         masterySeries.add(date,i);
+        if (lastMastery<date)
+        {
+          lastMastery=date;
+        }
       }
     }
 
     // Set last point
     if (lastItemDate!=null)
     {
-      CraftingLevel currentProficiency=_stats.getProficiencyLevel();
-      proficiencySeries.add(lastItemDate.longValue(),currentProficiency.getTier());
-      CraftingLevel currentMastery=_stats.getMasteryLevel();
-      masterySeries.add(lastItemDate.longValue(),currentMastery.getTier());
+      if (lastItemDate.longValue()>lastProficiency)
+      {
+        CraftingLevel currentProficiency=_stats.getProficiencyLevel();
+        proficiencySeries.add(lastItemDate.longValue(),currentProficiency.getTier());
+      }
+      if (lastItemDate.longValue()>lastMastery)
+      {
+        CraftingLevel currentMastery=_stats.getMasteryLevel();
+        masterySeries.add(lastItemDate.longValue(),currentMastery.getTier());
+      }
     }
 
     _data.addSeries(masterySeries);

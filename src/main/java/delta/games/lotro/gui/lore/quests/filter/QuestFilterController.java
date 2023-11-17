@@ -16,22 +16,28 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.combobox.ItemSelectionListener;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
 import delta.games.lotro.common.LockType;
 import delta.games.lotro.common.Repeatability;
 import delta.games.lotro.common.Size;
+import delta.games.lotro.common.enums.QuestCategory;
+import delta.games.lotro.common.filters.NamedFilter;
 import delta.games.lotro.common.rewards.RewardsExplorer;
 import delta.games.lotro.config.LotroCoreConfig;
 import delta.games.lotro.gui.common.requirements.RequirementsFilterController;
 import delta.games.lotro.gui.common.rewards.filter.RewardsFilterController;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
 import delta.games.lotro.gui.lore.quests.QuestsUiUtils;
+import delta.games.lotro.gui.lore.webStoreItems.WebStoreItemsFilterController;
 import delta.games.lotro.gui.lore.worldEvents.WorldEventsFilterController;
 import delta.games.lotro.gui.utils.SharedUiUtils;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.quests.QuestDescription;
 import delta.games.lotro.lore.quests.QuestsManager;
 import delta.games.lotro.lore.quests.filter.AchievableMonsterPlayFilter;
@@ -42,7 +48,6 @@ import delta.games.lotro.lore.quests.filter.LockTypeFilter;
 import delta.games.lotro.lore.quests.filter.QuestArcFilter;
 import delta.games.lotro.lore.quests.filter.QuestCategoryFilter;
 import delta.games.lotro.lore.quests.filter.QuestFilter;
-import delta.games.lotro.lore.quests.filter.QuestNameFilter;
 import delta.games.lotro.lore.quests.filter.QuestSizeFilter;
 import delta.games.lotro.lore.quests.filter.RepeatabilityFilter;
 import delta.games.lotro.lore.quests.filter.SessionPlayQuestFilter;
@@ -52,16 +57,15 @@ import delta.games.lotro.lore.quests.filter.ShareableQuestFilter;
  * Controller for a quest filter edition panel.
  * @author DAM
  */
-public class QuestFilterController implements ActionListener
+public class QuestFilterController extends AbstractPanelController implements ActionListener
 {
   // Data
   private QuestFilter _filter;
   // GUI
-  private JPanel _panel;
   private JButton _reset;
   // -- Quest attributes UI --
   private JTextField _contains;
-  private ComboBoxController<String> _category;
+  private ComboBoxController<QuestCategory> _category;
   private ComboBoxController<String> _questArc; // Live only
   private ComboBoxController<Boolean> _instanced;
   private ComboBoxController<Boolean> _shareable; // Live only
@@ -78,18 +82,22 @@ public class QuestFilterController implements ActionListener
   private RewardsFilterController _rewards;
   // -- World Events UI --
   private WorldEventsFilterController _worldEvents;
+  // -- Web Store Items UI --
+  private WebStoreItemsFilterController<QuestDescription> _webStoreItems; // Live only
   // Controllers
   private DynamicTextEditionController _textController;
   private FilterUpdateListener _filterUpdateListener;
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param filter Managed filter.
    * @param filterUpdateListener Filter update listener.
    * @param useRequirements Use requirements or not.
    */
-  public QuestFilterController(QuestFilter filter, FilterUpdateListener filterUpdateListener, boolean useRequirements)
+  public QuestFilterController(AreaController parent, QuestFilter filter, FilterUpdateListener filterUpdateListener, boolean useRequirements)
   {
+    super(parent);
     _filter=filter;
     _filterUpdateListener=filterUpdateListener;
     // Requirements
@@ -99,10 +107,18 @@ public class QuestFilterController implements ActionListener
     }
     // Rewards
     RewardsExplorer explorer=QuestsManager.getInstance().buildRewardsExplorer();
-    _rewards=new RewardsFilterController(filter.getRewardsFilter(),filterUpdateListener,explorer,true);
+    _rewards=new RewardsFilterController(this,filter.getRewardsFilter(),filterUpdateListener,explorer,true);
     // World events
     List<QuestDescription> quests=QuestsManager.getInstance().getAll();
     _worldEvents=new WorldEventsFilterController(quests,filter.getWorldEventsFilter(),filterUpdateListener);
+    // Web Store items
+    boolean isLive=LotroCoreConfig.isLive();
+    if (isLive)
+    {
+      _webStoreItems=new WebStoreItemsFilterController<QuestDescription>(quests,filter.getWebStoreItemsFilter(),filterUpdateListener);
+    }
+    JPanel panel=buildPanel();
+    setPanel(panel);
   }
 
   /**
@@ -114,19 +130,12 @@ public class QuestFilterController implements ActionListener
     return _filter;
   }
 
-  /**
-   * Get the managed panel.
-   * @return the managed panel.
-   */
-  public JPanel getPanel()
+  private JPanel buildPanel()
   {
-    if (_panel==null)
-    {
-      _panel=build();
-      setFilter();
-      filterUpdated();
-    }
-    return _panel;
+    JPanel panel=build();
+    setFilter();
+    filterUpdated();
+    return panel;
   }
 
   /**
@@ -172,6 +181,10 @@ public class QuestFilterController implements ActionListener
       }
       _rewards.reset();
       _worldEvents.reset();
+      if (_webStoreItems!=null)
+      {
+        _webStoreItems.reset();
+      }
       _contains.setText("");
     }
   }
@@ -179,7 +192,7 @@ public class QuestFilterController implements ActionListener
   private void setFilter()
   {
     // Name
-    QuestNameFilter nameFilter=_filter.getNameFilter();
+    NamedFilter<QuestDescription> nameFilter=_filter.getNameFilter();
     String contains=nameFilter.getPattern();
     if (contains!=null)
     {
@@ -187,7 +200,7 @@ public class QuestFilterController implements ActionListener
     }
     // Category
     QuestCategoryFilter categoryFilter=_filter.getCategoryFilter();
-    String category=categoryFilter.getQuestCategory();
+    QuestCategory category=categoryFilter.getQuestCategory();
     _category.selectItem(category);
     // Quest arc
     if (_questArc!=null)
@@ -250,6 +263,11 @@ public class QuestFilterController implements ActionListener
     _rewards.setFilter();
     // World Events
     _worldEvents.setFilter();
+    // Web store items
+    if (_webStoreItems!=null)
+    {
+      _webStoreItems.setFilter();
+    }
   }
 
   private JPanel build()
@@ -262,13 +280,13 @@ public class QuestFilterController implements ActionListener
     JPanel line1Panel=GuiFactory.buildPanel(new GridBagLayout());
     // Quest attributes
     JPanel questPanel=buildQuestPanel();
-    Border questBorder=GuiFactory.buildTitledBorder("Quest");
+    Border questBorder=GuiFactory.buildTitledBorder(Labels.getLabel("quests.filter.quest.border"));
     questPanel.setBorder(questBorder);
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     line1Panel.add(questPanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,0,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,0),0,0);
     line1Panel.add(_reset,c);
@@ -282,7 +300,7 @@ public class QuestFilterController implements ActionListener
     if (_requirements!=null)
     {
       JPanel requirementsPanel=_requirements.getPanel();
-      Border requirementsBorder=GuiFactory.buildTitledBorder("Requirements");
+      Border requirementsBorder=GuiFactory.buildTitledBorder(Labels.getLabel("quests.filter.requirements.border"));
       requirementsPanel.setBorder(requirementsBorder);
       c=new GridBagConstraints(0,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
       line2Panel.add(requirementsPanel,c);
@@ -290,10 +308,19 @@ public class QuestFilterController implements ActionListener
     // World Events
     {
       JPanel contextsPanel=_worldEvents.getPanel();
-      Border border=GuiFactory.buildTitledBorder("Context");
+      Border border=GuiFactory.buildTitledBorder(Labels.getLabel("quests.filter.context.border"));
       contextsPanel.setBorder(border);
       c=new GridBagConstraints(1,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
       line2Panel.add(contextsPanel,c);
+    }
+    // Web Store Items
+    if (_webStoreItems!=null)
+    {
+      JPanel webStoreItemsPanel=_webStoreItems.getPanel();
+      Border border=GuiFactory.buildTitledBorder(Labels.getLabel("quests.filter.contentsPack.border"));
+      webStoreItemsPanel.setBorder(border);
+      c=new GridBagConstraints(2,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
+      line2Panel.add(webStoreItemsPanel,c);
     }
     c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(line2Panel,c);
@@ -301,7 +328,7 @@ public class QuestFilterController implements ActionListener
 
     // Rewards
     JPanel rewardsPanel=_rewards.getPanel();
-    Border rewardsBorder=GuiFactory.buildTitledBorder("Rewards");
+    Border rewardsBorder=GuiFactory.buildTitledBorder(Labels.getLabel("quests.filter.rewards.border"));
     rewardsPanel.setBorder(rewardsBorder);
     c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
     panel.add(rewardsPanel,c);
@@ -322,7 +349,7 @@ public class QuestFilterController implements ActionListener
     // Label filter
     {
       JPanel containsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
-      containsPanel.add(GuiFactory.buildLabel("Name filter:"));
+      containsPanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.name")));
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(20);
       containsPanel.add(_contains);
@@ -332,7 +359,7 @@ public class QuestFilterController implements ActionListener
         public void textChanged(String newText)
         {
           if (newText.length()==0) newText=null;
-          QuestNameFilter nameFilter=_filter.getNameFilter();
+          NamedFilter<QuestDescription> nameFilter=_filter.getNameFilter();
           nameFilter.setPattern(newText);
           filterUpdated();
         }
@@ -347,13 +374,13 @@ public class QuestFilterController implements ActionListener
     JPanel line2Panel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Category
     {
-      JLabel label=GuiFactory.buildLabel("Category:");
+      JLabel label=GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.category"));
       line2Panel.add(label);
       _category=QuestsUiUtils.buildCategoryCombo();
-      ItemSelectionListener<String> categoryListener=new ItemSelectionListener<String>()
+      ItemSelectionListener<QuestCategory> categoryListener=new ItemSelectionListener<QuestCategory>()
       {
         @Override
-        public void itemSelected(String category)
+        public void itemSelected(QuestCategory category)
         {
           QuestCategoryFilter categoryFilter=_filter.getCategoryFilter();
           categoryFilter.setQuestCategory(category);
@@ -366,7 +393,7 @@ public class QuestFilterController implements ActionListener
     // Quest arc
     if (isLive)
     {
-      JLabel label=GuiFactory.buildLabel("Quest arc:");
+      JLabel label=GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.questArc"));
       line2Panel.add(label);
       _questArc=buildQuestArcCombobox();
       line2Panel.add(_questArc.getComboBox());
@@ -379,29 +406,29 @@ public class QuestFilterController implements ActionListener
     {
       JPanel line=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
       // Instanced
-      line.add(GuiFactory.buildLabel("Instanced:"));
+      line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.instanced")));
       _instanced=buildInstancedCombobox();
       line.add(_instanced.getComboBox());
       // Shareable
       if (isLive)
       {
-        line.add(GuiFactory.buildLabel("Shareable:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.shareable")));
         _shareable=buildShareableCombobox();
         line.add(_shareable.getComboBox());
       }
       // Session-play
-      line.add(GuiFactory.buildLabel("Session-play:"));
+      line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.sessionPlay")));
       _sessionPlay=buildSessionPlayCombobox();
       line.add(_sessionPlay.getComboBox());
       // Auto-bestowed
       if (isLive)
       {
-        line.add(GuiFactory.buildLabel("Auto-bestowed:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.autoBestowed")));
         _autoBestowed=buildAutoBestowedCombobox();
         line.add(_autoBestowed.getComboBox());
       }
       // Hidden
-      line.add(GuiFactory.buildLabel("Hidden:"));
+      line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.hidden")));
       _hidden=buildHiddenCombobox();
       line.add(_hidden.getComboBox());
 
@@ -413,22 +440,22 @@ public class QuestFilterController implements ActionListener
     {
       JPanel line=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
       // Repeatability
-      line.add(GuiFactory.buildLabel("Repeatability:"));
+      line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.repeatability")));
       _repeatability=buildRepeatabilityCombobox();
       line.add(_repeatability.getComboBox());
       // Lock type
       if (isLive)
       {
-        line.add(GuiFactory.buildLabel("Lock type:"));
+        line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.lockType")));
         _lockType=buildLockTypeCombobox();
         line.add(_lockType.getComboBox());
       }
       // Size
-      line.add(GuiFactory.buildLabel("Size:"));
+      line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.size")));
       _size=buildSizeCombobox();
       line.add(_size.getComboBox());
       // Faction
-      line.add(GuiFactory.buildLabel("Faction:"));
+      line.add(GuiFactory.buildLabel(Labels.getFieldLabel("quests.filter.faction")));
       _monsterPlay=buildMonsterPlayCombobox();
       line.add(_monsterPlay.getComboBox());
 
@@ -475,7 +502,9 @@ public class QuestFilterController implements ActionListener
 
   private ComboBoxController<Boolean> buildMonsterPlayCombobox()
   {
-    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox("","Monster Play","Free Peoples");
+    String monsterPlayLabel=Labels.getLabel("quests.filter.monsterPlay");
+    String freePeoplesLabel=Labels.getLabel("quests.filter.freePeoples");
+    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox("",monsterPlayLabel,freePeoplesLabel);
     ItemSelectionListener<Boolean> questSizeListener=new ItemSelectionListener<Boolean>()
     {
       @Override
@@ -614,14 +643,9 @@ public class QuestFilterController implements ActionListener
    */
   public void dispose()
   {
+    super.dispose();
     // Data
     _filter=null;
-    // GUI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
     // Controllers
     if (_textController!=null)
     {
@@ -692,6 +716,11 @@ public class QuestFilterController implements ActionListener
     {
       _worldEvents.dispose();
       _worldEvents=null;
+    }
+    if (_webStoreItems!=null)
+    {
+      _webStoreItems.dispose();
+      _webStoreItems=null;
     }
     if (_rewards!=null)
     {

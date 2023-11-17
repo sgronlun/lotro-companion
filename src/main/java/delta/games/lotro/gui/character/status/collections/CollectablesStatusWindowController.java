@@ -17,7 +17,6 @@ import delta.common.utils.collections.filters.Filter;
 import delta.games.lotro.character.CharacterFile;
 import delta.games.lotro.character.CharacterSummary;
 import delta.games.lotro.character.races.RaceDescription;
-import delta.games.lotro.character.races.RacesManager;
 import delta.games.lotro.character.skills.SkillDescription;
 import delta.games.lotro.character.skills.SkillsManager;
 import delta.games.lotro.character.skills.filters.SkillCategoryFilter;
@@ -25,7 +24,6 @@ import delta.games.lotro.character.status.collections.CollectionsStatusBuilder;
 import delta.games.lotro.character.status.collections.CollectionsStatusManager;
 import delta.games.lotro.character.status.skills.SkillsStatusManager;
 import delta.games.lotro.character.status.skills.io.SkillsStatusIo;
-import delta.games.lotro.common.Race;
 import delta.games.lotro.common.enums.CollectionCategory;
 import delta.games.lotro.common.enums.LotroEnum;
 import delta.games.lotro.common.enums.LotroEnumsRegistry;
@@ -103,9 +101,8 @@ public class CollectablesStatusWindowController extends DefaultDisplayDialogCont
     }
     // Filter mounts using size (tall mounts for tall races)
     CharacterSummary summary=file.getSummary();
-    Race race=summary.getRace();
-    RaceDescription raceDescription=RacesManager.getInstance().getRaceDescription(race);
-    boolean tall=raceDescription.isTall();
+    RaceDescription race=summary.getRace();
+    boolean tall=race.isTall();
     List<SkillDescription> filtered=new ArrayList<SkillDescription>();
     MountsManager mountsMgr=MountsManager.getInstance();
     for(SkillDescription skill : ret)
@@ -143,7 +140,7 @@ public class CollectablesStatusWindowController extends DefaultDisplayDialogCont
   protected JDialog build()
   {
     JDialog window=super.build();
-    window.setTitle((_type==STATUS_TYPE.PETS)?"Pets Status":"Mounts Status");
+    window.setTitle((_type==STATUS_TYPE.PETS)?"Pets Status":"Mounts Status"); // I18n
     window.pack();
     window.setSize(window.getWidth(),INITIAL_HEIGHT);
     window.setMinimumSize(new Dimension(window.getWidth(),MIN_HEIGHT));

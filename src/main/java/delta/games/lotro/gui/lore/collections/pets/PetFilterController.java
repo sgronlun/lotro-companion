@@ -17,6 +17,7 @@ import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.collections.pets.CosmeticPetDescription;
 import delta.games.lotro.lore.collections.pets.filters.PetNameFilter;
 
@@ -109,13 +110,13 @@ public class PetFilterController implements ActionListener
 
     // Pet attributes
     JPanel petPanel=buildPetPanel();
-    Border border=GuiFactory.buildTitledBorder("Pet");
+    Border border=GuiFactory.buildTitledBorder("Pet"); // 18n
     petPanel.setBorder(border);
     GridBagConstraints c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(petPanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,y,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,5),0,0);
     panel.add(_reset,c);
@@ -133,7 +134,7 @@ public class PetFilterController implements ActionListener
     // Label filter
     {
       JPanel containsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
-      containsPanel.add(GuiFactory.buildLabel("Name filter:"));
+      containsPanel.add(GuiFactory.buildLabel("Name filter:")); // 18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(20);
       containsPanel.add(_contains);

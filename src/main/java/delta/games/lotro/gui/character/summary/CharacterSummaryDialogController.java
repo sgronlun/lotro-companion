@@ -13,11 +13,14 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.windows.DefaultFormDialogController;
 import delta.common.ui.swing.windows.WindowController;
+import delta.games.lotro.account.Account;
+import delta.games.lotro.account.AccountReference;
+import delta.games.lotro.account.AccountsManager;
 import delta.games.lotro.character.CharacterSummary;
+import delta.games.lotro.character.classes.ClassDescription;
 import delta.games.lotro.character.races.NationalityDescription;
-import delta.games.lotro.common.CharacterClass;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.common.CharacterSex;
-import delta.games.lotro.common.Race;
 
 /**
  * Controller for the "character summary toon" dialog.
@@ -29,9 +32,9 @@ public class CharacterSummaryDialogController extends DefaultFormDialogControlle
   // UI
   private JTextField _toonName;
   private ComboBoxController<String> _server;
-  private ComboBoxController<String> _account;
-  private ComboBoxController<CharacterClass> _class;
-  private ComboBoxController<Race> _race;
+  private ComboBoxController<Account> _account;
+  private ComboBoxController<ClassDescription> _class;
+  private ComboBoxController<RaceDescription> _race;
   private ComboBoxController<CharacterSex> _sex;
   private CharacterNationalityController _nationality;
   private ComboBoxController<Integer> _level;
@@ -50,7 +53,7 @@ public class CharacterSummaryDialogController extends DefaultFormDialogControlle
   protected JDialog build()
   {
     JDialog dialog=super.build();
-    dialog.setTitle("Edit character summary...");
+    dialog.setTitle("Edit character summary..."); // I18n
     dialog.setResizable(false);
     return dialog;
   }
@@ -59,7 +62,7 @@ public class CharacterSummaryDialogController extends DefaultFormDialogControlle
   protected JPanel buildFormPanel()
   {
     JPanel dataPanel=buildPanel();
-    TitledBorder pathsBorder=GuiFactory.buildTitledBorder("Character summary");
+    TitledBorder pathsBorder=GuiFactory.buildTitledBorder("Character summary"); // I18n
     dataPanel.setBorder(pathsBorder);
     initData();
     return dataPanel;
@@ -76,7 +79,7 @@ public class CharacterSummaryDialogController extends DefaultFormDialogControlle
     // Account
     _account=CharacterUiUtils.buildAccountCombo();
     // Class
-    _class=CharacterUiUtils.buildClassCombo(false);
+    _class=CharacterUiUtils.buildCharacterClassCombo(false);
     _class.getComboBox().setEnabled(false);
     // Race
     _race=CharacterUiUtils.buildRaceCombo(false);
@@ -91,21 +94,21 @@ public class CharacterSummaryDialogController extends DefaultFormDialogControlle
 
     Insets insets=new Insets(5,5,5,5);
     GridBagConstraints gbc=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0);
-    panel.add(GuiFactory.buildLabel("Name:"),gbc);
+    panel.add(GuiFactory.buildLabel("Name:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Server:"),gbc);
+    panel.add(GuiFactory.buildLabel("Server:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Account:"),gbc);
+    panel.add(GuiFactory.buildLabel("Account:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Race:"),gbc);
+    panel.add(GuiFactory.buildLabel("Race:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Class:"),gbc);
+    panel.add(GuiFactory.buildLabel("Class:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Sex:"),gbc);
+    panel.add(GuiFactory.buildLabel("Sex:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Region:"),gbc);
+    panel.add(GuiFactory.buildLabel("Region:"),gbc); // I18n
     gbc.gridx=0; gbc.gridy++;
-    panel.add(GuiFactory.buildLabel("Level:"),gbc);
+    panel.add(GuiFactory.buildLabel("Level:"),gbc); // I18n
     gbc.gridx=1; gbc.gridy=0;
     gbc.weightx=1.0; gbc.fill=GridBagConstraints.HORIZONTAL;
     panel.add(_toonName,gbc);
@@ -135,13 +138,14 @@ public class CharacterSummaryDialogController extends DefaultFormDialogControlle
     String server=_data.getServer();
     _server.selectItem(server);
     // Account
-    String account=_data.getAccountName();
+    AccountReference accountID=_data.getAccountID();
+    Account account=AccountsManager.getInstance().getAccountByID(accountID);
     _account.selectItem(account);
     // Class
-    CharacterClass characterClass=_data.getCharacterClass();
+    ClassDescription characterClass=_data.getCharacterClass();
     _class.selectItem(characterClass);
     // Race
-    Race race=_data.getRace();
+    RaceDescription race=_data.getRace();
     _race.selectItem(race);
     _nationality.setRace(race);
     // Sex
@@ -162,11 +166,12 @@ public class CharacterSummaryDialogController extends DefaultFormDialogControlle
     _data.setName(toonName);
     String server=_server.getSelectedItem();
     _data.setServer(server);
-    String accountName=_account.getSelectedItem();
-    _data.setAccountName(accountName);
-    CharacterClass cClass=_class.getSelectedItem();
+    Account account=_account.getSelectedItem();
+    AccountReference accountID=(account!=null)?account.getID():null;
+    _data.setAccountID(accountID);
+    ClassDescription cClass=_class.getSelectedItem();
     _data.setCharacterClass(cClass);
-    Race race=_race.getSelectedItem();
+    RaceDescription race=_race.getSelectedItem();
     _data.setRace(race);
     CharacterSex sex=_sex.getSelectedItem();
     _data.setCharacterSex(sex);

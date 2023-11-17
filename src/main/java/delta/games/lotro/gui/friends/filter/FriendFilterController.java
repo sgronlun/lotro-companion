@@ -16,10 +16,11 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
-import delta.games.lotro.character.social.friends.Friend;
-import delta.games.lotro.character.social.friends.filters.FriendFilter;
-import delta.games.lotro.character.social.friends.filters.FriendNoteFilter;
+import delta.games.lotro.account.status.friends.Friend;
+import delta.games.lotro.account.status.friends.filters.FriendFilter;
+import delta.games.lotro.account.status.friends.filters.FriendNoteFilter;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 
 /**
  * Controller for a kinship member filter edition panel.
@@ -123,7 +124,7 @@ public class FriendFilterController implements ActionListener
     int x=0;
     // Summary
     JPanel summaryPanel=_summary.getPanel();
-    Border summaryBorder=GuiFactory.buildTitledBorder("Character");
+    Border summaryBorder=GuiFactory.buildTitledBorder("Character"); // I18n
     summaryPanel.setBorder(summaryBorder);
     GridBagConstraints c=new GridBagConstraints(x,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(summaryPanel,c);
@@ -131,13 +132,13 @@ public class FriendFilterController implements ActionListener
 
     // Friend attributes
     JPanel friendFilterPanel=buildFriendPanel();
-    friendFilterPanel.setBorder(GuiFactory.buildTitledBorder("Friend"));
+    friendFilterPanel.setBorder(GuiFactory.buildTitledBorder("Friend")); // I18n
     c=new GridBagConstraints(x,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(friendFilterPanel,c);
     x++;
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(x,0,1,1,1.0,0,GridBagConstraints.SOUTHEAST,GridBagConstraints.NONE,new Insets(0,5,5,5),0,0);
     panel.add(_reset,c);
@@ -153,7 +154,7 @@ public class FriendFilterController implements ActionListener
     JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Notes filter
     {
-      linePanel.add(GuiFactory.buildLabel("Notes filter:"));
+      linePanel.add(GuiFactory.buildLabel("Notes filter:")); // I18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(10);
       linePanel.add(_contains);

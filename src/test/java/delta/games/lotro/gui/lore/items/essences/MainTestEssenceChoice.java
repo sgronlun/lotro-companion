@@ -1,8 +1,11 @@
 package delta.games.lotro.gui.lore.items.essences;
 
 import delta.games.lotro.character.CharacterSummary;
-import delta.games.lotro.common.CharacterClass;
+import delta.games.lotro.character.classes.ClassDescription;
+import delta.games.lotro.character.classes.ClassesManager;
+import delta.games.lotro.character.classes.WellKnownCharacterClassKeys;
 import delta.games.lotro.lore.items.Item;
+import delta.games.lotro.lore.items.essences.SocketTypes;
 
 /**
  * Test class for the essence choice UI.
@@ -13,9 +16,10 @@ public class MainTestEssenceChoice
   private void doIt()
   {
     CharacterSummary c=new CharacterSummary();
-    c.setCharacterClass(CharacterClass.MINSTREL);
+    ClassDescription minstrel=ClassesManager.getInstance().getCharacterClassByKey(WellKnownCharacterClassKeys.MINSTREL);
+    c.setCharacterClass(minstrel);
     c.setLevel(110);
-    Item ret=EssenceChoice.chooseEssence(null,c);
+    Item ret=EssenceChoice.chooseEssence(null,c,SocketTypes.ESSENCE_OF_WAR);
     System.out.println(ret);
   }
 

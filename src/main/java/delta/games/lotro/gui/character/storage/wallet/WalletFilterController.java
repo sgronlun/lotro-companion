@@ -20,8 +20,10 @@ import delta.common.ui.swing.tables.panel.FilterUpdateListener;
 import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
+import delta.games.lotro.common.enums.PaperItemCategory;
 import delta.games.lotro.common.filters.NamedFilter;
 import delta.games.lotro.gui.utils.SharedUiUtils;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.items.paper.PaperItem;
 import delta.games.lotro.lore.items.paper.filters.PaperItemCategoryFilter;
 import delta.games.lotro.lore.items.paper.filters.PaperItemFilter;
@@ -41,7 +43,7 @@ public class WalletFilterController implements ActionListener
   // -- Paper item attributes UI --
   private JTextField _contains;
   private ComboBoxController<Boolean> _shared;
-  private ComboBoxController<String> _category;
+  private ComboBoxController<PaperItemCategory> _category;
   // Controllers
   private DynamicTextEditionController _textController;
   private FilterUpdateListener _filterUpdateListener;
@@ -116,7 +118,7 @@ public class WalletFilterController implements ActionListener
     _shared.selectItem(shared);
     // Category
     PaperItemCategoryFilter categoryFilter=_filter.getCategoryFilter();
-    String category=categoryFilter.getCategory();
+    PaperItemCategory category=categoryFilter.getCategory();
     _category.selectItem(category);
   }
 
@@ -128,13 +130,13 @@ public class WalletFilterController implements ActionListener
 
     // Paper items attributes
     JPanel paperItemPanel=buildPaperItemPanel();
-    Border border=GuiFactory.buildTitledBorder("Filter");
+    Border border=GuiFactory.buildTitledBorder("Filter"); // I18n
     paperItemPanel.setBorder(border);
     GridBagConstraints c=new GridBagConstraints(0,y,1,1,1.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
     panel.add(paperItemPanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,y,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,5),0,0);
     panel.add(_reset,c);
@@ -150,7 +152,7 @@ public class WalletFilterController implements ActionListener
     JPanel namePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Label filter
     {
-      namePanel.add(GuiFactory.buildLabel("Name:"));
+      namePanel.add(GuiFactory.buildLabel("Name:")); // I18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(10);
       namePanel.add(_contains);
@@ -170,7 +172,7 @@ public class WalletFilterController implements ActionListener
     // Shared
     JPanel sharedPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     {
-      JLabel label=GuiFactory.buildLabel("Shared:");
+      JLabel label=GuiFactory.buildLabel("Shared:"); // I18n
       sharedPanel.add(label);
       _shared=buildSharedCombobox();
       sharedPanel.add(_shared.getComboBox());
@@ -178,13 +180,13 @@ public class WalletFilterController implements ActionListener
     // Category
     JPanel categoryPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     {
-      JLabel label=GuiFactory.buildLabel("Category:");
+      JLabel label=GuiFactory.buildLabel("Category:"); // I18n
       categoryPanel.add(label);
       _category=WalletUiUtils.buildCategoryCombo();
-      ItemSelectionListener<String> categoryListener=new ItemSelectionListener<String>()
+      ItemSelectionListener<PaperItemCategory> categoryListener=new ItemSelectionListener<PaperItemCategory>()
       {
         @Override
-        public void itemSelected(String category)
+        public void itemSelected(PaperItemCategory category)
         {
           PaperItemCategoryFilter categoryFilter=_filter.getCategoryFilter();
           categoryFilter.setCategory(category);
@@ -206,7 +208,7 @@ public class WalletFilterController implements ActionListener
 
   private ComboBoxController<Boolean> buildSharedCombobox()
   {
-    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox("","Yes","No");
+    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox();
     ItemSelectionListener<Boolean> listener=new ItemSelectionListener<Boolean>()
     {
       @Override

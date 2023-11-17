@@ -12,29 +12,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
 
 import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.labels.MultilineLabel2;
-import delta.common.ui.swing.navigator.NavigablePanelController;
+import delta.common.ui.swing.navigator.AbstractNavigablePanelController;
 import delta.common.ui.swing.navigator.NavigatorWindowController;
+import delta.common.utils.l10n.L10n;
 import delta.games.lotro.character.skills.SkillDescription;
-import delta.games.lotro.character.stats.BasicStatsSet;
 import delta.games.lotro.character.traits.TraitDescription;
+import delta.games.lotro.common.Duration;
 import delta.games.lotro.common.enums.EquipmentCategory;
 import delta.games.lotro.common.money.Money;
-import delta.games.lotro.common.stats.StatUtils;
-import delta.games.lotro.common.stats.StatsProvider;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.common.money.MoneyDisplayController;
 import delta.games.lotro.gui.common.requirements.RequirementsUtils;
 import delta.games.lotro.gui.lore.items.containers.form.ContainerDisplayPanelController;
+import delta.games.lotro.gui.lore.items.essences.EssencesTemplatePanelController;
 import delta.games.lotro.gui.utils.IconAndLinkPanelController;
 import delta.games.lotro.gui.utils.SharedPanels;
+import delta.games.lotro.gui.utils.UiConfiguration;
+import delta.games.lotro.gui.utils.items.SaveItemIconController;
 import delta.games.lotro.lore.emotes.EmoteDescription;
 import delta.games.lotro.lore.items.DamageType;
 import delta.games.lotro.lore.items.DisenchantmentManager;
@@ -42,38 +47,44 @@ import delta.games.lotro.lore.items.DisenchantmentResult;
 import delta.games.lotro.lore.items.EquipmentLocation;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.ItemBinding;
+import delta.games.lotro.lore.items.ItemQuality;
 import delta.games.lotro.lore.items.ItemSturdiness;
+import delta.games.lotro.lore.items.ItemUtils;
 import delta.games.lotro.lore.items.Weapon;
 import delta.games.lotro.lore.items.details.GrantedElement;
 import delta.games.lotro.lore.items.details.ItemDetailsManager;
 import delta.games.lotro.lore.items.details.ItemReputation;
+import delta.games.lotro.lore.items.details.ItemUsageCooldown;
 import delta.games.lotro.lore.items.details.ItemXP;
 import delta.games.lotro.lore.items.details.VirtueXP;
+import delta.games.lotro.lore.items.details.WeaponSlayerInfo;
+import delta.games.lotro.lore.items.essences.Essence;
 import delta.games.lotro.lore.items.legendary2.EnhancementRune;
 import delta.games.lotro.lore.items.legendary2.EnhancementRunesManager;
 import delta.games.lotro.lore.items.legendary2.TraceriesManager;
 import delta.games.lotro.lore.items.legendary2.Tracery;
+import delta.games.lotro.lore.items.weapons.WeaponSpeedEntry;
 import delta.games.lotro.lore.reputation.Faction;
 import delta.games.lotro.utils.gui.HtmlUtils;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Controller for an item display panel.
  * @author DAM
  */
-public class ItemDisplayPanelController implements NavigablePanelController
+public class ItemDisplayPanelController extends AbstractNavigablePanelController
 {
   // Data
   private Item _item;
-  // GUI
-  private JPanel _panel;
   // Controllers
-  private NavigatorWindowController _parent;
   private ItemReferencesDisplayController _references;
   private ItemScalableStatsPanelController _scaling;
   private ContainerDisplayPanelController _container;
+  private EssencesTemplatePanelController _essences;
   private MoneyDisplayController _money;
   private DisenchantmentResultPanelController _disenchantment;
   private List<IconAndLinkPanelController> _grantedCtrls;
+  private SaveItemIconController _saveItemIcon;
 
   /**
    * Constructor.
@@ -82,29 +93,20 @@ public class ItemDisplayPanelController implements NavigablePanelController
    */
   public ItemDisplayPanelController(NavigatorWindowController parent, Item item)
   {
-    _parent=parent;
+    super(parent);
     _item=item;
     _references=new ItemReferencesDisplayController(parent,item.getIdentifier());
     _scaling=new ItemScalableStatsPanelController(item);
     _container=new ContainerDisplayPanelController(parent,item);
     _money=new MoneyDisplayController();
     _grantedCtrls=new ArrayList<IconAndLinkPanelController>();
+    setPanel(build());
   }
 
   @Override
   public String getTitle()
   {
     return "Item: "+_item.getName();
-  }
-
-  @Override
-  public JPanel getPanel()
-  {
-    if (_panel==null)
-    {
-      _panel=build();
-    }
-    return _panel;
   }
 
   private JPanel build()
@@ -125,19 +127,12 @@ public class ItemDisplayPanelController implements NavigablePanelController
   private MultilineLabel2 buildStatsDisplay()
   {
     MultilineLabel2 statsLabel=null;
-    StatsProvider statsProvider=_item.getStatsProvider();
-    BasicStatsSet stats=_item.getStats();
-    int nbStats=stats.getStatsCount();
-    int nbEffects=0;
-    if (statsProvider!=null)
+    List<String> lines=ItemUtils.buildLinesToShowItem(_item);
+    if (!lines.isEmpty())
     {
-      nbEffects=statsProvider.getSpecialEffects().size();
-    }
-    if (nbStats+nbEffects>0)
-    {
-      String[] lines=StatUtils.getFullStatsDisplay(stats,statsProvider);
       statsLabel=new MultilineLabel2();
-      statsLabel.setText(lines);
+      String[] linesToShow=lines.toArray(new String[lines.size()]);
+      statsLabel.setText(linesToShow);
       statsLabel.setBorder(GuiFactory.buildTitledBorder("Stats"));
     }
     return statsLabel;
@@ -207,6 +202,7 @@ public class ItemDisplayPanelController implements NavigablePanelController
     JLabel iconLabel=GuiFactory.buildIconLabel(icon);
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,5,0,5),0,0);
     panel.add(iconLabel,c);
+    _saveItemIcon=new SaveItemIconController(_item,iconLabel);
     // Name
     String name=_item.getName();
     JLabel nameLabel=GuiFactory.buildLabel(name);
@@ -214,6 +210,18 @@ public class ItemDisplayPanelController implements NavigablePanelController
     c=new GridBagConstraints(1,0,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
     panel.add(nameLabel,c);
     return panel;
+  }
+
+  private JComponent buildSelectableLabel(String text)
+  {
+    JTextField f=GuiFactory.buildTextField(text);
+    f.setEditable(false);
+    f.setBorder(null);
+    f.setOpaque(false);
+    f.setFont(UIManager.getFont("Label.font"));
+    Dimension d=f.getPreferredSize();
+    f.setPreferredSize(new Dimension(d.width+5,d.height));
+    return f;
   }
 
   private JPanel buildMainAttrsPanel()
@@ -227,9 +235,18 @@ public class ItemDisplayPanelController implements NavigablePanelController
       JPanel panelLine=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
       panel.add(panelLine,c);
       c.gridy++;
-      panelLine.add(GuiFactory.buildLabel(line));
+      panelLine.add(buildSelectableLabel(line));
     }
     c.insets=new Insets(0,5,0,0);
+    // Essence slots
+    int nbSlots=_item.getEssenceSlots();
+    if (nbSlots>0)
+    {
+      _essences=new EssencesTemplatePanelController(_item.getEssenceSlotsSetup());
+      JPanel essencesPanel=_essences.getPanel();
+      panel.add(essencesPanel,c);
+      c.gridy++;
+    }
     // Details
     JPanel detailPanel=buildDetailsPanel();
     if (detailPanel!=null)
@@ -268,7 +285,7 @@ public class ItemDisplayPanelController implements NavigablePanelController
     DisenchantmentResult disenchantment=DisenchantmentManager.getInstance().getDisenchantmentResults().getItem(itemId);
     if (disenchantment!=null)
     {
-      _disenchantment=new DisenchantmentResultPanelController(_parent,disenchantment);
+      _disenchantment=new DisenchantmentResultPanelController(getParent(),disenchantment);
       JPanel disenchantmentPanel=_disenchantment.getPanel();
       disenchantmentPanel.setBorder(GuiFactory.buildTitledBorder("Disenchantment"));
       c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
@@ -287,8 +304,16 @@ public class ItemDisplayPanelController implements NavigablePanelController
   private List<String> getAttributesLines()
   {
     List<String> ret=new ArrayList<String>();
+    if (UiConfiguration.showTechnicalColumns())
+    {
+      ret.add("ID: "+_item.getIdentifier());
+    }
     // Quality
-    // TODO
+    ItemQuality quality=_item.getQuality();
+    if (quality!=null)
+    {
+      ret.add("Quality: "+_item.getQuality().getLabel());
+    }
     // Equipment category
     EquipmentCategory equipmentCategory=_item.getEquipmentCategory();
     if (equipmentCategory!=null)
@@ -307,19 +332,25 @@ public class ItemDisplayPanelController implements NavigablePanelController
       String category=_item.getSubCategory();
       if ((category!=null) && (category.length()>0))
       {
-        ret.add("Category: "+category);
+        String label=category;
+        if (_item instanceof Essence)
+        {
+          Essence essence=(Essence)_item;
+          label=label+" ("+essence.getType().getLabel();
+          Integer tier=essence.getTier();
+          if (tier!=null)
+          {
+            label=label+", tier "+tier;
+          }
+          label=label+")";
+        }
+        ret.add("Category: "+label);
       }
     }
     if (_item instanceof Weapon)
     {
       List<String> weaponLines=getWeaponAttributeLines((Weapon)_item);
       ret.addAll(weaponLines);
-    }
-    // Slots
-    int nbSlots=_item.getEssenceSlots();
-    if (nbSlots>0)
-    {
-      ret.add("Essence slots: "+nbSlots);
     }
     // Item level
     Integer itemLevel=_item.getItemLevel();
@@ -347,11 +378,7 @@ public class ItemDisplayPanelController implements NavigablePanelController
       int minItemLevel=enhancementRune.getMinItemLevel();
       int maxItemLevel=enhancementRune.getMaxItemLevel();
       int increment=enhancementRune.getLevelUpIncrement();
-      String label="Enhancement item levels: "+minItemLevel+"-"+maxItemLevel;
-      if (increment>1)
-      {
-        label=label+" (increment: "+increment+")";
-      }
+      String label="Enhancement item levels: "+minItemLevel+"-"+maxItemLevel+" (increment: "+increment+")";
       ret.add(label);
     }
     // Durability
@@ -361,7 +388,7 @@ public class ItemDisplayPanelController implements NavigablePanelController
       ret.add("Durability: "+durability.toString());
     }
     // Requirements
-    String requirements=RequirementsUtils.buildRequirementString(_item.getUsageRequirements());
+    String requirements=RequirementsUtils.buildRequirementString(this,_item.getUsageRequirements());
     if (requirements.length()>0)
     {
       ret.add("Requirements: "+requirements);
@@ -369,7 +396,10 @@ public class ItemDisplayPanelController implements NavigablePanelController
     // Attributes
     {
       String attributes=buildAttributesString();
-      ret.add(attributes);
+      if (!attributes.isEmpty())
+      {
+        ret.add(attributes);
+      }
     }
     return ret;
   }
@@ -389,8 +419,16 @@ public class ItemDisplayPanelController implements NavigablePanelController
     ret.add("Damage: "+minDamage+" - "+maxDamage);
     // DPS
     float dps=weapon.getDPS();
-    String dpsStr=String.format("%.1f",Float.valueOf(dps));
+    String dpsStr=L10n.getString(dps,1);
     ret.add("DPS: "+dpsStr);
+    // Speed
+    WeaponSpeedEntry speedData=weapon.getSpeed();
+    if (speedData!=null)
+    {
+      float duration=speedData.getBaseActionDuration();
+      String durationStr=L10n.getString(duration,1);
+      ret.add("Speed: "+durationStr);
+    }
     return ret;
   }
 
@@ -512,10 +550,35 @@ public class ItemDisplayPanelController implements NavigablePanelController
         Faction faction=reputation.getFaction();
         int amount=reputation.getAmount();
         String verb=(amount>0)?"Gives":"Removes";
-        String label=verb+" "+amount+" reputation points in faction "+faction.getName()+".";
+        String rawFactionName=faction.getName();
+        String factionName=ContextRendering.render(this,rawFactionName);
+        String label=verb+" "+amount+" reputation points in faction "+factionName+".";
         ret.add(GuiFactory.buildLabel(label),c);
         y++;
       }
+    }
+    // Weapon slayer
+    List<WeaponSlayerInfo> weaponSlayerInfos=mgr.getItemDetails(WeaponSlayerInfo.class);
+    if (!weaponSlayerInfos.isEmpty())
+    {
+      for(WeaponSlayerInfo weaponSlayerInfo : weaponSlayerInfos)
+      {
+        GridBagConstraints c=new GridBagConstraints(0,y,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
+        String label=weaponSlayerInfo.getLabel();
+        ret.add(GuiFactory.buildLabel(label),c);
+        y++;
+      }
+    }
+    // Usage Cooldown
+    ItemUsageCooldown cooldown=mgr.getFirstItemDetail(ItemUsageCooldown.class);
+    if (cooldown!=null)
+    {
+      GridBagConstraints c=new GridBagConstraints(0,y,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
+      float duration=cooldown.getDuration();
+      String durationStr=Duration.getDurationString((int)duration);
+      String label="Cooldown: "+durationStr;
+      ret.add(GuiFactory.buildLabel(label),c);
+      y++;
     }
     return ret;
   }
@@ -526,17 +589,17 @@ public class ItemDisplayPanelController implements NavigablePanelController
     if (element instanceof SkillDescription)
     {
       SkillDescription skill=(SkillDescription)element;
-      return SharedPanels.buildSkillPanel(_parent,skill);
+      return SharedPanels.buildSkillPanel(getParent(),skill);
     }
     if (element instanceof TraitDescription)
     {
       TraitDescription trait=(TraitDescription)element;
-      return SharedPanels.buildTraitPanel(_parent,trait);
+      return SharedPanels.buildTraitPanel(getParent(),trait);
     }
     if (element instanceof EmoteDescription)
     {
       EmoteDescription emote=(EmoteDescription)element;
-      return SharedPanels.buildEmotePanel(_parent,emote);
+      return SharedPanels.buildEmotePanel(getParent(),emote);
     }
     return null;
   }
@@ -544,6 +607,7 @@ public class ItemDisplayPanelController implements NavigablePanelController
   @Override
   public void dispose()
   {
+    super.dispose();
     // Data
     _item=null;
     // Controllers
@@ -561,6 +625,11 @@ public class ItemDisplayPanelController implements NavigablePanelController
     {
       _container.dispose();
       _container=null;
+    }
+    if (_essences!=null)
+    {
+      _essences.dispose();
+      _essences=null;
     }
     if (_money!=null)
     {
@@ -580,12 +649,10 @@ public class ItemDisplayPanelController implements NavigablePanelController
       }
       _grantedCtrls=null;
     }
-    _parent=null;
-    // UI
-    if (_panel!=null)
+    if (_saveItemIcon!=null)
     {
-      _panel.removeAll();
-      _panel=null;
+      _saveItemIcon.dispose();
+      _saveItemIcon=null;
     }
   }
 }

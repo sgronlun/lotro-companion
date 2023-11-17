@@ -7,13 +7,14 @@ import delta.common.utils.collections.filters.CompoundFilter;
 import delta.common.utils.collections.filters.Filter;
 import delta.common.utils.collections.filters.Operator;
 import delta.games.lotro.character.BasicCharacterAttributes;
-import delta.games.lotro.common.CharacterClass;
+import delta.games.lotro.character.classes.ClassDescription;
 import delta.games.lotro.lore.items.ArmourType;
+import delta.games.lotro.lore.items.DamageType;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.WeaponType;
 import delta.games.lotro.lore.items.filters.ArmourTypeFilter;
 import delta.games.lotro.lore.items.filters.CharacterProficienciesFilter;
-import delta.games.lotro.lore.items.filters.EssenceTierFilter;
+import delta.games.lotro.lore.items.filters.DamageTypeFilter;
 import delta.games.lotro.lore.items.filters.ItemCharacterLevelFilter;
 import delta.games.lotro.lore.items.filters.ItemClassFilter;
 import delta.games.lotro.lore.items.filters.ItemEquipmentLocationFilter;
@@ -24,6 +25,9 @@ import delta.games.lotro.lore.items.filters.ItemRequiredClassFilter;
 import delta.games.lotro.lore.items.filters.ItemRequiredRaceFilter;
 import delta.games.lotro.lore.items.filters.ItemStatFilter;
 import delta.games.lotro.lore.items.filters.LegendaryItemFilter;
+import delta.games.lotro.lore.items.filters.ScalableItemFilter;
+import delta.games.lotro.lore.items.filters.TierFilter;
+import delta.games.lotro.lore.items.filters.WeaponSlayerFilter;
 import delta.games.lotro.lore.items.filters.WeaponTypeFilter;
 
 /**
@@ -47,17 +51,20 @@ public class ItemChooserFilter implements Filter<Item>
   private ItemRequiredClassFilter _characterClassFilter;
   private CharacterProficienciesFilter _characterProficienciesFilter;
   private ItemCharacterLevelFilter _characterLevelFilter;
-  private EssenceTierFilter _essenceTierFilter;
+  private TierFilter _tierFilter;
   private ItemNameFilter _nameFilter;
   private ItemQualityFilter _qualityFilter;
   private ItemClassFilter _categoryFilter;
   private LegendaryItemFilter _legendaryFilter;
   private ItemEquipmentLocationFilter _locationFilter;
   private WeaponTypeFilter _weaponTypeFilter;
+  private DamageTypeFilter _damageTypeFilter;
+  private WeaponSlayerFilter _slayerGenusFilter;
   private ArmourTypeFilter _armourTypeFilter;
   private ArmourTypeFilter _shieldTypeFilter;
   private ItemStatFilter _statFilter;
   private ItemLevelFilter _itemLevelFilter;
+  private ScalableItemFilter _scalableFilter;
 
   /**
    * Constructor.
@@ -72,7 +79,7 @@ public class ItemChooserFilter implements Filter<Item>
     if (attrs!=null)
     {
       // - class
-      CharacterClass characterClass=attrs.getCharacterClass();
+      ClassDescription characterClass=attrs.getCharacterClass();
       boolean useCurrentCharClass=cfg.hasComponent(ItemChooserFilterComponent.CURRENT_CHAR_CLASS);
       if (useCurrentCharClass)
       {
@@ -99,8 +106,8 @@ public class ItemChooserFilter implements Filter<Item>
     boolean useTier=cfg.hasComponent(ItemChooserFilterComponent.TIER);
     if (useTier)
     {
-      _essenceTierFilter=new EssenceTierFilter();
-      filters.add(_essenceTierFilter);
+      _tierFilter=new TierFilter();
+      filters.add(_tierFilter);
     }
     // Name
     boolean useName=cfg.hasComponent(ItemChooserFilterComponent.NAME);
@@ -144,6 +151,24 @@ public class ItemChooserFilter implements Filter<Item>
         filters.add(_weaponTypeFilter);
       }
     }
+    // Damage type
+    boolean useDamageType=cfg.hasComponent(ItemChooserFilterComponent.DAMAGE_TYPE);
+    if (useDamageType)
+    {
+      List<DamageType> damageTypes=cfg.getDamageTypes();
+      if (!damageTypes.isEmpty())
+      {
+        _damageTypeFilter=new DamageTypeFilter(null);
+        filters.add(_damageTypeFilter);
+      }
+    }
+    // Slayer genus
+    boolean useSlayerGenus=cfg.hasComponent(ItemChooserFilterComponent.SLAYER_GENUS);
+    if (useSlayerGenus)
+    {
+      _slayerGenusFilter=new WeaponSlayerFilter(null);
+      filters.add(_slayerGenusFilter);
+    }
     // Armour type
     boolean useArmourType=cfg.hasComponent(ItemChooserFilterComponent.ARMOUR_TYPE);
     if (useArmourType)
@@ -180,6 +205,13 @@ public class ItemChooserFilter implements Filter<Item>
       _itemLevelFilter=new ItemLevelFilter();
       filters.add(_itemLevelFilter);
     }
+    // Scalable
+    boolean useScalable=cfg.hasComponent(ItemChooserFilterComponent.SCALABLE);
+    if (useScalable)
+    {
+      _scalableFilter=new ScalableItemFilter(null);
+      filters.add(_scalableFilter);
+    }
     // Character class
     boolean useCharacterClass=cfg.hasComponent(ItemChooserFilterComponent.GENERIC_CHARACTER_CLASS);
     if (useCharacterClass)
@@ -207,12 +239,12 @@ public class ItemChooserFilter implements Filter<Item>
   }
 
   /**
-   * Get the managed essence tier filter.
+   * Get the managed tier filter.
    * @return a filter.
    */
-  public EssenceTierFilter getEssenceTierFilter()
+  public TierFilter getTierFilter()
   {
-    return _essenceTierFilter;
+    return _tierFilter;
   }
 
   /**
@@ -315,6 +347,24 @@ public class ItemChooserFilter implements Filter<Item>
   }
 
   /**
+   * Get the damage type filter.
+   * @return a damage type filter or <code>null</code>.
+   */
+  public DamageTypeFilter getDamageTypeFilter()
+  {
+    return _damageTypeFilter;
+  }
+
+  /**
+   * Get the slayer genus filter.
+   * @return a slayer genus filter or <code>null</code>.
+   */
+  public WeaponSlayerFilter getSlayerGenusFilter()
+  {
+    return _slayerGenusFilter;
+  }
+
+  /**
    * Get the armour type filter.
    * @return a armour type filter or <code>null</code>.
    */
@@ -348,6 +398,15 @@ public class ItemChooserFilter implements Filter<Item>
   public ItemLevelFilter getItemLevelFilter()
   {
     return _itemLevelFilter;
+  }
+
+  /**
+   * Get the scalable item filter.
+   * @return A filter for scalable items.
+   */
+  public ScalableItemFilter getScalableFilter()
+  {
+    return _scalableFilter;
   }
 
   @Override

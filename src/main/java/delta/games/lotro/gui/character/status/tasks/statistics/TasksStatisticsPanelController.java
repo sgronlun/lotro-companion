@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.status.achievables.statistics.reputation.AchievablesFactionStats;
 import delta.games.lotro.character.status.tasks.TaskStatus;
@@ -21,12 +22,10 @@ import delta.games.lotro.gui.common.statistics.reputation.ReputationTableControl
  * Controller for a panel to show the statistics about some tasks.
  * @author DAM
  */
-public class TasksStatisticsPanelController
+public class TasksStatisticsPanelController extends AbstractPanelController
 {
   // Data
   private TasksStatistics _statistics;
-  // UI
-  private JPanel _panel;
   // Controllers
   private TasksStatisticsSummaryPanelController _summary;
   private ReputationDisplayPanelController<AchievablesFactionStats> _reputation;
@@ -40,13 +39,15 @@ public class TasksStatisticsPanelController
    */
   public TasksStatisticsPanelController(WindowController parent, TasksStatistics statistics)
   {
+    super(parent);
     _statistics=statistics;
     _summary=new TasksStatisticsSummaryPanelController(statistics);
-    ReputationTableController<AchievablesFactionStats> tableController=new AchievablesReputationTableController(statistics.getReputationStats(),AchievableUIMode.QUEST);
+    ReputationTableController<AchievablesFactionStats> tableController=new AchievablesReputationTableController(this,statistics.getReputationStats(),AchievableUIMode.QUEST);
     _reputation=new ReputationDisplayPanelController<AchievablesFactionStats>(parent,statistics.getReputationStats(),tableController);
     _consumedItems=new ItemsDisplayPanelController(parent,statistics.getConsumedItemsStats());
     _earnedItems=new ItemsDisplayPanelController(parent,statistics.getEarnedItemsStats());
-    _panel=buildPanel();
+    JPanel panel=buildPanel();
+    setPanel(panel);
   }
 
   private JPanel buildPanel()
@@ -59,13 +60,13 @@ public class TasksStatisticsPanelController
     panel.add(pane,BorderLayout.CENTER);
     // Reputation
     JPanel reputationPanel=_reputation.getPanel();
-    pane.add("Reputation",reputationPanel);
+    pane.add("Reputation",reputationPanel); // I18n
     // Consumed items
     JPanel itemsPanel=_consumedItems.getPanel();
-    pane.add("Consumed items",itemsPanel);
+    pane.add("Consumed items",itemsPanel); // I18n
     // Earned items
     JPanel earnedItemsPanel=_earnedItems.getPanel();
-    pane.add("Earned items",earnedItemsPanel);
+    pane.add("Earned items",earnedItemsPanel); // I18n
     return panel;
   }
 
@@ -83,27 +84,13 @@ public class TasksStatisticsPanelController
   }
 
   /**
-   * Get the managed panel.
-   * @return the managed panel.
-   */
-  public JPanel getPanel()
-  {
-    return _panel;
-  }
-
-  /**
    * Release all managed resources.
    */
   public void dispose()
   {
+    super.dispose();
     // Data
     _statistics=null;
-    // UI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
     // Controllers
     if (_summary!=null)
     {

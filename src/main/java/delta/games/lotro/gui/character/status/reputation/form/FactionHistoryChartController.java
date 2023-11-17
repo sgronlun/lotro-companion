@@ -21,42 +21,43 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYStepAreaRenderer;
 import org.jfree.chart.title.LegendTitle;
-import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.common.utils.l10n.LocalizedFormats;
 import delta.games.lotro.character.status.reputation.FactionLevelStatus;
 import delta.games.lotro.character.status.reputation.FactionStatus;
 import delta.games.lotro.lore.reputation.Faction;
 import delta.games.lotro.lore.reputation.FactionLevel;
 import delta.games.lotro.utils.Formats;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Controller for faction history chart.
  * @author DAM
  */
-public class FactionHistoryChartController
+public class FactionHistoryChartController extends AbstractPanelController
 {
-  private JPanel _panel;
   private JFreeChart _chart;
   private FactionStatus _stats;
-  private boolean _showTitle;
   private XYSeriesCollection _data;
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param stats Data to display.
-   * @param showTitle Show title or not.
    */
-  public FactionHistoryChartController(FactionStatus stats, boolean showTitle)
+  public FactionHistoryChartController(AreaController parent, FactionStatus stats)
   {
+    super(parent);
     _stats=stats;
-    _showTitle=showTitle;
     _data=new XYSeriesCollection();
-    _panel=buildPanel();
+    JPanel panel=buildPanel();
+    setPanel(panel);
   }
 
   /**
@@ -65,18 +66,20 @@ public class FactionHistoryChartController
    */
   public JPanel getPanel()
   {
-    if (_panel==null)
+    JPanel panel=super.getPanel();
+    if (panel==null)
     {
-      _panel=buildPanel();
+      panel=buildPanel();
+      setPanel(panel);
     }
-    return _panel;
+    return panel;
   }
 
   private JPanel buildPanel()
   {
     _chart=buildChart();
-    _panel=buildChartPanel();
-    return _panel;
+    JPanel panel=buildChartPanel();
+    return panel;
   }
 
   private JPanel buildChartPanel()
@@ -91,16 +94,12 @@ public class FactionHistoryChartController
     return chartPanel;
   }
 
-  private JFreeChart buildChart(){
-    String title="";
-    if (_showTitle)
-    {
-      title=_stats.getFaction().getName();
-    }
+  private JFreeChart buildChart()
+  {
     updateData();
-    JFreeChart jfreechart = ChartFactory.createXYStepChart(title,
-                        "Time",
-                        "Level",
+    JFreeChart jfreechart = ChartFactory.createXYStepChart("",
+                        "Time", // I18n
+                        "Level", // I18n
                         _data,
                         PlotOrientation.VERTICAL,
                         true,
@@ -110,21 +109,18 @@ public class FactionHistoryChartController
     Color foregroundColor=GuiFactory.getForegroundColor();
     Paint backgroundPaint=GuiFactory.getBackgroundPaint();
     jfreechart.setBackgroundPaint(backgroundPaint);
-    TextTitle t=new TextTitle(title);
-    t.setFont(t.getFont().deriveFont(24.0f));
-    t.setPaint(foregroundColor);
-    jfreechart.setTitle(t);
     XYPlot xyplot = (XYPlot)jfreechart.getPlot();
     xyplot.setDomainPannable(false);
     XYStepAreaRenderer xysteparearenderer = new XYStepAreaRenderer(XYStepAreaRenderer.AREA_AND_SHAPES);
     final Faction faction=_stats.getFaction();
-    XYToolTipGenerator tooltip=new StandardXYToolTipGenerator() {
+    XYToolTipGenerator tooltip=new StandardXYToolTipGenerator()
+    {
       @Override
       public String generateLabelString(XYDataset dataset, int series, int item)
       {
         int tier=(int)dataset.getYValue(series,item);
         FactionLevel level=faction.getLevelByTier(tier);
-        String label=(level!=null)?level.getName():"?";
+        String label=getTierName(level);
         double timestamp=dataset.getXValue(series,item);
         String date=Formats.getDateString(Long.valueOf((long)timestamp));
         return label+" ("+date+")";
@@ -154,7 +150,7 @@ public class FactionHistoryChartController
       private String format(int number)
       {
         FactionLevel level=faction.getLevelByTier(number);
-        return (level!=null)?level.getName():"???";
+        return getTierName(level);
       }
 
       @Override
@@ -183,6 +179,21 @@ public class FactionHistoryChartController
     return jfreechart;
   }
 
+  private String getTierName(FactionLevel level)
+  {
+    String tierName=null;
+    if (level!=null)
+    {
+      String rawName=level.getName();
+      tierName=ContextRendering.render(this,rawName);
+    }
+    else
+    {
+      tierName="?";
+    }
+    return tierName;
+  }
+
   /**
    * Update graph data.
    */
@@ -190,7 +201,7 @@ public class FactionHistoryChartController
   {
     _data.removeAllSeries();
 
-    XYSeries series = new XYSeries("History");
+    XYSeries series = new XYSeries("History"); // I18n
     Faction faction=_stats.getFaction();
     FactionLevel[] levels=faction.getLevels();
     for(FactionLevel level : levels)
@@ -213,11 +224,7 @@ public class FactionHistoryChartController
    */
   public void dispose()
   {
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
+    super.dispose();
     _chart=null;
     _stats=null;
   }

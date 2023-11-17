@@ -3,10 +3,12 @@ package delta.games.lotro.gui.lore.items.legendary.imbued;
 import javax.swing.JPanel;
 
 import delta.common.ui.swing.windows.DefaultFormDialogController;
-import delta.games.lotro.common.CharacterClass;
+import delta.games.lotro.character.classes.ClassDescription;
+import delta.games.lotro.character.classes.ClassesManager;
+import delta.games.lotro.character.classes.WellKnownCharacterClassKeys;
 import delta.games.lotro.common.constraints.ClassAndSlot;
 import delta.games.lotro.gui.lore.items.legendary.shared.LegendariesTestUtils;
-import delta.games.lotro.lore.items.EquipmentLocation;
+import delta.games.lotro.lore.items.EquipmentLocations;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.ItemInstance;
 import delta.games.lotro.lore.items.legendary.LegendaryInstanceAttrs;
@@ -29,7 +31,8 @@ public class MainTestImbuedLegendaryAttrsEdition
   private void doIt()
   {
     final ImbuedLegendaryInstanceAttrs attrs=buildTestAttrs();
-    ClassAndSlot constraints=new ClassAndSlot(CharacterClass.CAPTAIN,EquipmentLocation.MAIN_HAND);
+    ClassDescription captain=ClassesManager.getInstance().getCharacterClassByKey(WellKnownCharacterClassKeys.CAPTAIN);
+    ClassAndSlot constraints=new ClassAndSlot(captain,EquipmentLocations.MAIN_HAND);
     final ImbuedLegendaryAttrsEditionPanelController controller=new ImbuedLegendaryAttrsEditionPanelController(null,attrs,constraints);
 
     DefaultFormDialogController<ImbuedLegendaryInstanceAttrs> dialog=new DefaultFormDialogController<ImbuedLegendaryInstanceAttrs>(null,attrs)

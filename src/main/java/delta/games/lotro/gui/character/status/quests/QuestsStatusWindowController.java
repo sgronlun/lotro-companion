@@ -85,7 +85,7 @@ public class QuestsStatusWindowController extends DefaultDisplayDialogController
   {
     JDialog dialog=super.build();
     dialog.setMinimumSize(new Dimension(400,300));
-    dialog.setTitle("Quests status");
+    dialog.setTitle("Quests status"); // I18n
     dialog.pack();
     Dimension size=dialog.getSize();
     if (size.height>MAX_HEIGHT)
@@ -117,14 +117,14 @@ public class QuestsStatusWindowController extends DefaultDisplayDialogController
     _panelController=new QuestsStatusPanelController(this,_tableController);
     JPanel tablePanel=_panelController.getPanel();
     // Quest filter
-    _filterController=new QuestFilterController(_filter.getQuestFilter(),this,false);
+    _filterController=new QuestFilterController(this,_filter.getQuestFilter(),this,false);
     JPanel questFilterPanel=_filterController.getPanel();
-    TitledBorder questFilterBorder=GuiFactory.buildTitledBorder("Quest Filter");
+    TitledBorder questFilterBorder=GuiFactory.buildTitledBorder("Quest Filter"); // I18n
     questFilterPanel.setBorder(questFilterBorder);
     // Status filter
     _statusFilterController=new AchievableStatusFilterController(_filter,this);
     JPanel statusFilterPanel=_statusFilterController.getPanel();
-    TitledBorder statusFilterBorder=GuiFactory.buildTitledBorder("Status Filter");
+    TitledBorder statusFilterBorder=GuiFactory.buildTitledBorder("Status Filter"); // I18n
     statusFilterPanel.setBorder(statusFilterBorder);
     // Blacklist
     _filter.setBlacklist(blacklist);
@@ -154,7 +154,7 @@ public class QuestsStatusWindowController extends DefaultDisplayDialogController
     JPanel ret=GuiFactory.buildPanel(new FlowLayout());
     // Stats button
     {
-      JButton statsButton=GuiFactory.buildButton("Stats");
+      JButton statsButton=GuiFactory.buildButton("Stats"); // I18n
       ActionListener alStats=new ActionListener()
       {
         @Override
@@ -172,7 +172,7 @@ public class QuestsStatusWindowController extends DefaultDisplayDialogController
   private void initTable(Blacklist blacklist)
   {
     TypedProperties prefs=GlobalPreferences.getGlobalProperties("QuestsStatus");
-    _tableController=new QuestStatusTableController(_data,prefs,_filter,_quests,blacklist);
+    _tableController=new QuestStatusTableController(this,_data,prefs,_filter,_quests,blacklist);
     GenericTableController<AchievableStatus> tableController=_tableController.getTableController();
     JTable table=tableController.getTable();
     table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);

@@ -18,6 +18,7 @@ import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.status.achievables.statistics.AchievablesStatistics;
 import delta.games.lotro.character.status.achievables.statistics.virtues.VirtueXPStatsFromAchievable;
 import delta.games.lotro.gui.character.status.achievables.AchievableUIMode;
+import delta.games.lotro.gui.utils.l10n.Labels;
 
 /**
  * Controller for the virtue XP display panel.
@@ -63,7 +64,7 @@ public class VirtueXPDisplayPanelController
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildBackgroundPanel(new BorderLayout());
-    TitledBorder border=GuiFactory.buildTitledBorder("Virtue XP");
+    TitledBorder border=GuiFactory.buildTitledBorder("Virtue XP"); // I18n
     panel.setBorder(border);
 
     // Table
@@ -74,7 +75,7 @@ public class VirtueXPDisplayPanelController
     JPanel statsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
     _statsLabel=GuiFactory.buildLabel("-");
     statsPanel.add(_statsLabel);
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     ActionListener al=new ActionListener()
     {
       @Override
@@ -102,7 +103,7 @@ public class VirtueXPDisplayPanelController
   private void updateStatsLabel()
   {
     int nbItems=_stats.getVirtueXPStats().getEntriesCount();
-    String label="Element(s): "+nbItems;
+    String label="Element(s): "+nbItems; // I18n
     _statsLabel.setText(label);
   }
 

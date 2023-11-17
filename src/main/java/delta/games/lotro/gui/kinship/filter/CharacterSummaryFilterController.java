@@ -16,14 +16,14 @@ import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
 import delta.games.lotro.character.BaseCharacterSummary;
+import delta.games.lotro.character.classes.ClassDescription;
 import delta.games.lotro.character.filters.CharacterClassFilter;
 import delta.games.lotro.character.filters.CharacterNameFilter;
 import delta.games.lotro.character.filters.CharacterSexFilter;
 import delta.games.lotro.character.filters.CharacterSummaryFilter;
 import delta.games.lotro.character.filters.RaceFilter;
-import delta.games.lotro.common.CharacterClass;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.common.CharacterSex;
-import delta.games.lotro.common.Race;
 import delta.games.lotro.gui.character.summary.CharacterUiUtils;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
 
@@ -39,8 +39,8 @@ public class CharacterSummaryFilterController
   private JPanel _panel;
   // -- Character attributes UI --
   private JTextField _contains;
-  private ComboBoxController<CharacterClass> _class;
-  private ComboBoxController<Race> _race;
+  private ComboBoxController<ClassDescription> _class;
+  private ComboBoxController<RaceDescription> _race;
   private ComboBoxController<CharacterSex> _sex;
   // Controllers
   private DynamicTextEditionController _textController;
@@ -114,11 +114,11 @@ public class CharacterSummaryFilterController
     }
     // Class
     CharacterClassFilter<BaseCharacterSummary> classFilter=_filter.getClassFilter();
-    CharacterClass characterClass=classFilter.getCharacterClass();
+    ClassDescription characterClass=classFilter.getCharacterClass();
     _class.selectItem(characterClass);
     // Race
     RaceFilter raceFilter=_filter.getRaceFilter();
-    Race race=raceFilter.getRace();
+    RaceDescription race=raceFilter.getRace();
     _race.selectItem(race);
     // Sex
     CharacterSexFilter sexFilter=_filter.getSexFilter();
@@ -148,7 +148,7 @@ public class CharacterSummaryFilterController
     JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Label filter
     {
-      linePanel.add(GuiFactory.buildLabel("Name filter:"));
+      linePanel.add(GuiFactory.buildLabel("Name filter:")); // I18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(10);
       linePanel.add(_contains);
@@ -167,13 +167,13 @@ public class CharacterSummaryFilterController
     }
     // Class
     {
-      JLabel label=GuiFactory.buildLabel("Class:");
+      JLabel label=GuiFactory.buildLabel("Class:"); // I18n
       linePanel.add(label);
-      _class=CharacterUiUtils.buildClassCombo(true);
-      ItemSelectionListener<CharacterClass> classListener=new ItemSelectionListener<CharacterClass>()
+      _class=CharacterUiUtils.buildCharacterClassCombo(true);
+      ItemSelectionListener<ClassDescription> classListener=new ItemSelectionListener<ClassDescription>()
       {
         @Override
-        public void itemSelected(CharacterClass characterClass)
+        public void itemSelected(ClassDescription characterClass)
         {
           CharacterClassFilter<BaseCharacterSummary> classFilter=_filter.getClassFilter();
           classFilter.setCharacterClass(characterClass);
@@ -185,13 +185,13 @@ public class CharacterSummaryFilterController
     }
     // Race
     {
-      JLabel label=GuiFactory.buildLabel("Race:");
+      JLabel label=GuiFactory.buildLabel("Race:"); // I18n
       linePanel.add(label);
       _race=CharacterUiUtils.buildRaceCombo(true);
-      ItemSelectionListener<Race> raceListener=new ItemSelectionListener<Race>()
+      ItemSelectionListener<RaceDescription> raceListener=new ItemSelectionListener<RaceDescription>()
       {
         @Override
-        public void itemSelected(Race race)
+        public void itemSelected(RaceDescription race)
         {
           RaceFilter raceFilter=_filter.getRaceFilter();
           raceFilter.setRace(race);
@@ -203,7 +203,7 @@ public class CharacterSummaryFilterController
     }
     // Sex
     {
-      JLabel label=GuiFactory.buildLabel("Sex:");
+      JLabel label=GuiFactory.buildLabel("Sex:"); // I18n
       linePanel.add(label);
       _sex=CharacterUiUtils.buildSexCombo(true);
       ItemSelectionListener<CharacterSex> sexListener=new ItemSelectionListener<CharacterSex>()

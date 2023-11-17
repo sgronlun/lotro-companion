@@ -30,6 +30,7 @@ import delta.games.lotro.common.owner.CharacterOwner;
 import delta.games.lotro.common.owner.Owner;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
 import delta.games.lotro.gui.lore.items.ItemUiTools;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.ItemQuality;
 import delta.games.lotro.lore.items.filters.ItemClassFilter;
@@ -168,7 +169,7 @@ public class StorageFilterController implements ActionListener
     panel.add(filter,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,y,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,5),0,0);
     panel.add(_reset,c);
@@ -186,7 +187,7 @@ public class StorageFilterController implements ActionListener
     // Label filter
     {
       JPanel containsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
-      containsPanel.add(GuiFactory.buildLabel("Name filter:"));
+      containsPanel.add(GuiFactory.buildLabel("Name filter:")); // I18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(20);
       containsPanel.add(_contains);
@@ -207,7 +208,7 @@ public class StorageFilterController implements ActionListener
     // Category
     {
       JPanel categoryPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING));
-      categoryPanel.add(GuiFactory.buildLabel("Category:"));
+      categoryPanel.add(GuiFactory.buildLabel("Category:")); // I18n
       _category=buildCategoryCombobox();
       categoryPanel.add(_category.getComboBox());
       line1Panel.add(categoryPanel);
@@ -219,14 +220,14 @@ public class StorageFilterController implements ActionListener
     JPanel line2Panel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Owner
     {
-      JLabel label=GuiFactory.buildLabel("Owner:");
+      JLabel label=GuiFactory.buildLabel("Owner:"); // I18n
       line2Panel.add(label);
       _owner=buildOwnerCombobox();
       line2Panel.add(_owner.getComboBox());
     }
     // Location
     {
-      JLabel label=GuiFactory.buildLabel("Location:");
+      JLabel label=GuiFactory.buildLabel("Location:"); // I18n
       line2Panel.add(label);
       _location=buildLocationCombobox();
       line2Panel.add(_location.getComboBox());
@@ -234,7 +235,7 @@ public class StorageFilterController implements ActionListener
     // Quality
     {
       JPanel qualityPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING));
-      qualityPanel.add(GuiFactory.buildLabel("Quality:"));
+      qualityPanel.add(GuiFactory.buildLabel("Quality:")); // I18n
       _quality=buildQualityCombobox();
       qualityPanel.add(_quality.getComboBox());
       line2Panel.add(qualityPanel);

@@ -13,7 +13,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import delta.common.ui.swing.GuiFactory;
-import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.ui.swing.tables.GenericTableController;
 import delta.common.ui.swing.windows.DefaultDisplayDialogController;
@@ -32,7 +31,7 @@ import delta.games.lotro.gui.character.status.tasks.table.TaskStatusTableControl
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
 import delta.games.lotro.gui.main.GlobalPreferences;
-import delta.games.lotro.gui.navigation.NavigatorFactory;
+import delta.games.lotro.gui.utils.NavigationUtils;
 import delta.games.lotro.lore.quests.QuestDescription;
 
 /**
@@ -80,7 +79,7 @@ public class TasksStatusWindowController extends DefaultDisplayDialogController<
   {
     JDialog dialog=super.build();
     dialog.setMinimumSize(new Dimension(1000,300));
-    dialog.setTitle("Tasks status");
+    dialog.setTitle("Tasks status"); // I18n
     dialog.pack();
     Dimension size=dialog.getSize();
     if (size.height>MAX_HEIGHT)
@@ -111,7 +110,7 @@ public class TasksStatusWindowController extends DefaultDisplayDialogController<
     _panelController=new TasksStatusPanelController(this,_tableController);
     JPanel tablePanel=_panelController.getPanel();
     // Build child controllers
-    _filterController=new TaskFilterController(_filter,this);
+    _filterController=new TaskFilterController(this,_filter,this);
     _statusFilterController=new AchievableStatusFilterController(_filter.getQuestStatusFilter(),this);
     _taskDeedsController=new TaskDeedsStatusPanelController();
     _taskDeedsController.update(_data.getCompletedTasksCount());
@@ -126,12 +125,12 @@ public class TasksStatusWindowController extends DefaultDisplayDialogController<
     JPanel statusPanel=GuiFactory.buildPanel(new GridBagLayout());
     // - deeds status
     JPanel taskDeedsPanel=_taskDeedsController.getPanel();
-    taskDeedsPanel.setBorder(GuiFactory.buildTitledBorder("Task Deeds"));
+    taskDeedsPanel.setBorder(GuiFactory.buildTitledBorder("Task Deeds")); // I18n
     c=new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     statusPanel.add(taskDeedsPanel,c);
     // - quests status
     JPanel taskQuestsPanel=_taskQuestsController.getPanel();
-    taskQuestsPanel.setBorder(GuiFactory.buildTitledBorder("Task Quests"));
+    taskQuestsPanel.setBorder(GuiFactory.buildTitledBorder("Task Quests")); // I18n
     c=new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     statusPanel.add(taskQuestsPanel,c);
 
@@ -149,12 +148,12 @@ public class TasksStatusWindowController extends DefaultDisplayDialogController<
     GridBagConstraints c=new GridBagConstraints(0,0,3,1,0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     // Task filter
     JPanel taskFilterPanel=_filterController.getPanel();
-    taskFilterPanel.setBorder(GuiFactory.buildTitledBorder("Task Filter"));
+    taskFilterPanel.setBorder(GuiFactory.buildTitledBorder("Task Filter")); // I18n
     panel.add(taskFilterPanel,c);
     c=new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     // Status filter
     JPanel statusFilterPanel=_statusFilterController.getPanel();
-    statusFilterPanel.setBorder(GuiFactory.buildTitledBorder("Status Filter"));
+    statusFilterPanel.setBorder(GuiFactory.buildTitledBorder("Status Filter")); // I18n
     panel.add(statusFilterPanel,c);
     // Stats button
     JButton b=GuiFactory.buildButton("Stats");
@@ -177,7 +176,7 @@ public class TasksStatusWindowController extends DefaultDisplayDialogController<
   private void initTable()
   {
     TypedProperties prefs=GlobalPreferences.getGlobalProperties("TasksStatus");
-    _tableController=new TaskStatusTableController(_data,prefs,_filter);
+    _tableController=new TaskStatusTableController(this,_data,prefs,_filter);
     ActionListener al=new ActionListener()
     {
       @Override
@@ -207,13 +206,8 @@ public class TasksStatusWindowController extends DefaultDisplayDialogController<
 
   private void showQuest(QuestDescription quest)
   {
-    WindowsManager windowsMgr=getWindowsManager();
-    int id=windowsMgr.getAll().size();
-    NavigatorWindowController window=NavigatorFactory.buildNavigator(TasksStatusWindowController.this,id);
     PageIdentifier ref=ReferenceConstants.getAchievableReference(quest);
-    window.navigateTo(ref);
-    window.show(false);
-    windowsMgr.registerWindow(window);
+    NavigationUtils.navigateTo(ref,this);
   }
 
   private TasksStatisticsWindowController getStatisticsWindow()

@@ -1,25 +1,30 @@
 package delta.games.lotro.gui.lore.quests;
 
+import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.utils.misc.IntegerHolder;
 import delta.games.lotro.character.skills.SkillDescription;
+import delta.games.lotro.common.Interactable;
+import delta.games.lotro.common.geo.PositionUtils;
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
+import delta.games.lotro.lore.agents.AgentDescription;
 import delta.games.lotro.lore.agents.EntityClassification;
-import delta.games.lotro.lore.agents.mobs.MobDescription;
-import delta.games.lotro.lore.agents.npcs.NpcDescription;
 import delta.games.lotro.lore.deeds.DeedDescription;
 import delta.games.lotro.lore.emotes.EmoteDescription;
-import delta.games.lotro.lore.geo.LandmarkDescription;
+import delta.games.lotro.lore.geo.landmarks.LandmarkDescription;
 import delta.games.lotro.lore.items.Item;
+import delta.games.lotro.lore.maps.LandDivision;
 import delta.games.lotro.lore.quests.Achievable;
 import delta.games.lotro.lore.quests.QuestDescription;
 import delta.games.lotro.lore.quests.dialogs.DialogElement;
+import delta.games.lotro.lore.quests.geo.AchievableGeoPoint;
 import delta.games.lotro.lore.quests.objectives.ConditionTarget;
 import delta.games.lotro.lore.quests.objectives.ConditionType;
 import delta.games.lotro.lore.quests.objectives.DefaultObjectiveCondition;
@@ -35,8 +40,9 @@ import delta.games.lotro.lore.quests.objectives.ItemTalkCondition;
 import delta.games.lotro.lore.quests.objectives.ItemUsedCondition;
 import delta.games.lotro.lore.quests.objectives.LandmarkDetectionCondition;
 import delta.games.lotro.lore.quests.objectives.LevelCondition;
+import delta.games.lotro.lore.quests.objectives.MobLocation;
+import delta.games.lotro.lore.quests.objectives.MobSelection;
 import delta.games.lotro.lore.quests.objectives.MonsterDiedCondition;
-import delta.games.lotro.lore.quests.objectives.MonsterDiedCondition.MobSelection;
 import delta.games.lotro.lore.quests.objectives.NpcCondition;
 import delta.games.lotro.lore.quests.objectives.NpcTalkCondition;
 import delta.games.lotro.lore.quests.objectives.NpcUsedCondition;
@@ -51,6 +57,7 @@ import delta.games.lotro.lore.reputation.FactionLevel;
 import delta.games.lotro.utils.Proxy;
 import delta.games.lotro.utils.gui.HtmlUtils;
 import delta.games.lotro.utils.gui.TextSanitizer;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Build for HTML code to display objectives.
@@ -60,16 +67,19 @@ public class ObjectivesDisplayBuilder
 {
   private static final Logger LOGGER=Logger.getLogger(ObjectivesDisplayBuilder.class);
 
-  private static final String COUNT_PATTERN="{***}/{***}";
+  private static final String COUNT_PATTERN="${NUMBER}/${TOTAL}";
 
   private boolean _html;
+  private AreaController _controller;
 
   /**
    * Constructor.
+   * @param controller Parent controller.
    * @param html Use HTML output, or raw output.
    */
-  public ObjectivesDisplayBuilder(boolean html)
+  public ObjectivesDisplayBuilder(AreaController controller, boolean html)
   {
+    _controller=controller;
     _html=html;
   }
 
@@ -88,8 +98,9 @@ public class ObjectivesDisplayBuilder
     for(Objective objective : objectives)
     {
       int index=objective.getIndex();
-      sb.append("<p><b>Objective #").append(index).append("</b></p>");
+      sb.append("<p><b>Objective #").append(index).append("</b></p>"); // I18n
       String text=objective.getDescription();
+      text=ContextRendering.render(_controller,text);
       if (text.length()>0)
       {
         sb.append("<p>").append(HtmlUtils.toHtml(text)).append("</p>");
@@ -103,7 +114,7 @@ public class ObjectivesDisplayBuilder
       // Dialogs
       for(DialogElement dialog : objective.getDialogs())
       {
-        QuestsHtmlUtils.buildHtmlForDialog(sb,dialog);
+        QuestsHtmlUtils.buildHtmlForDialog(_controller,sb,dialog);
       }
     }
   }
@@ -238,8 +249,7 @@ public class ObjectivesDisplayBuilder
 
   private void handleQuestCompleteCondition(StringBuilder sb, QuestCompleteCondition questComplete)
   {
-    int count=questComplete.getCount();
-    String progressOverride=getProgressOverrideWithCount(questComplete,count);
+    String progressOverride=getProgressOverrideWithCount(questComplete);
     Proxy<Achievable> proxy=questComplete.getProxy();
     String questCategory=questComplete.getQuestCategory();
 
@@ -248,12 +258,13 @@ public class ObjectivesDisplayBuilder
       if (proxy!=null)
       {
         String link=getAchievableLink(proxy,null);
-        sb.append("Complete ").append(link);
+        sb.append("Complete ").append(link); // I18n
       }
       else if (questCategory!=null)
       {
-        sb.append("Complete quests in category ").append(questCategory);
+        sb.append("Complete quests in category ").append(questCategory); // I18n
       }
+      int count=questComplete.getCount();
       if (count>1)
       {
         sb.append(" (x").append(count).append(')');
@@ -275,36 +286,41 @@ public class ObjectivesDisplayBuilder
 
   private void handleMonsterDiedCondition(StringBuilder sb, MonsterDiedCondition monsterDied)
   {
-    int count=monsterDied.getCount();
-    boolean hasProgressOverride=printProgressOverrideWithCount(sb,monsterDied,count);
+    boolean hasProgressOverride=printProgressOverrideWithCount(sb,monsterDied);
     if (!hasProgressOverride)
     {
       String mobName=monsterDied.getMobName();
       List<MobSelection> mobSelections=monsterDied.getMobSelections();
       if (mobName!=null)
       {
-        sb.append("Kill ").append(mobName);
+        sb.append("Kill ").append(mobName); // I18n
       }
       else
       {
         if (mobSelections.size()>0)
         {
-          sb.append("Kill ");
+          sb.append("Kill "); // I18n
           int index=0;
           for(MobSelection mobSelection : mobSelections)
           {
             EntityClassification what=mobSelection.getWhat();
-            String where=mobSelection.getWhere();
-            String whatStr=(what!=null)?what.getLabel():"Mob";
+            MobLocation where=mobSelection.getWhere();
+            String whatStr=(what!=null)?what.getLabel():"Mob"; // I18n
             if (index>0)
             {
-              sb.append(" or ");
+              sb.append(" or "); // I18n
             }
-            sb.append(whatStr).append(" in ").append(where);
+            sb.append(whatStr);
+            if (where!=null)
+            {
+              String whereStr=renderMobLocation(where);
+              sb.append(" in ").append(whereStr); // I18n
+            }
             index++;
           }
         }
       }
+      int count=monsterDied.getCount();
       if (count>1)
       {
         sb.append(" (x").append(count).append(')');
@@ -312,54 +328,93 @@ public class ObjectivesDisplayBuilder
     }
   }
 
+  private String renderMobLocation(MobLocation where)
+  {
+    String ret="";
+    // Mob division
+    String mobDivision=where.getMobDivision();
+    if (mobDivision!=null)
+    {
+      ret=mobDivision;
+    }
+    // Land division
+    LandDivision landDivision=where.getLandDivision();
+    if (landDivision!=null)
+    {
+      String landDivisionName=landDivision.getName();
+      if (ret.length()>0)
+      {
+        ret=ret+"/"+landDivisionName;
+      }
+      else
+      {
+        ret=landDivisionName;
+      }
+    }
+    // Landmark
+    LandmarkDescription landmark=where.getLandmark();
+    if (landmark!=null)
+    {
+      if (ret.length()>0)
+      {
+        ret=ret+"/"+landmark.getName();
+      }
+      else
+      {
+        ret=landmark.getName();
+      }
+    }
+    return ret;
+  }
+
   private void handleLandmarkDetectionCondition(StringBuilder sb, LandmarkDetectionCondition condition)
   {
     boolean hasProgressOverride=printProgressOverride(sb,condition);
     if (!hasProgressOverride)
     {
-      Proxy<LandmarkDescription> landmark=condition.getLandmarkProxy();
+      LandmarkDescription landmark=condition.getLandmark();
       if (landmark!=null)
       {
         String name=landmark.getName();
-        sb.append("Find ").append(name);
+        sb.append("Find ").append(name); // I18n
       }
     }
   }
 
   private void handleInventoryItemCondition(StringBuilder sb, InventoryItemCondition condition)
   {
-    handleItemCondition(sb,condition,"Get");
+    handleItemCondition(sb,condition,"Get"); // I18n
   }
 
   private void handleItemUsedCondition(StringBuilder sb, ItemUsedCondition condition)
   {
-    handleItemCondition(sb,condition,"Use");
+    handleItemCondition(sb,condition,"Use"); // I18n
   }
 
   private void handleExternalInventoryItemCondition(StringBuilder sb, ExternalInventoryItemCondition condition)
   {
-    handleItemCondition(sb,condition,"Obtain");
+    handleItemCondition(sb,condition,"Obtain"); // I18n
   }
 
   private void handleItemTalkCondition(StringBuilder sb, ItemTalkCondition condition)
   {
-    handleItemCondition(sb,condition,"Use");
+    handleItemCondition(sb,condition,"Use"); // I18n
   }
 
   private void handleItemCondition(StringBuilder sb, ItemCondition condition, String verb)
   {
-    int count=condition.getCount();
-    boolean hasProgressOverride=printProgressOverrideWithCount(sb,condition,count);
+    boolean hasProgressOverride=printProgressOverrideWithCount(sb,condition);
     if (!hasProgressOverride)
     {
-      Proxy<Item> itemProxy=condition.getProxy();
-      if (itemProxy!=null)
+      Item item=condition.getItem();
+      if (item!=null)
       {
         sb.append(verb).append(' ');
-        String name=itemProxy.getName();
+        String rawName=item.getName();
+        String name=ContextRendering.render(_controller,rawName);
         if (_html)
         {
-          PageIdentifier to=ReferenceConstants.getItemReference(itemProxy.getId());
+          PageIdentifier to=ReferenceConstants.getItemReference(item.getIdentifier());
           String toStr=to.getFullAddress();
           HtmlUtils.printLink(sb,toStr,name);
         }
@@ -367,6 +422,7 @@ public class ObjectivesDisplayBuilder
         {
           sb.append(name);
         }
+        int count=condition.getCount();
         if (count>1)
         {
           sb.append(" x").append(count);
@@ -380,35 +436,34 @@ public class ObjectivesDisplayBuilder
     boolean hasProgressOverride=printProgressOverride(sb,condition);
     if (!hasProgressOverride)
     {
-      Proxy<Faction> factionProxy=condition.getProxy();
+      Faction faction=condition.getFaction();
       int tier=condition.getTier();
-      if (factionProxy!=null)
+      if (faction!=null)
       {
-        String name=factionProxy.getName();
+        String name=faction.getName();
         String levelName="?";
-        Faction faction=factionProxy.getObject();
-        if (faction!=null)
+        FactionLevel level=faction.getLevelByTier(tier);
+        if (level!=null)
         {
-          FactionLevel level=faction.getLevelByTier(tier);
-          levelName=(level!=null)?level.getName():levelName;
+          levelName=ContextRendering.render(_controller,level.getName());
         }
-        sb.append("Reach reputation '").append(levelName);
-        sb.append("' (tier ").append(tier).append(") with ").append(name);
+        sb.append("Reach reputation '").append(levelName); // I18n
+        sb.append("' (tier ").append(tier).append(") with ").append(name); // I18n
       }
     }
   }
 
   private void handleSkillUsedCondition(StringBuilder sb, SkillUsedCondition condition)
   {
-    int count=condition.getCount();
-    boolean hasProgressOverride=printProgressOverrideWithCount(sb,condition,count);
+    boolean hasProgressOverride=printProgressOverrideWithCount(sb,condition);
     if (!hasProgressOverride)
     {
-      Proxy<SkillDescription> skillProxy=condition.getProxy();
-      if (skillProxy!=null)
+      SkillDescription skill=condition.getSkill();
+      if (skill!=null)
       {
-        String name=skillProxy.getName();
-        sb.append("Use skill ").append(name);
+        String name=skill.getName();
+        sb.append("Use skill ").append(name); // I18n
+        int count=condition.getCount();
         if (count>1)
         {
           sb.append(" x").append(count);
@@ -416,7 +471,7 @@ public class ObjectivesDisplayBuilder
         Integer maxPerDay=condition.getMaxPerDay();
         if (maxPerDay!=null)
         {
-          sb.append(" (max ").append(maxPerDay).append("/day)");
+          sb.append(" (max ").append(maxPerDay).append("/day)"); // I18n
         }
       }
       else
@@ -441,17 +496,27 @@ public class ObjectivesDisplayBuilder
     boolean hasProgressOverride=printProgressOverride(sb,condition);
     if (!hasProgressOverride)
     {
-      Proxy<NpcDescription> npcProxy=condition.getProxy();
-      if (npcProxy!=null)
+      Interactable npc=condition.getNpc();
+      if (npc!=null)
       {
-        String name=npcProxy.getName();
+        String name=npc.getName();
         String action=condition.getAction();
         sb.append(action).append(' ').append(name);
       }
       else
       {
-        LOGGER.warn("No NPC and no progress override");
-        sb.append("No NPC and no progress override");
+        List<AchievableGeoPoint> points=condition.getPoints();
+        if (!points.isEmpty())
+        {
+          String action=condition.getAction();
+          sb.append(action).append(" NPC at "); // I18n
+          sb.append(getPositions(points));
+        }
+        else
+        {
+          LOGGER.warn("No NPC and no progress override");
+          sb.append("No NPC and no progress override");
+        }
       }
     }
   }
@@ -462,7 +527,7 @@ public class ObjectivesDisplayBuilder
     if (!hasProgressOverride)
     {
       int level=condition.getLevel();
-      sb.append("Reach level ").append(level);
+      sb.append("Reach level ").append(level); // I18n
     }
   }
 
@@ -475,7 +540,7 @@ public class ObjectivesDisplayBuilder
       if (proxy!=null)
       {
         String link=getAchievableLink(proxy,null);
-        sb.append("Have ").append(link).append(" bestowed");
+        sb.append("Have ").append(link).append(" bestowed"); // I18n
       }
     }
   }
@@ -498,11 +563,22 @@ public class ObjectivesDisplayBuilder
       String target=getTarget(condition.getTarget());
       if (target!=null)
       {
-        sb.append("Go near ").append(target);
+        sb.append("Go near ").append(target); // I18n
       }
       else
       {
-        LOGGER.warn("No NPC, no mob and no progress override");
+        List<AchievableGeoPoint> points=condition.getPoints();
+        if (!points.isEmpty())
+        {
+          String action=condition.getAction();
+          sb.append(action).append("Go near "); // I18n
+          sb.append(getPositions(points));
+        }
+        else
+        {
+          LOGGER.warn("No NPC, no mob and no progress override");
+          sb.append("No NPC, no mob and no progress override"); // I18n
+        }
       }
     }
   }
@@ -512,9 +588,9 @@ public class ObjectivesDisplayBuilder
     boolean hasProgressOverride=printProgressOverride(sb,condition);
     if (!hasProgressOverride)
     {
-      Proxy<EmoteDescription> emote=condition.getProxy();
+      EmoteDescription emote=condition.getEmote();
       String command=emote.getName();
-      sb.append("Perform emote ").append(command);
+      sb.append("Perform emote ").append(command); // I18n
       int count=condition.getCount();
       if (count>1)
       {
@@ -523,13 +599,13 @@ public class ObjectivesDisplayBuilder
       Integer maxDaily=condition.getMaxDaily();
       if (maxDaily!=null)
       {
-        sb.append(" (max ").append(maxDaily).append("/day");
+        sb.append(" (max ").append(maxDaily).append("/day"); // I18n
       }
       ConditionTarget target=condition.getTarget();
       String targetLabel=getTarget(target);
       if (targetLabel!=null)
       {
-        sb.append(" on ");
+        sb.append(" on "); // I18n
         sb.append(targetLabel);
       }
     }
@@ -540,15 +616,10 @@ public class ObjectivesDisplayBuilder
     String ret=null;
     if (target!=null)
     {
-      Proxy<NpcDescription> npcProxy=target.getNpcProxy();
-      Proxy<MobDescription> mobProxy=target.getMobProxy();
-      if (npcProxy!=null)
+      AgentDescription agent=target.getAgent();
+      if (agent!=null)
       {
-        ret=npcProxy.getName();
-      }
-      else if (mobProxy!=null)
-      {
-        ret=mobProxy.getName();
+        ret=agent.getName();
       }
     }
     return ret;
@@ -563,9 +634,10 @@ public class ObjectivesDisplayBuilder
       if (text==null)
       {
         boolean isQuest=(achievable instanceof QuestDescription);
-        String type=isQuest?"quest ":"deed ";
+        String type=isQuest?"quest ":"deed "; // I18n
         sb.append(type);
         text=achievable.getName();
+        text=ContextRendering.render(_controller,text);
       }
       if (_html)
       {
@@ -582,7 +654,7 @@ public class ObjectivesDisplayBuilder
     else
     {
       LOGGER.warn("Could not resolve deed/quest ID="+proxy.getId()+", name="+proxy.getName());
-      sb.append("quest/deed "+proxy.getId());
+      sb.append("quest/deed "+proxy.getId()); // I18n
     }
     return sb.toString();
   }
@@ -597,7 +669,7 @@ public class ObjectivesDisplayBuilder
     boolean hasProgressOverride=printProgressOverride(sb,condition);
     if (!hasProgressOverride)
     {
-      sb.append("Missing data!!");
+      sb.append("Missing data!!"); // I18n
       ConditionType type=condition.getType();
       IntegerHolder counter=_counters.get(type);
       if (counter==null)
@@ -615,9 +687,9 @@ public class ObjectivesDisplayBuilder
     return ((progressOverride!=null) && (progressOverride.length()>0));
   }
 
-  private boolean printProgressOverrideWithCount(StringBuilder sb, ObjectiveCondition condition, int count)
+  private boolean printProgressOverrideWithCount(StringBuilder sb, ObjectiveCondition condition)
   {
-    String progressOverride=getProgressOverrideWithCount(condition,count);
+    String progressOverride=getProgressOverrideWithCount(condition);
     if (progressOverride!=null)
     {
       if (_html)
@@ -633,8 +705,9 @@ public class ObjectivesDisplayBuilder
     return false;
   }
 
-  private String getProgressOverrideWithCount(ObjectiveCondition condition, int count)
+  private String getProgressOverrideWithCount(ObjectiveCondition condition)
   {
+    int count=condition.getCount();
     String progressOverride=condition.getProgressOverride();
     if ((progressOverride!=null) && (progressOverride.length()>0))
     {
@@ -651,6 +724,7 @@ public class ObjectivesDisplayBuilder
         }
       }
     }
+    progressOverride=ContextRendering.render(_controller,progressOverride);
     return progressOverride;
   }
 
@@ -659,6 +733,7 @@ public class ObjectivesDisplayBuilder
     String progressOverride=condition.getProgressOverride();
     if ((progressOverride!=null) && (progressOverride.length()>0))
     {
+      progressOverride=getProgressOverrideWithCount(condition);
       if (_html)
       {
         sb.append(HtmlUtils.toHtml(progressOverride));
@@ -678,6 +753,7 @@ public class ObjectivesDisplayBuilder
     String loreInfo=condition.getLoreInfo();
     if ((loreInfo!=null) && (loreInfo.trim().length()>0))
     {
+      loreInfo=ContextRendering.render(_controller,loreInfo);
       if (_html)
       {
         sb.append("<p><i>").append(HtmlUtils.toHtml(loreInfo)).append("</i></p>");
@@ -687,5 +763,20 @@ public class ObjectivesDisplayBuilder
         sb.append(loreInfo);
       }
     }
+  }
+
+  private String getPositions(List<AchievableGeoPoint> points)
+  {
+    StringBuilder sb=new StringBuilder();
+    int index=0;
+    for(AchievableGeoPoint point : points)
+    {
+      Point2D.Float lonLat=point.getLonLat();
+      String positionStr=PositionUtils.getLabel(lonLat.y,lonLat.x,null);
+      if (index>0) sb.append(" ; ");
+      sb.append(positionStr);
+      index++;
+    }
+    return sb.toString();
   }
 }

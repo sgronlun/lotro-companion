@@ -5,19 +5,23 @@ import java.util.List;
 import delta.common.utils.BooleanTools;
 import delta.common.utils.NumericTools;
 import delta.common.utils.misc.TypedProperties;
-import delta.games.lotro.common.CharacterClass;
-import delta.games.lotro.common.Race;
+import delta.games.lotro.character.classes.AbstractClassDescription;
+import delta.games.lotro.character.classes.ClassesManager;
+import delta.games.lotro.character.races.RaceDescription;
+import delta.games.lotro.character.races.RacesManager;
+import delta.games.lotro.common.enums.Genus;
 import delta.games.lotro.common.enums.ItemClass;
 import delta.games.lotro.common.enums.LotroEnum;
 import delta.games.lotro.common.enums.LotroEnumsRegistry;
 import delta.games.lotro.common.stats.StatDescription;
 import delta.games.lotro.common.stats.StatsRegistry;
 import delta.games.lotro.lore.items.ArmourType;
+import delta.games.lotro.lore.items.DamageType;
 import delta.games.lotro.lore.items.ItemQuality;
 import delta.games.lotro.lore.items.WeaponType;
 import delta.games.lotro.lore.items.filters.ArmourTypeFilter;
 import delta.games.lotro.lore.items.filters.CharacterProficienciesFilter;
-import delta.games.lotro.lore.items.filters.EssenceTierFilter;
+import delta.games.lotro.lore.items.filters.DamageTypeFilter;
 import delta.games.lotro.lore.items.filters.ItemCharacterLevelFilter;
 import delta.games.lotro.lore.items.filters.ItemClassFilter;
 import delta.games.lotro.lore.items.filters.ItemEquipmentLocationFilter;
@@ -28,6 +32,9 @@ import delta.games.lotro.lore.items.filters.ItemRequiredClassFilter;
 import delta.games.lotro.lore.items.filters.ItemRequiredRaceFilter;
 import delta.games.lotro.lore.items.filters.ItemStatFilter;
 import delta.games.lotro.lore.items.filters.LegendaryItemFilter;
+import delta.games.lotro.lore.items.filters.ScalableItemFilter;
+import delta.games.lotro.lore.items.filters.TierFilter;
+import delta.games.lotro.lore.items.filters.WeaponSlayerFilter;
 import delta.games.lotro.lore.items.filters.WeaponTypeFilter;
 
 /**
@@ -40,18 +47,21 @@ public class ItemChooserFilterIo
   private static final String CURRENT_CHAR_CLASS_FILTER_ENABLED="classFilterEnabled";
   private static final String CURRENT_CHAR_PROFICIENCIES_FILTER_ENABLED="proficienciesFilterEnabled";
   private static final String CURRENT_CHAR_LEVEL_FILTER_ENABLED="levelFilterEnabled";
-  private static final String ESSENCE_TIER="essenceTier";
+  private static final String TIER="tier";
   private static final String NAME_PATTERN="namePattern";
   private static final String CATEGORY="category";
   private static final String QUALITY="quality";
   private static final String LEGENDARY="legendary";
   private static final String LOCATION="location";
   private static final String WEAPON_TYPE="weaponType";
+  private static final String DAMAGE_TYPE="damageType";
+  private static final String SLAYER_GENUS="slayerGenus";
   private static final String ARMOUR_TYPE="armourType";
   private static final String SHIELD_TYPE="shieldType";
   private static final String STAT_SEED="stat.";
   private static final String MIN_ITEM_LEVEL="minItemLevel";
   private static final String MAX_ITEM_LEVEL="maxItemLevel";
+  private static final String SCALABLE="scalable";
   // Generic class/race filters
   private static final String GENERIC_CLASS_FILTER="classFilter";
   private static final String GENERIC_RACE_FILTER="raceFilter";
@@ -88,11 +98,11 @@ public class ItemChooserFilterIo
       boolean enabled=props.getBooleanProperty(CURRENT_CHAR_LEVEL_FILTER_ENABLED,levelFilter.isEnabled());
       levelFilter.setEnabled(enabled);
     }
-    // Essence Tier
-    EssenceTierFilter tierFilter=filter.getEssenceTierFilter();
+    // Tier
+    TierFilter tierFilter=filter.getTierFilter();
     if (tierFilter!=null)
     {
-      Integer tier=props.getIntegerProperty(ESSENCE_TIER);
+      Integer tier=props.getIntegerProperty(TIER);
       tierFilter.setTier(tier);
     }
     // Name
@@ -161,6 +171,23 @@ public class ItemChooserFilterIo
       WeaponType weaponType=WeaponType.getWeaponTypeByKey(weaponTypeKey);
       weaponTypeFilter.setWeaponType(weaponType);
     }
+    // Damage type
+    DamageTypeFilter damageTypeFilter=filter.getDamageTypeFilter();
+    if (damageTypeFilter!=null)
+    {
+      String damageTypeKey=props.getStringProperty(DAMAGE_TYPE,null);
+      DamageType damageType=DamageType.getDamageTypeByKey(damageTypeKey);
+      damageTypeFilter.setDamageType(damageType);
+    }
+    // Slayer genus
+    WeaponSlayerFilter slayerGenusFilter=filter.getSlayerGenusFilter();
+    if (slayerGenusFilter!=null)
+    {
+      int slayerGenusCode=props.getIntProperty(SLAYER_GENUS,-1);
+      LotroEnum<Genus> genusEnum=LotroEnumsRegistry.getInstance().get(Genus.class);
+      Genus genus=genusEnum.getEntry(slayerGenusCode);
+      slayerGenusFilter.setGenus(genus);
+    }
     // Armour type
     ArmourTypeFilter armourTypeFilter=filter.getArmourTypeFilter();
     if (armourTypeFilter!=null)
@@ -198,20 +225,32 @@ public class ItemChooserFilterIo
       Integer maxLevel=props.getIntegerProperty(MAX_ITEM_LEVEL);
       itemLevelFilter.setRange(minLevel,maxLevel);
     }
-    // Character class
+    // Scalable
+    ScalableItemFilter scalableFilter=filter.getScalableFilter();
+    if (scalableFilter!=null)
+    {
+      String scalableKey=props.getStringProperty(SCALABLE,null);
+      Boolean scalable=null;
+      if (scalableKey!=null)
+      {
+        scalable=BooleanTools.parseBoolean(scalableKey);
+      }
+      scalableFilter.setScalable(scalable);
+    }
+    // Character/monster class
     ItemRequiredClassFilter genericClassFilter=filter.getGenericClassFilter();
     if (genericClassFilter!=null)
     {
       String classFilterKey=props.getStringProperty(GENERIC_CLASS_FILTER,null);
-      CharacterClass characterClass=CharacterClass.getByKey(classFilterKey);
-      genericClassFilter.setCharacterClass(characterClass);
+      AbstractClassDescription clazz=ClassesManager.getInstance().getClassByKey(classFilterKey);
+      genericClassFilter.setClass(clazz);
     }
     // Race
     ItemRequiredRaceFilter genericRaceFilter=filter.getGenericRaceFilter();
     if (genericRaceFilter!=null)
     {
       String raceFilterKey=props.getStringProperty(GENERIC_RACE_FILTER,null);
-      Race race=Race.getByKey(raceFilterKey);
+      RaceDescription race=RacesManager.getInstance().getByKey(raceFilterKey);
       genericRaceFilter.setRace(race);
     }
   }
@@ -241,18 +280,18 @@ public class ItemChooserFilterIo
     {
       props.setStringProperty(CURRENT_CHAR_LEVEL_FILTER_ENABLED,Boolean.toString(levelFilter.isEnabled()));
     }
-    // Essence Tier
-    EssenceTierFilter tierFilter=filter.getEssenceTierFilter();
+    // Tier
+    TierFilter tierFilter=filter.getTierFilter();
     if (tierFilter!=null)
     {
       Integer tier=tierFilter.getTier();
       if (tier!=null)
       {
-        props.setIntProperty(ESSENCE_TIER,tier.intValue());
+        props.setIntProperty(TIER,tier.intValue());
       }
       else
       {
-        props.removeProperty(ESSENCE_TIER);
+        props.removeProperty(TIER);
       }
     }
     // Name
@@ -322,6 +361,34 @@ public class ItemChooserFilterIo
       else
       {
         props.removeProperty(WEAPON_TYPE);
+      }
+    }
+    // Damage type
+    DamageTypeFilter damageTypeFilter=filter.getDamageTypeFilter();
+    if (damageTypeFilter!=null)
+    {
+      DamageType damageType=damageTypeFilter.getDamageType();
+      if (damageType!=null)
+      {
+        props.setStringProperty(DAMAGE_TYPE,damageType.getKey());
+      }
+      else
+      {
+        props.removeProperty(DAMAGE_TYPE);
+      }
+    }
+    // Damage type
+    WeaponSlayerFilter slayerGenusFilter=filter.getSlayerGenusFilter();
+    if (slayerGenusFilter!=null)
+    {
+      Genus genus=slayerGenusFilter.getGenus();
+      if (genus!=null)
+      {
+        props.setIntProperty(SLAYER_GENUS,genus.getCode());
+      }
+      else
+      {
+        props.removeProperty(SLAYER_GENUS);
       }
     }
     // Armour type
@@ -394,14 +461,28 @@ public class ItemChooserFilterIo
         props.removeProperty(MAX_ITEM_LEVEL);
       }
     }
-    // Character class
+    // Scalable
+    ScalableItemFilter scalableFilter=filter.getScalableFilter();
+    if (scalableFilter!=null)
+    {
+      Boolean scalable=scalableFilter.getScalable();
+      if (scalable!=null)
+      {
+        props.setStringProperty(SCALABLE,scalable.toString());
+      }
+      else
+      {
+        props.removeProperty(SCALABLE);
+      }
+    }
+    // Character/monster class
     ItemRequiredClassFilter genericClassFilter=filter.getGenericClassFilter();
     if (genericClassFilter!=null)
     {
-      CharacterClass characterClass=genericClassFilter.getCharacterClass();
-      if (characterClass!=null)
+      AbstractClassDescription clazz=genericClassFilter.getCharacterClass();
+      if (clazz!=null)
       {
-        props.setStringProperty(GENERIC_CLASS_FILTER,characterClass.getKey());
+        props.setStringProperty(GENERIC_CLASS_FILTER,clazz.getKey());
       }
       else
       {
@@ -412,7 +493,7 @@ public class ItemChooserFilterIo
     ItemRequiredRaceFilter genericRaceFilter=filter.getGenericRaceFilter();
     if (genericRaceFilter!=null)
     {
-      Race race=genericRaceFilter.getRace();
+      RaceDescription race=genericRaceFilter.getRace();
       if (race!=null)
       {
         props.setStringProperty(GENERIC_RACE_FILTER,race.getKey());

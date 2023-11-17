@@ -10,11 +10,12 @@ import javax.swing.JPanel;
 import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.combobox.ItemSelectionListener;
-import delta.games.lotro.common.CharacterClass;
-import delta.games.lotro.common.Race;
+import delta.games.lotro.character.classes.ClassDescription;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.common.requirements.filters.UsageRequirementFilter;
 import delta.games.lotro.gui.character.summary.CharacterUiUtils;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 
 /**
  * Controller for a requirements filter edition panel.
@@ -30,8 +31,8 @@ public class RequirementsFilterController
   private JPanel _panel;
 
   // Controllers
-  private ComboBoxController<CharacterClass> _class;
-  private ComboBoxController<Race> _race;
+  private ComboBoxController<ClassDescription> _class;
+  private ComboBoxController<RaceDescription> _race;
 
   /**
    * Constructor.
@@ -82,10 +83,10 @@ public class RequirementsFilterController
   public void setFilter()
   {
     // - class
-    CharacterClass requiredClass=_filter.getCharacterClass();
+    ClassDescription requiredClass=_filter.getCharacterClass();
     _class.selectItem(requiredClass);
     // - race
-    Race requiredRace=_filter.getRace();
+    RaceDescription requiredRace=_filter.getRace();
     _race.selectItem(requiredRace);
   }
 
@@ -98,11 +99,11 @@ public class RequirementsFilterController
     {
       JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
       // Class
-      linePanel.add(GuiFactory.buildLabel("Class:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("requirements.filter.class")));
       _class=buildCharacterClassCombobox();
       linePanel.add(_class.getComboBox());
       // Race
-      linePanel.add(GuiFactory.buildLabel("Race:"));
+      linePanel.add(GuiFactory.buildLabel(Labels.getFieldLabel("requirements.filter.race")));
       _race=buildRaceCombobox();
       linePanel.add(_race.getComboBox());
       c=new GridBagConstraints(0,y,1,1,1.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,0,5,0),0,0);
@@ -113,13 +114,13 @@ public class RequirementsFilterController
     return panel;
   }
 
-  private ComboBoxController<CharacterClass> buildCharacterClassCombobox()
+  private ComboBoxController<ClassDescription> buildCharacterClassCombobox()
   {
-    ComboBoxController<CharacterClass> combo=CharacterUiUtils.buildClassCombo(true);
-    ItemSelectionListener<CharacterClass> listener=new ItemSelectionListener<CharacterClass>()
+    ComboBoxController<ClassDescription> combo=CharacterUiUtils.buildCharacterClassCombo(true);
+    ItemSelectionListener<ClassDescription> listener=new ItemSelectionListener<ClassDescription>()
     {
       @Override
-      public void itemSelected(CharacterClass requiredClass)
+      public void itemSelected(ClassDescription requiredClass)
       {
         _filter.setCharacterClass(requiredClass);
         filterUpdated();
@@ -129,13 +130,13 @@ public class RequirementsFilterController
     return combo;
   }
 
-  private ComboBoxController<Race> buildRaceCombobox()
+  private ComboBoxController<RaceDescription> buildRaceCombobox()
   {
-    ComboBoxController<Race> combo=CharacterUiUtils.buildRaceCombo(true);
-    ItemSelectionListener<Race> listener=new ItemSelectionListener<Race>()
+    ComboBoxController<RaceDescription> combo=CharacterUiUtils.buildRaceCombo(true);
+    ItemSelectionListener<RaceDescription> listener=new ItemSelectionListener<RaceDescription>()
     {
       @Override
-      public void itemSelected(Race requiredRace)
+      public void itemSelected(RaceDescription requiredRace)
       {
         _filter.setRace(requiredRace);
         filterUpdated();

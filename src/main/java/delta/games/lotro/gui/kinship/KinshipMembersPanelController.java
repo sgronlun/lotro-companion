@@ -16,6 +16,7 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.tables.TableColumnsChooserController;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.kinship.KinshipMember;
 
 /**
@@ -59,7 +60,7 @@ public class KinshipMembersPanelController implements FilterUpdateListener
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildPanel(new BorderLayout());
-    TitledBorder itemsFrameBorder=GuiFactory.buildTitledBorder("Members");
+    TitledBorder itemsFrameBorder=GuiFactory.buildTitledBorder("Members"); // I18n
     panel.setBorder(itemsFrameBorder);
 
     // Table
@@ -71,7 +72,7 @@ public class KinshipMembersPanelController implements FilterUpdateListener
     _statsLabel=GuiFactory.buildLabel("-");
     statsPanel.add(_statsLabel);
     // Button to choose columns
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     ActionListener al=new ActionListener()
     {
       @Override
@@ -102,15 +103,7 @@ public class KinshipMembersPanelController implements FilterUpdateListener
   {
     int nbFiltered=_tableController.getNbFilteredItems();
     int nbItems=_tableController.getNbItems();
-    String label="";
-    if (nbFiltered==nbItems)
-    {
-      label="Member(s): "+nbItems;
-    }
-    else
-    {
-      label="Member(s): "+nbFiltered+"/"+nbItems;
-    }
+    String label=Labels.getCountLabel("Member(s)",nbFiltered,nbItems); // I18n
     _statsLabel.setText(label);
   }
 

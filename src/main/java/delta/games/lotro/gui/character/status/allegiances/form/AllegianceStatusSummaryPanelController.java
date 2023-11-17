@@ -56,7 +56,7 @@ public class AllegianceStatusSummaryPanelController
     JProgressBar levels=buildProgressBar();
     Integer currentLevel=_status.getCurrentLevel();
     int levelToShow=currentLevel.intValue();
-    int maxLevel=_status.getAllegiance().getDeeds().size();
+    int maxLevel=_status.getMaxLevel();
     setBar(levels,0,maxLevel,levelToShow);
     // - points
     int currentPoints=_status.getPointsEarned();
@@ -67,12 +67,12 @@ public class AllegianceStatusSummaryPanelController
     JPanel panel=GuiFactory.buildPanel(new GridBagLayout());
     // - level
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
-    panel.add(GuiFactory.buildLabel("Level:"),c);
+    panel.add(GuiFactory.buildLabel("Level:"),c); // I18n
     c=new GridBagConstraints(1,0,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,0,5,5),0,0);
     panel.add(levels,c);
     // - points
     c=new GridBagConstraints(0,1,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
-    panel.add(GuiFactory.buildLabel("Points:"),c);
+    panel.add(GuiFactory.buildLabel("Points:"),c); // I18n
     c=new GridBagConstraints(1,1,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,0,5,5),0,0);
     panel.add(points,c);
     return panel;

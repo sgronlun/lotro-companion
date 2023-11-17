@@ -19,10 +19,14 @@ import delta.common.ui.swing.combobox.ItemSelectionListener;
 import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
+import delta.games.lotro.common.enums.MountType;
+import delta.games.lotro.common.enums.SkillCharacteristicSubCategory;
+import delta.games.lotro.common.filters.NamedFilter;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.collections.mounts.MountDescription;
 import delta.games.lotro.lore.collections.mounts.filters.MountCategoryFilter;
-import delta.games.lotro.lore.collections.mounts.filters.MountNameFilter;
+import delta.games.lotro.lore.collections.mounts.filters.MountTypeFilter;
 
 /**
  * Controller for a mount filter edition panel.
@@ -37,7 +41,8 @@ public class MountFilterController implements ActionListener
   private JButton _reset;
   // -- Mount attributes UI --
   private JTextField _contains;
-  private ComboBoxController<String> _category;
+  private ComboBoxController<SkillCharacteristicSubCategory> _category;
+  private ComboBoxController<MountType> _mountType;
   // Controllers
   private DynamicTextEditionController _textController;
   private FilterUpdateListener _filterUpdateListener;
@@ -92,6 +97,7 @@ public class MountFilterController implements ActionListener
     if (source==_reset)
     {
       _category.selectItem(null);
+      _mountType.selectItem(null);
       _contains.setText("");
     }
   }
@@ -99,7 +105,7 @@ public class MountFilterController implements ActionListener
   private void setFilter()
   {
     // Name
-    MountNameFilter nameFilter=_filter.getNameFilter();
+    NamedFilter<MountDescription> nameFilter=_filter.getNameFilter();
     String contains=nameFilter.getPattern();
     if (contains!=null)
     {
@@ -107,8 +113,12 @@ public class MountFilterController implements ActionListener
     }
     // Category
     MountCategoryFilter categoryFilter=_filter.getCategoryFilter();
-    String category=categoryFilter.getCategory();
+    SkillCharacteristicSubCategory category=categoryFilter.getCategory();
     _category.selectItem(category);
+    // Mount type
+    MountTypeFilter typeFilter=_filter.getTypeFilter();
+    MountType type=typeFilter.getType();
+    _mountType.selectItem(type);
   }
 
   private JPanel build()
@@ -119,13 +129,13 @@ public class MountFilterController implements ActionListener
 
     // Mount attributes
     JPanel mountPanel=buildMountPanel();
-    Border border=GuiFactory.buildTitledBorder("Mount");
+    Border border=GuiFactory.buildTitledBorder("Mount"); // 18n
     mountPanel.setBorder(border);
     GridBagConstraints c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(mountPanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,y,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,5),0,0);
     panel.add(_reset,c);
@@ -142,7 +152,7 @@ public class MountFilterController implements ActionListener
     JPanel line1Panel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Label filter
     {
-      line1Panel.add(GuiFactory.buildLabel("Name filter:"));
+      line1Panel.add(GuiFactory.buildLabel("Name filter:")); // 18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(20);
       line1Panel.add(_contains);
@@ -152,7 +162,7 @@ public class MountFilterController implements ActionListener
         public void textChanged(String newText)
         {
           if (newText.length()==0) newText=null;
-          MountNameFilter nameFilter=_filter.getNameFilter();
+          NamedFilter<MountDescription> nameFilter=_filter.getNameFilter();
           nameFilter.setPattern(newText);
           filterUpdated();
         }
@@ -161,13 +171,13 @@ public class MountFilterController implements ActionListener
     }
     // Category
     {
-      JLabel label=GuiFactory.buildLabel("Category:");
+      JLabel label=GuiFactory.buildLabel("Category:"); // 18n
       line1Panel.add(label);
       _category=MountUiUtils.buildCategoryCombo();
-      ItemSelectionListener<String> categoryListener=new ItemSelectionListener<String>()
+      ItemSelectionListener<SkillCharacteristicSubCategory> categoryListener=new ItemSelectionListener<SkillCharacteristicSubCategory>()
       {
         @Override
-        public void itemSelected(String category)
+        public void itemSelected(SkillCharacteristicSubCategory category)
         {
           MountCategoryFilter categoryFilter=_filter.getCategoryFilter();
           categoryFilter.setCategory(category);
@@ -176,6 +186,24 @@ public class MountFilterController implements ActionListener
       };
       _category.addListener(categoryListener);
       line1Panel.add(_category.getComboBox());
+    }
+    // Type
+    {
+      JLabel label=GuiFactory.buildLabel("Type:"); // 18n
+      line1Panel.add(label);
+      _mountType=MountUiUtils.buildTypeCombo();
+      ItemSelectionListener<MountType> typeListener=new ItemSelectionListener<MountType>()
+      {
+        @Override
+        public void itemSelected(MountType type)
+        {
+          MountTypeFilter typeFilter=_filter.getTypeFilter();
+          typeFilter.setType(type);
+          filterUpdated();
+        }
+      };
+      _mountType.addListener(typeListener);
+      line1Panel.add(_mountType.getComboBox());
     }
     GridBagConstraints c=new GridBagConstraints(0,y,1,1,1.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,5,0),0,0);
     panel.add(line1Panel,c);
@@ -207,6 +235,11 @@ public class MountFilterController implements ActionListener
     {
       _category.dispose();
       _category=null;
+    }
+    if (_mountType!=null)
+    {
+      _mountType.dispose();
+      _mountType=null;
     }
     _contains=null;
     _reset=null;

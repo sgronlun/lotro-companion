@@ -18,6 +18,7 @@ import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.status.relics.RelicsInventoryEntry;
 import delta.games.lotro.gui.character.status.relics.table.RelicsInventoryTableController;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 
 /**
  * Controller the relics inventory display panel.
@@ -60,8 +61,8 @@ public class RelicsInventoryPanelController implements FilterUpdateListener
   private JPanel build()
   {
     JPanel panel=GuiFactory.buildPanel(new BorderLayout());
-    TitledBorder itemsFrameBorder=GuiFactory.buildTitledBorder("Status of tasks");
-    panel.setBorder(itemsFrameBorder);
+    TitledBorder border=GuiFactory.buildTitledBorder("Status of relics"); // I18n
+    panel.setBorder(border);
 
     // Table
     JTable table=_tableController.getTable();
@@ -72,7 +73,7 @@ public class RelicsInventoryPanelController implements FilterUpdateListener
     _statsLabel=GuiFactory.buildLabel("-");
     statsPanel.add(_statsLabel);
     // - choose columns button
-    JButton choose=GuiFactory.buildButton("Choose columns...");
+    JButton choose=GuiFactory.buildButton(Labels.getLabel("shared.chooseColumns.button"));
     ActionListener al=new ActionListener()
     {
       @Override
@@ -101,15 +102,7 @@ public class RelicsInventoryPanelController implements FilterUpdateListener
   {
     int nbFiltered=_tableController.getNbFilteredItems();
     int nbItems=_tableController.getNbItems();
-    String label="";
-    if (nbFiltered==nbItems)
-    {
-      label="Relic(s): "+nbItems;
-    }
-    else
-    {
-      label="Relic(s): "+nbFiltered+"/"+nbItems;
-    }
+    String label=Labels.getCountLabel("Relic(s)",nbFiltered,nbItems); // I18n
     _statsLabel.setText(label);
   }
 

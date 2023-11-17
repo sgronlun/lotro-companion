@@ -27,6 +27,7 @@ import delta.games.lotro.common.enums.GroupSize;
 import delta.games.lotro.common.enums.LotroEnum;
 import delta.games.lotro.common.enums.LotroEnumsRegistry;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.instances.PrivateEncountersManager;
 import delta.games.lotro.lore.instances.SkirmishPrivateEncounter;
 
@@ -123,7 +124,7 @@ public class SkirmishEntryFilterController implements ActionListener
     panel.add(statusPanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,0,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,0,5,5),0,0);
     panel.add(_reset,c);
@@ -142,19 +143,19 @@ public class SkirmishEntryFilterController implements ActionListener
     // First line: skirmish combo and levels
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     JComboBox<?> skirmishCombo=_skirmish.getComboBox();
-    TitledBorder border=GuiFactory.buildTitledBorder("Skirmish");
+    TitledBorder border=GuiFactory.buildTitledBorder("Skirmish"); // I18n
     skirmishCombo.setBorder(border);
     skirmishCombo.setOpaque(false);
     panel.add(skirmishCombo,c);
     c=new GridBagConstraints(1,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     JPanel levelsPanel=_levels.getPanel();
-    levelsPanel.setBorder(GuiFactory.buildTitledBorder("Level"));
+    levelsPanel.setBorder(GuiFactory.buildTitledBorder("Level")); // I18n
     panel.add(levelsPanel,c);
 
     // Second line: group sizes
     c=new GridBagConstraints(0,1,2,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     JPanel sizesPanel=_sizes.getPanel();
-    sizesPanel.setBorder(GuiFactory.buildTitledBorder("Group size"));
+    sizesPanel.setBorder(GuiFactory.buildTitledBorder("Group size")); // I18n
     panel.add(sizesPanel,c);
 
     return panel;

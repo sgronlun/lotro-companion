@@ -16,11 +16,15 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import delta.common.ui.swing.GuiFactory;
+import delta.common.ui.swing.area.AreaController;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.combobox.ItemSelectionListener;
+import delta.common.ui.swing.panels.AbstractPanelController;
 import delta.common.ui.swing.text.DynamicTextEditionController;
 import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
+import delta.games.lotro.common.enums.DeedCategory;
+import delta.games.lotro.common.filters.NamedFilter;
 import delta.games.lotro.common.rewards.RewardsExplorer;
 import delta.games.lotro.config.LotroCoreConfig;
 import delta.games.lotro.gui.common.requirements.RequirementsFilterController;
@@ -28,14 +32,15 @@ import delta.games.lotro.gui.common.rewards.filter.RewardsFilterController;
 import delta.games.lotro.gui.lore.deeds.DeedUiUtils;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
 import delta.games.lotro.gui.lore.quests.QuestsUiUtils;
+import delta.games.lotro.gui.lore.webStoreItems.WebStoreItemsFilterController;
 import delta.games.lotro.gui.lore.worldEvents.WorldEventsFilterController;
 import delta.games.lotro.gui.utils.SharedUiUtils;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.deeds.DeedDescription;
 import delta.games.lotro.lore.deeds.DeedType;
 import delta.games.lotro.lore.deeds.DeedsManager;
 import delta.games.lotro.lore.deeds.filters.DeedCategoryFilter;
 import delta.games.lotro.lore.deeds.filters.DeedFilter;
-import delta.games.lotro.lore.deeds.filters.DeedNameFilter;
 import delta.games.lotro.lore.deeds.filters.DeedTypeFilter;
 import delta.games.lotro.lore.quests.filter.AchievableMonsterPlayFilter;
 import delta.games.lotro.lore.quests.filter.HiddenAchievableFilter;
@@ -44,17 +49,16 @@ import delta.games.lotro.lore.quests.filter.HiddenAchievableFilter;
  * Controller for a deed filter edition panel.
  * @author DAM
  */
-public class DeedFilterController implements ActionListener
+public class DeedFilterController extends AbstractPanelController implements ActionListener
 {
   // Data
   private DeedFilter _filter;
   // GUI
-  private JPanel _panel;
   private JButton _reset;
   // -- Deed attributes UI --
   private JTextField _contains;
   private ComboBoxController<DeedType> _type;
-  private ComboBoxController<String> _category;
+  private ComboBoxController<DeedCategory> _category;
   private ComboBoxController<Boolean> _monsterPlay;
   private ComboBoxController<Boolean> _hidden;
   // -- Requirements UI --
@@ -62,34 +66,44 @@ public class DeedFilterController implements ActionListener
   // -- Rewards UI --
   private RewardsFilterController _rewards;
   // -- World Events UI --
-  private WorldEventsFilterController _worldEvents;
+  private WorldEventsFilterController _worldEvents; // Live only
+  // -- Web Store Items UI --
+  private WebStoreItemsFilterController<DeedDescription> _webStoreItems; // Live only
   // Controllers
   private DynamicTextEditionController _textController;
   private FilterUpdateListener _filterUpdateListener;
 
   /**
    * Constructor.
+   * @param parent Parent controller.
    * @param filter Managed filter.
    * @param filterUpdateListener Filter update listener.
    * @param useRequirements Use requirements or not.
    */
-  public DeedFilterController(DeedFilter filter, FilterUpdateListener filterUpdateListener, boolean useRequirements)
+  public DeedFilterController(AreaController parent, DeedFilter filter, FilterUpdateListener filterUpdateListener, boolean useRequirements)
   {
+    super(parent);
     _filter=filter;
     _filterUpdateListener=filterUpdateListener;
+    // Requirements
     if (useRequirements)
     {
       _requirements=new RequirementsFilterController(filter.getRequirementsFilter(),filterUpdateListener);
     }
+    // Rewards
     RewardsExplorer explorer=DeedsManager.getInstance().buildRewardsExplorer();
-    _rewards=new RewardsFilterController(filter.getRewardsFilter(),filterUpdateListener,explorer,false);
-    // World events
+    _rewards=new RewardsFilterController(parent,filter.getRewardsFilter(),filterUpdateListener,explorer,false);
     boolean isLive=LotroCoreConfig.isLive();
     if (isLive)
     {
+      // World events
       List<DeedDescription> deeds=DeedsManager.getInstance().getAll();
       _worldEvents=new WorldEventsFilterController(deeds,filter.getWorldEventsFilter(),filterUpdateListener);
+      // Web Store items
+      _webStoreItems=new WebStoreItemsFilterController<DeedDescription>(deeds,filter.getWebStoreItemsFilter(),filterUpdateListener);
     }
+    JPanel panel=buildPanel();
+    setPanel(panel);
   }
 
   /**
@@ -101,19 +115,12 @@ public class DeedFilterController implements ActionListener
     return _filter;
   }
 
-  /**
-   * Get the managed panel.
-   * @return the managed panel.
-   */
-  public JPanel getPanel()
+  private JPanel buildPanel()
   {
-    if (_panel==null)
-    {
-      _panel=build();
-      setFilter();
-      filterUpdated();
-    }
-    return _panel;
+    JPanel panel=build();
+    setFilter();
+    filterUpdated();
+    return panel;
   }
 
   /**
@@ -149,6 +156,10 @@ public class DeedFilterController implements ActionListener
       {
         _worldEvents.reset();
       }
+      if (_webStoreItems!=null)
+      {
+        _webStoreItems.reset();
+      }
       _contains.setText("");
     }
   }
@@ -156,7 +167,7 @@ public class DeedFilterController implements ActionListener
   private void setFilter()
   {
     // Name
-    DeedNameFilter nameFilter=_filter.getNameFilter();
+    NamedFilter<DeedDescription> nameFilter=_filter.getNameFilter();
     String contains=nameFilter.getPattern();
     if (contains!=null)
     {
@@ -168,7 +179,7 @@ public class DeedFilterController implements ActionListener
     _type.selectItem(type);
     // Category
     DeedCategoryFilter categoryFilter=_filter.getCategoryFilter();
-    String category=categoryFilter.getDeedCategory();
+    DeedCategory category=categoryFilter.getDeedCategory();
     _category.selectItem(category);
     // Monster play
     if (_monsterPlay!=null)
@@ -196,6 +207,11 @@ public class DeedFilterController implements ActionListener
     {
       _worldEvents.setFilter();
     }
+    // Web store items
+    if (_webStoreItems!=null)
+    {
+      _webStoreItems.setFilter();
+    }
   }
 
   private JPanel build()
@@ -208,13 +224,13 @@ public class DeedFilterController implements ActionListener
     JPanel line1Panel=GuiFactory.buildPanel(new GridBagLayout());
     // Deed attributes
     JPanel deedPanel=buildDeedPanel();
-    Border deedBorder=GuiFactory.buildTitledBorder("Deed");
+    Border deedBorder=GuiFactory.buildTitledBorder("Deed"); // 18n
     deedPanel.setBorder(deedBorder);
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     line1Panel.add(deedPanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,0,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,0),0,0);
     line1Panel.add(_reset,c);
@@ -228,7 +244,7 @@ public class DeedFilterController implements ActionListener
     if (_requirements!=null)
     {
       JPanel requirementsPanel=_requirements.getPanel();
-      Border requirementsBorder=GuiFactory.buildTitledBorder("Requirements");
+      Border requirementsBorder=GuiFactory.buildTitledBorder("Requirements"); // I18n
       requirementsPanel.setBorder(requirementsBorder);
       c=new GridBagConstraints(0,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
       line2Panel.add(requirementsPanel,c);
@@ -237,10 +253,19 @@ public class DeedFilterController implements ActionListener
     if (_worldEvents!=null)
     {
       JPanel contextsPanel=_worldEvents.getPanel();
-      Border border=GuiFactory.buildTitledBorder("Context");
+      Border border=GuiFactory.buildTitledBorder("Context"); // I18n
       contextsPanel.setBorder(border);
       c=new GridBagConstraints(1,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
       line2Panel.add(contextsPanel,c);
+    }
+    // Web Store Items
+    if (_webStoreItems!=null)
+    {
+      JPanel webStoreItemsPanel=_webStoreItems.getPanel();
+      Border border=GuiFactory.buildTitledBorder("Contents Pack"); // I18n
+      webStoreItemsPanel.setBorder(border);
+      c=new GridBagConstraints(2,0,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
+      line2Panel.add(webStoreItemsPanel,c);
     }
     c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(line2Panel,c);
@@ -248,7 +273,7 @@ public class DeedFilterController implements ActionListener
 
     // Rewards
     JPanel rewardsPanel=_rewards.getPanel();
-    Border rewardsBorder=GuiFactory.buildTitledBorder("Rewards");
+    Border rewardsBorder=GuiFactory.buildTitledBorder("Rewards"); // I18n
     rewardsPanel.setBorder(rewardsBorder);
     c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
     panel.add(rewardsPanel,c);
@@ -261,13 +286,14 @@ public class DeedFilterController implements ActionListener
 
   private JPanel buildDeedPanel()
   {
+    boolean isLive=LotroCoreConfig.isLive();
     JPanel panel=GuiFactory.buildPanel(new GridBagLayout());
 
     int y=0;
     JPanel linePanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Label filter
     {
-      linePanel.add(GuiFactory.buildLabel("Name filter:"));
+      linePanel.add(GuiFactory.buildLabel("Name filter:")); // 18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(20);
       linePanel.add(_contains);
@@ -277,7 +303,7 @@ public class DeedFilterController implements ActionListener
         public void textChanged(String newText)
         {
           if (newText.length()==0) newText=null;
-          DeedNameFilter nameFilter=_filter.getNameFilter();
+          NamedFilter<DeedDescription> nameFilter=_filter.getNameFilter();
           nameFilter.setPattern(newText);
           filterUpdated();
         }
@@ -286,7 +312,7 @@ public class DeedFilterController implements ActionListener
     }
     // Type
     {
-      JLabel label=GuiFactory.buildLabel("Type:");
+      JLabel label=GuiFactory.buildLabel("Type:"); // 18n
       linePanel.add(label);
       _type=DeedUiUtils.buildDeedTypeCombo();
       ItemSelectionListener<DeedType> typeListener=new ItemSelectionListener<DeedType>()
@@ -304,13 +330,13 @@ public class DeedFilterController implements ActionListener
     }
     // Category
     {
-      JLabel label=GuiFactory.buildLabel("Category:");
+      JLabel label=GuiFactory.buildLabel("Category:"); // 18n
       linePanel.add(label);
       _category=DeedUiUtils.buildCategoryCombo();
-      ItemSelectionListener<String> categoryListener=new ItemSelectionListener<String>()
+      ItemSelectionListener<DeedCategory> categoryListener=new ItemSelectionListener<DeedCategory>()
       {
         @Override
-        public void itemSelected(String category)
+        public void itemSelected(DeedCategory category)
         {
           DeedCategoryFilter categoryFilter=_filter.getCategoryFilter();
           categoryFilter.setDeedCategory(category);
@@ -321,17 +347,16 @@ public class DeedFilterController implements ActionListener
       linePanel.add(_category.getComboBox());
     }
     // Faction
-    boolean isLive=LotroCoreConfig.isLive();
     if (isLive)
     {
-      linePanel.add(GuiFactory.buildLabel("Faction:"));
+      linePanel.add(GuiFactory.buildLabel("Faction:")); // 18n
       _monsterPlay=buildMonsterPlayCombobox();
       linePanel.add(_monsterPlay.getComboBox());
     }
     // Hidden
     if (isLive)
     {
-      linePanel.add(GuiFactory.buildLabel("Hidden:"));
+      linePanel.add(GuiFactory.buildLabel("Hidden:")); // 18n
       _hidden=buildHiddenCombobox();
       linePanel.add(_hidden.getComboBox());
     }
@@ -343,7 +368,7 @@ public class DeedFilterController implements ActionListener
 
   private ComboBoxController<Boolean> buildMonsterPlayCombobox()
   {
-    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox("","Monster Play","Free Peoples");
+    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox("","Monster Play","Free Peoples"); // 18n
     ItemSelectionListener<Boolean> questSizeListener=new ItemSelectionListener<Boolean>()
     {
       @Override
@@ -380,14 +405,9 @@ public class DeedFilterController implements ActionListener
    */
   public void dispose()
   {
+    super.dispose();
     // Data
     _filter=null;
-    // GUI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
     // Controllers
     if (_textController!=null)
     {
@@ -423,6 +443,11 @@ public class DeedFilterController implements ActionListener
     {
       _worldEvents.dispose();
       _worldEvents=null;
+    }
+    if (_webStoreItems!=null)
+    {
+      _webStoreItems.dispose();
+      _webStoreItems=null;
     }
     if (_rewards!=null)
     {

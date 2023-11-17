@@ -16,6 +16,7 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.combobox.ComboBoxController;
 import delta.common.ui.swing.combobox.ItemSelectionListener;
 import delta.games.lotro.common.Size;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.warbands.WarbandDefinition;
 import delta.games.lotro.lore.warbands.WarbandFilter;
 import delta.games.lotro.lore.warbands.WarbandsRegistry;
@@ -148,7 +149,7 @@ public class WarbandsFilterController implements ActionListener
       }
     };
     _region.addListener(regionListener);
-    panel.add(GuiFactory.buildLabel("Region:"));
+    panel.add(GuiFactory.buildLabel("Region:")); // I18n
     panel.add(_region.getComboBox());
     // Sizes
     Size[] sizes={Size.SOLO,Size.SMALL_FELLOWSHIP,Size.FELLOWSHIP,Size.RAID};
@@ -168,7 +169,7 @@ public class WarbandsFilterController implements ActionListener
       }
     };
     _size.addListener(sizeListener);
-    panel.add(GuiFactory.buildLabel("Size:"));
+    panel.add(GuiFactory.buildLabel("Size:")); // I18n
     panel.add(_size.getComboBox());
     // Levels
     Integer[] minLevels=getMinLevels();
@@ -188,10 +189,10 @@ public class WarbandsFilterController implements ActionListener
       }
     };
     _minLevel.addListener(minLevelListener);
-    panel.add(GuiFactory.buildLabel("Minimum level:"));
+    panel.add(GuiFactory.buildLabel("Minimum level:")); // I18n
     panel.add(_minLevel.getComboBox());
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     panel.add(_reset);
     return panel;

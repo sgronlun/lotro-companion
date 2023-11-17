@@ -15,11 +15,11 @@ import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.character.CharacterFile;
 import delta.games.lotro.character.CharacterSummary;
+import delta.games.lotro.character.classes.ClassDescription;
 import delta.games.lotro.character.events.CharacterEvent;
 import delta.games.lotro.character.events.CharacterEventType;
-import delta.games.lotro.common.CharacterClass;
+import delta.games.lotro.character.races.RaceDescription;
 import delta.games.lotro.common.CharacterSex;
-import delta.games.lotro.common.Race;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.character.summary.CharacterSummaryDialogController;
 import delta.games.lotro.utils.events.EventsManager;
@@ -74,17 +74,21 @@ public class CharacterSummaryPanelController implements GenericEventsListener<Ch
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(2,2,2,2),0,0);
 
     // Grab data
-    CharacterClass cClass=null;
-    Race race=null;
+    ClassDescription characterClass=null;
+    RaceDescription race=null;
     CharacterSex sex=null;
     if (_summary!=null)
     {
-      cClass=_summary.getCharacterClass();
+      characterClass=_summary.getCharacterClass();
       race=_summary.getRace();
       sex=_summary.getCharacterSex();
     }
     // Class
-    ImageIcon classIcon=LotroIconsManager.getClassIcon(cClass,LotroIconsManager.COMPACT_SIZE);
+    ImageIcon classIcon=null;
+    if (characterClass!=null)
+    {
+      classIcon=LotroIconsManager.getClassIcon(characterClass.getIconId());
+    }
     panel.add(GuiFactory.buildIconLabel(classIcon),c);
     // Character icon
     ImageIcon characterIcon=LotroIconsManager.getCharacterIcon(race,sex);
@@ -101,7 +105,7 @@ public class CharacterSummaryPanelController implements GenericEventsListener<Ch
     c.gridx=3;c.weightx=0.0;c.fill=GridBagConstraints.NONE;c.anchor=GridBagConstraints.EAST;
     panel.add(_levelLabel,c);
     c.gridx=4;
-    JButton edit=GuiFactory.buildButton("Edit...");
+    JButton edit=GuiFactory.buildButton("Edit..."); // I18n
     ActionListener al=new ActionListener()
     {
       @Override
@@ -159,14 +163,14 @@ public class CharacterSummaryPanelController implements GenericEventsListener<Ch
       String text=name;
       if ((region!=null) && (region.length()>0))
       {
-        text=text+" of "+region;
+        text=text+" of "+region; // I18n
       }
       _nameLabel.setText(text);
       // Level
       int level=_summary.getLevel();
       _levelLabel.setText(String.valueOf(level));
       // Character icon
-      Race race=_summary.getRace();
+      RaceDescription race=_summary.getRace();
       CharacterSex sex=_summary.getCharacterSex();
       ImageIcon characterIcon=LotroIconsManager.getCharacterIcon(race,sex);
       _characterIconLabel.setIcon(characterIcon);

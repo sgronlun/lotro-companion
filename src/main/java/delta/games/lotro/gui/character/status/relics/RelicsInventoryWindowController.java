@@ -13,12 +13,10 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import delta.common.ui.swing.GuiFactory;
-import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.ui.swing.tables.GenericTableController;
 import delta.common.ui.swing.windows.DefaultDisplayDialogController;
 import delta.common.ui.swing.windows.WindowController;
-import delta.common.ui.swing.windows.WindowsManager;
 import delta.common.utils.misc.TypedProperties;
 import delta.games.lotro.character.status.relics.RelicsInventoryEntry;
 import delta.games.lotro.character.status.relics.RelicsInventoryManager;
@@ -28,7 +26,7 @@ import delta.games.lotro.gui.common.navigation.ReferenceConstants;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
 import delta.games.lotro.gui.lore.items.legendary.relics.RelicsFilterController;
 import delta.games.lotro.gui.main.GlobalPreferences;
-import delta.games.lotro.gui.navigation.NavigatorFactory;
+import delta.games.lotro.gui.utils.NavigationUtils;
 import delta.games.lotro.lore.items.legendary.relics.Relic;
 import delta.games.lotro.lore.items.legendary.relics.RelicsManager;
 
@@ -70,7 +68,7 @@ public class RelicsInventoryWindowController extends DefaultDisplayDialogControl
   {
     JDialog dialog=super.build();
     dialog.setMinimumSize(new Dimension(600,300));
-    dialog.setTitle("Relics inventory");
+    dialog.setTitle("Relics inventory"); // I18n
     dialog.pack();
     Dimension size=dialog.getSize();
     if (size.height>MAX_HEIGHT)
@@ -106,7 +104,7 @@ public class RelicsInventoryWindowController extends DefaultDisplayDialogControl
     // Whole panel
     // - filter
     JPanel filterPanel=_filterController.getPanel();
-    filterPanel.setBorder(GuiFactory.buildTitledBorder("Relic Filter"));
+    filterPanel.setBorder(GuiFactory.buildTitledBorder("Relic Filter")); // I18n
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(filterPanel,c);
     // - table
@@ -143,13 +141,8 @@ public class RelicsInventoryWindowController extends DefaultDisplayDialogControl
 
   private void showRelic(Relic relic)
   {
-    WindowsManager windowsMgr=getWindowsManager();
-    int id=windowsMgr.getAll().size();
-    NavigatorWindowController window=NavigatorFactory.buildNavigator(RelicsInventoryWindowController.this,id);
     PageIdentifier ref=ReferenceConstants.getRelicReference(relic.getIdentifier());
-    window.navigateTo(ref);
-    window.show(false);
-    windowsMgr.registerWindow(window);
+    NavigationUtils.navigateTo(ref,this);
   }
 
   /**

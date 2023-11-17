@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import delta.games.lotro.common.CharacterSex;
+import delta.games.lotro.common.Genders;
 import delta.games.lotro.dat.data.strings.renderer.OptionItem;
 import delta.games.lotro.dat.data.strings.renderer.StringParser;
 import delta.games.lotro.dat.data.strings.renderer.StringRenderer;
@@ -25,6 +26,7 @@ public class KinshipRankRenderer
    */
   public static String render(KinshipRank rank, CharacterSex sex)
   {
+    // TODO Use generic context system
     String key=buildKey(rank.getName(),sex);
     String ret=_cache.get(key);
     if (ret==null)
@@ -62,7 +64,7 @@ public class KinshipRankRenderer
   {
     StringRenderer r=new StringRenderer(null);
     StringBuilder sb=new StringBuilder();
-    String text=((sex==CharacterSex.MALE)?"[M]":"[f]");
+    String text=((sex==Genders.MALE)?"[M]":"[f]");
     r.renderOptions(sb,options,text);
     return sb.toString();
   }

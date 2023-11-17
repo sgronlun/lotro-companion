@@ -28,12 +28,16 @@ import delta.games.lotro.utils.gui.filechooser.FileChooserController;
  */
 public class ConfigurationDialogController extends DefaultFormDialogController<ApplicationConfiguration>
 {
+  // DAT files path
   private static final int DAT_PATH_SIZE=50;
   private JTextField _datPath;
   private JButton _datPathChooseButton;
+  // Usage data path
   private static final int USER_DATA_PATH_SIZE=50;
   private JTextField _dataPath;
   private JButton _dataPathChooseButton;
+  // Labels
+  private LabelsConfigurationPanelController _labels;
 
   /**
    * Constructor.
@@ -49,7 +53,7 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
   protected JDialog build()
   {
     JDialog dialog=super.build();
-    dialog.setTitle("Configuration...");
+    dialog.setTitle("Configuration..."); // I18n
     dialog.setResizable(true);
     return dialog;
   }
@@ -60,6 +64,7 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     // Build components
     JPanel datPanel=buildDatConfigurationPanel();
     JPanel dataPanel=buildDataConfigurationPanel();
+    _labels=new LabelsConfigurationPanelController();
     // Init
     init();
     // Layout
@@ -68,6 +73,8 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     ret.add(datPanel,c);
     c=new GridBagConstraints(0,1,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,5,5,5),0,0);
     ret.add(dataPanel,c);
+    c=new GridBagConstraints(0,2,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
+    ret.add(_labels.getPanel(),c);
     return ret;
   }
 
@@ -77,7 +84,7 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     // DAT path
     _datPath=GuiFactory.buildTextField("");
     _datPath.setColumns(DAT_PATH_SIZE);
-    _datPathChooseButton=GuiFactory.buildButton("Choose...");
+    _datPathChooseButton=GuiFactory.buildButton("Choose..."); // I18n
     ActionListener al=new ActionListener()
     {
       @Override
@@ -90,13 +97,13 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
 
     // Assembly
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
-    panel.add(GuiFactory.buildLabel("Directory:"),c);
+    panel.add(GuiFactory.buildLabel("Directory:"),c); // I18n
     c=new GridBagConstraints(1,0,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,5,5,5),0,0);
     panel.add(_datPath,c);
     c=new GridBagConstraints(2,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
     panel.add(_datPathChooseButton,c);
 
-    panel.setBorder(GuiFactory.buildTitledBorder("LOTRO Client"));
+    panel.setBorder(GuiFactory.buildTitledBorder("LOTRO Client")); // I18n
     return panel;
   }
 
@@ -106,7 +113,7 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     // User data path
     _dataPath=GuiFactory.buildTextField("");
     _dataPath.setColumns(USER_DATA_PATH_SIZE);
-    _dataPathChooseButton=GuiFactory.buildButton("Choose...");
+    _dataPathChooseButton=GuiFactory.buildButton("Choose..."); // I18n
     ActionListener al=new ActionListener()
     {
       @Override
@@ -119,13 +126,13 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
 
     // Assembly
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
-    panel.add(GuiFactory.buildLabel("Directory:"),c);
+    panel.add(GuiFactory.buildLabel("Directory:"),c); // I18n
     c=new GridBagConstraints(1,0,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5,5,5,5),0,0);
     panel.add(_dataPath,c);
     c=new GridBagConstraints(2,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(5,5,5,5),0,0);
     panel.add(_dataPathChooseButton,c);
 
-    panel.setBorder(GuiFactory.buildTitledBorder("User data"));
+    panel.setBorder(GuiFactory.buildTitledBorder("User data")); // I18n
     return panel;
   }
 
@@ -139,15 +146,17 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     DataConfiguration dataConfiguration=_data.getDataConfiguration();
     String dataPathStr=dataConfiguration.getRootPath().getAbsolutePath();
     _dataPath.setText(dataPathStr);
+    // Labels
+    _labels.setConfig(_data.getLabelsConfiguration());
   }
 
   private void doChooseDATFilesPath()
   {
-    FileChooserController ctrl=new FileChooserController("ApplicationConfiguration", "Choose LOTRO client path...");
+    FileChooserController ctrl=new FileChooserController("ApplicationConfiguration", "Choose LOTRO client path..."); // I18n
     DatConfiguration datConfiguration=_data.getDatConfiguration();
     File path=datConfiguration.getRootPath();
     ctrl.getChooser().setCurrentDirectory(path);
-    File datDir=ctrl.chooseDirectory(getWindow(),"OK");
+    File datDir=ctrl.chooseDirectory(getWindow(),"OK"); // I18n
     if (datDir!=null)
     {
       _datPath.setText(datDir.getAbsolutePath());
@@ -156,11 +165,11 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
 
   private void doChooseDataPath()
   {
-    FileChooserController ctrl=new FileChooserController("ApplicationConfigurationUserData", "Choose user data path...");
+    FileChooserController ctrl=new FileChooserController("ApplicationConfigurationUserData", "Choose user data path..."); // I18n
     DataConfiguration dataConfiguration=_data.getDataConfiguration();
     File path=dataConfiguration.getRootPath();
     ctrl.getChooser().setCurrentDirectory(path);
-    File dataDir=ctrl.chooseDirectory(getWindow(),"OK");
+    File dataDir=ctrl.chooseDirectory(getWindow(),"OK"); // I18n
     if (dataDir!=null)
     {
       _dataPath.setText(dataDir.getAbsolutePath());
@@ -179,6 +188,8 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     File dataPath=new File(dataPathStr);
     File oldDataPath=_data.getDataConfiguration().getRootPath();
     _data.getDataConfiguration().setRootPath(dataPath);
+    // Labels
+    _labels.saveTo(_data.getLabelsConfiguration());
     _data.saveConfiguration();
     if (!Objects.equals(dataPath,oldDataPath))
     {
@@ -189,8 +200,8 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
 
   private void warnOnDataPathChange(File oldPath, File newPath)
   {
-    String message="User data path has changed.\nPlease restart the application so that it takes effect!";
-    String title="Restart application";
+    String message="User data path has changed.\nPlease restart the application so that it takes effect!"; // I18n
+    String title="Restart application"; // I18n
     GuiFactory.showInformationDialog(_dataPath,message,title);
   }
 
@@ -225,7 +236,7 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     boolean ok=DatChecks.checkDatPath(datPath);
     if (!ok)
     {
-      errorMsg="Invalid LOTRO installation directory!";
+      errorMsg="Invalid LOTRO installation directory!"; // I18n
     }
     return errorMsg;
   }
@@ -237,7 +248,7 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
 
   private void showErrorMessage(String errorMsg)
   {
-    String title="Configuration";
+    String title="Configuration"; // I18n
     JDialog dialog=getDialog();
     GuiFactory.showErrorDialog(dialog,errorMsg,title);
   }
@@ -253,5 +264,10 @@ public class ConfigurationDialogController extends DefaultFormDialogController<A
     _datPathChooseButton=null;
     _dataPath=null;
     _dataPathChooseButton=null;
+    if (_labels!=null)
+    {
+      _labels.dispose();
+      _labels=null;
+    }
   }
 }

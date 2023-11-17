@@ -55,6 +55,30 @@ public enum ItemColumnIds
    */
   WEAPON_TYPE,
   /**
+   * DPS.
+   */
+  DPS,
+  /**
+   * Speed.
+   */
+  SPEED,
+  /**
+   * Damage type.
+   */
+  DAMAGE_TYPE,
+  /**
+   * Minimum Damage.
+   */
+  MIN_DAMAGE,
+  /**
+   * Maximum damage.
+   */
+  MAX_DAMAGE,
+  /**
+   * Weapon slayer info.
+   */
+  WEAPON_SLAYER,
+  /**
    * Binding.
    */
   BINDING,

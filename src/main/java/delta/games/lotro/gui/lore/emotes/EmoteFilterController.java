@@ -22,6 +22,7 @@ import delta.common.ui.swing.text.TextListener;
 import delta.common.utils.collections.filters.Filter;
 import delta.games.lotro.gui.lore.emotes.EmoteFilterConfiguration.State;
 import delta.games.lotro.gui.utils.SharedUiUtils;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.emotes.EmoteDescription;
 import delta.games.lotro.lore.emotes.filters.EmoteAutoFilter;
 import delta.games.lotro.lore.emotes.filters.EmoteCommandFilter;
@@ -127,13 +128,13 @@ public class EmoteFilterController implements ActionListener
 
     // Emote attributes
     JPanel emotePanel=buildEmotePanel();
-    Border border=GuiFactory.buildTitledBorder("Emote");
+    Border border=GuiFactory.buildTitledBorder("Emote"); // I18n
     emotePanel.setBorder(border);
     GridBagConstraints c=new GridBagConstraints(0,y,1,1,0.0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(emotePanel,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,y,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,5),0,0);
     panel.add(_reset,c);
@@ -150,7 +151,7 @@ public class EmoteFilterController implements ActionListener
     JPanel line1Panel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
     // Label filter
     {
-      line1Panel.add(GuiFactory.buildLabel("Command filter:"));
+      line1Panel.add(GuiFactory.buildLabel("Command filter:")); // I18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(20);
       line1Panel.add(_contains);
@@ -171,7 +172,7 @@ public class EmoteFilterController implements ActionListener
     State autoState=_config.getAutoState();
     if (autoState!=State.HIDDEN)
     {
-      JLabel label=GuiFactory.buildLabel("Auto:");
+      JLabel label=GuiFactory.buildLabel("Auto:"); // I18n
       line1Panel.add(label);
       _auto=buildAutoCombobox();
       line1Panel.add(_auto.getComboBox());
@@ -189,7 +190,7 @@ public class EmoteFilterController implements ActionListener
 
   private ComboBoxController<Boolean> buildAutoCombobox()
   {
-    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox("","Auto","Earned");
+    ComboBoxController<Boolean> combo=SharedUiUtils.build3StatesBooleanCombobox("","Auto","Earned"); // I18n
     ItemSelectionListener<Boolean> listener=new ItemSelectionListener<Boolean>()
     {
       @Override

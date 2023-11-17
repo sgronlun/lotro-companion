@@ -14,8 +14,9 @@ import javax.swing.JPanel;
 import delta.common.ui.swing.GuiFactory;
 import delta.common.ui.swing.icons.IconWithText;
 import delta.common.ui.swing.icons.IconsManager;
-import delta.common.ui.swing.navigator.NavigablePanelController;
+import delta.common.ui.swing.navigator.AbstractNavigablePanelController;
 import delta.common.ui.swing.navigator.NavigatorWindowController;
+import delta.common.ui.swing.windows.WindowController;
 import delta.games.lotro.gui.common.requirements.RequirementsUtils;
 import delta.games.lotro.gui.utils.ItemDisplayGadgets;
 import delta.games.lotro.lore.items.Item;
@@ -25,20 +26,17 @@ import delta.games.lotro.lore.trade.barter.BarterEntryElement;
 import delta.games.lotro.lore.trade.barter.BarterProfile;
 import delta.games.lotro.lore.trade.barter.ItemBarterEntryElement;
 import delta.games.lotro.lore.trade.barter.ReputationBarterEntryElement;
-import delta.games.lotro.utils.Proxy;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Controller for a panel to display a barter entry.
  * @author DAM
  */
-public class BarterEntryDisplayPanelController implements NavigablePanelController
+public class BarterEntryDisplayPanelController extends AbstractNavigablePanelController
 {
   // Data
   private BarterEntry _entry;
-  // GUI
-  private JPanel _panel;
   // Controllers
-  private NavigatorWindowController _parent;
   private List<ItemDisplayGadgets> _itemIcons;
 
   /**
@@ -48,28 +46,16 @@ public class BarterEntryDisplayPanelController implements NavigablePanelControll
    */
   public BarterEntryDisplayPanelController(NavigatorWindowController parent, BarterEntry entry)
   {
-    _parent=parent;
+    super(parent);
     _entry=entry;
     _itemIcons=new ArrayList<ItemDisplayGadgets>();
+    setPanel(build());
   }
 
   @Override
   public String getTitle()
   {
     return "Barter entry";
-  }
-
-  /**
-   * Get the managed panel.
-   * @return the managed panel.
-   */
-  public JPanel getPanel()
-  {
-    if (_panel==null)
-    {
-      _panel=build();
-    }
-    return _panel;
   }
 
   private JPanel build()
@@ -88,7 +74,7 @@ public class BarterEntryDisplayPanelController implements NavigablePanelControll
       y++;
     }
     // Requirements
-    String requirements=RequirementsUtils.buildRequirementString(profile.getRequirements());
+    String requirements=RequirementsUtils.buildRequirementString(this,profile.getRequirements());
     if (requirements.length()>0)
     {
       GridBagConstraints c=new GridBagConstraints(0,y,1,1,0,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(2,5,2,5),0,0);
@@ -185,17 +171,20 @@ public class BarterEntryDisplayPanelController implements NavigablePanelControll
     // Name
     c=new GridBagConstraints(1,0,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(2,2,2,2),0,0);
     Faction faction=reputationToReceive.getFaction();
-    JLabel factionLabel=GuiFactory.buildLabel(faction.getName());
+    String rawFactionName=faction.getName();
+    String factionName=ContextRendering.render(this,rawFactionName);
+    JLabel factionLabel=GuiFactory.buildLabel(factionName);
     panel.add(factionLabel,c);
     return panel;
   }
 
   private ItemDisplayGadgets buildItemGadgets(ItemBarterEntryElement element)
   {
-    Proxy<Item> proxy=element.getItemProxy();
+    Item item=element.getItem();
     int quantity=element.getQuantity();
-    int itemId=proxy.getId();
-    ItemDisplayGadgets gadgets=new ItemDisplayGadgets(_parent,itemId,quantity,"");
+    int itemId=item.getIdentifier();
+    WindowController parent=getParentWindowController();
+    ItemDisplayGadgets gadgets=new ItemDisplayGadgets(parent,itemId,quantity,"");
     _itemIcons.add(gadgets);
     return gadgets;
   }
@@ -205,16 +194,10 @@ public class BarterEntryDisplayPanelController implements NavigablePanelControll
    */
   public void dispose()
   {
+    super.dispose();
     // Data
     _entry=null;
     // UI
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
-    // Controllers
-    _parent=null;
     if (_itemIcons!=null)
     {
       for(ItemDisplayGadgets itemIcon : _itemIcons)

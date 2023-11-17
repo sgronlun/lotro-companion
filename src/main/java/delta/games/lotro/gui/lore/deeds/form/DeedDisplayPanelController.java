@@ -18,11 +18,12 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import delta.common.ui.swing.GuiFactory;
-import delta.common.ui.swing.navigator.NavigablePanelController;
+import delta.common.ui.swing.navigator.AbstractNavigablePanelController;
 import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.utils.expressions.logical.LogicalTreeNode;
 import delta.games.lotro.common.ChallengeLevel;
+import delta.games.lotro.common.enums.DeedCategory;
 import delta.games.lotro.common.requirements.AbstractAchievableRequirement;
 import delta.games.lotro.gui.LotroIconsManager;
 import delta.games.lotro.gui.common.requirements.RequirementsUtils;
@@ -38,17 +39,16 @@ import delta.games.lotro.lore.webStore.WebStoreItem;
 import delta.games.lotro.lore.worldEvents.AbstractWorldEventCondition;
 import delta.games.lotro.lore.worldEvents.WorldEventConditionsUtils;
 import delta.games.lotro.utils.gui.HtmlUtils;
+import delta.games.lotro.utils.strings.ContextRendering;
 
 /**
  * Controller for an deed display panel.
  * @author DAM
  */
-public class DeedDisplayPanelController implements NavigablePanelController
+public class DeedDisplayPanelController extends AbstractNavigablePanelController
 {
   // Data
   private DeedDescription _deed;
-  // GUI
-  private JPanel _panel;
 
   private JLabel _icon;
   private JLabel _type;
@@ -61,7 +61,6 @@ public class DeedDisplayPanelController implements NavigablePanelController
   private JEditorPane _details;
 
   // Controllers
-  private NavigatorWindowController _parent;
   private RewardsPanelController _rewards;
   private AbstractAchievableRequirementPanelController _achievablesRequirements;
   private PanelProvider _worldEventConditions;
@@ -73,24 +72,15 @@ public class DeedDisplayPanelController implements NavigablePanelController
    */
   public DeedDisplayPanelController(NavigatorWindowController parent, DeedDescription deed)
   {
-    _parent=parent;
+    super(parent);
     _deed=deed;
+    setPanel(build());
   }
 
   @Override
   public String getTitle()
   {
-    return "Deed: "+_deed.getName();
-  }
-
-  @Override
-  public JPanel getPanel()
-  {
-    if (_panel==null)
-    {
-      _panel=build();
-    }
-    return _panel;
+    return "Deed: "+_deed.getName(); // 18n
   }
 
   private JPanel build()
@@ -104,9 +94,9 @@ public class DeedDisplayPanelController implements NavigablePanelController
     panel.add(topPanel,c);
 
     // Rewards
-    _rewards=new RewardsPanelController(_parent,_deed.getRewards());
+    _rewards=new RewardsPanelController(getParent(),_deed.getRewards());
     JPanel rewardsPanel=_rewards.getPanel();
-    TitledBorder rewardsBorder=GuiFactory.buildTitledBorder("Rewards");
+    TitledBorder rewardsBorder=GuiFactory.buildTitledBorder("Rewards"); // 18n
     rewardsPanel.setBorder(rewardsBorder);
     c=new GridBagConstraints(1,1,1,1,0.0,0.0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
     panel.add(rewardsPanel,c);
@@ -114,13 +104,11 @@ public class DeedDisplayPanelController implements NavigablePanelController
     // Details
     _details=buildDetailsPane();
     JScrollPane detailsPane=GuiFactory.buildScrollPane(_details);
-    detailsPane.setBorder(GuiFactory.buildTitledBorder("Details"));
+    detailsPane.setBorder(GuiFactory.buildTitledBorder("Details")); // 18n
     c=new GridBagConstraints(0,1,1,1,1.0,1.0,GridBagConstraints.WEST,GridBagConstraints.BOTH,new Insets(0,0,0,0),0,0);
     panel.add(detailsPane,c);
-
-    _panel=panel;
     setData();
-    return _panel;
+    return panel;
   }
 
   private JPanel buildTopPanel()
@@ -148,11 +136,11 @@ public class DeedDisplayPanelController implements NavigablePanelController
       panel.add(panelLine,c);
       c.gridy++;
       // Category
-      panelLine.add(GuiFactory.buildLabel("Category: "));
+      panelLine.add(GuiFactory.buildLabel("Category: ")); // 18n
       _category=GuiFactory.buildLabel("");
       panelLine.add(_category);
       // Type
-      panelLine.add(GuiFactory.buildLabel("Type: "));
+      panelLine.add(GuiFactory.buildLabel("Type: ")); // 18n
       _type=GuiFactory.buildLabel("");
       panelLine.add(_type);
     }
@@ -162,17 +150,17 @@ public class DeedDisplayPanelController implements NavigablePanelController
       panel.add(panelLine,c);
       c.gridy++;
       // Challenge level
-      panelLine.add(GuiFactory.buildLabel("Level: "));
+      panelLine.add(GuiFactory.buildLabel("Level: ")); // 18n
       _challengeLevel=GuiFactory.buildLabel("");
       panelLine.add(_challengeLevel);
     }
-    // Line 4
+    // Line 4 (requirements)
     {
       JPanel panelLine=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEFT));
       panel.add(panelLine,c);
       c.gridy++;
       // Requirements
-      panelLine.add(GuiFactory.buildLabel("Requirements: "));
+      panelLine.add(GuiFactory.buildLabel("Requirements: ")); // 18n
       _requirements=GuiFactory.buildLabel("");
       panelLine.add(_requirements);
     }
@@ -191,7 +179,7 @@ public class DeedDisplayPanelController implements NavigablePanelController
       panel.add(panelLine,c);
       c.gridy++;
       // Quest pack
-      panelLine.add(GuiFactory.buildLabel("Contents pack: "));
+      panelLine.add(GuiFactory.buildLabel("Contents pack: ")); // 18n
       _questPack=GuiFactory.buildLabel("");
       panelLine.add(_questPack);
     }
@@ -200,11 +188,11 @@ public class DeedDisplayPanelController implements NavigablePanelController
     AbstractAchievableRequirement requirement=_deed.getQuestRequirements();
     if (requirement!=null)
     {
-      _achievablesRequirements=AchievableRequirementsPanelFactory.buildAchievableRequirementPanelController(_parent,requirement);
+      _achievablesRequirements=AchievableRequirementsPanelFactory.buildAchievableRequirementPanelController(getParent(),requirement);
       JPanel achievablesRequirementsPanel=_achievablesRequirements.getPanel();
       c=new GridBagConstraints(0,c.gridy,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
       panel.add(achievablesRequirementsPanel,c);
-      achievablesRequirementsPanel.setBorder(GuiFactory.buildTitledBorder("Quests/deeds Requirements"));
+      achievablesRequirementsPanel.setBorder(GuiFactory.buildTitledBorder("Quests/deeds Requirements")); // 18n
       c.gridy++;
     }
     // World events conditions
@@ -218,7 +206,7 @@ public class DeedDisplayPanelController implements NavigablePanelController
         JPanel worldEventConditionsPanel=_worldEventConditions.getPanel();
         c=new GridBagConstraints(0,c.gridy,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(0,0,0,0),0,0);
         panel.add(worldEventConditionsPanel,c);
-        worldEventConditionsPanel.setBorder(GuiFactory.buildTitledBorder("Context"));
+        worldEventConditionsPanel.setBorder(GuiFactory.buildTitledBorder("Context")); // 18n
         c.gridy++;
       }
     }
@@ -243,7 +231,7 @@ public class DeedDisplayPanelController implements NavigablePanelController
         {
           String referenceStr=e.getDescription();
           PageIdentifier pageId=PageIdentifier.fromString(referenceStr);
-          _parent.navigateTo(pageId);
+          getParent().navigateTo(pageId);
         }
       }
     };
@@ -255,10 +243,12 @@ public class DeedDisplayPanelController implements NavigablePanelController
   {
     StringBuilder sb=new StringBuilder();
     sb.append("<html><body>");
-    sb.append("<b>Description</b><p>");
-    sb.append(HtmlUtils.toHtml(_deed.getDescription()));
+    sb.append("<b>Description</b><p>"); // 18n
+    String description=_deed.getDescription();
+    description=ContextRendering.render(this,description);
+    sb.append(HtmlUtils.toHtml(description));
     // Objectives
-    new ObjectivesDisplayBuilder(true).build(sb,_deed);
+    new ObjectivesDisplayBuilder(this,true).build(sb,_deed);
     sb.append("</body></html>");
     return sb.toString();
   }
@@ -278,13 +268,13 @@ public class DeedDisplayPanelController implements NavigablePanelController
     ImageIcon icon=LotroIconsManager.getDeedTypeIcon(type);
     _icon.setIcon(icon);
     // Category
-    String category=_deed.getCategory();
-    _category.setText((category!=null)?category:"");
+    DeedCategory category=_deed.getCategory();
+    _category.setText((category!=null)?category.getLabel():"");
     // Challenge level
     ChallengeLevel challengeLevel=_deed.getChallengeLevel();
     _challengeLevel.setText(challengeLevel.getLabel());
     // Requirements
-    String requirements=RequirementsUtils.buildRequirementString(_deed.getUsageRequirement());
+    String requirements=RequirementsUtils.buildRequirementString(this,_deed.getUsageRequirement());
     if (requirements.length()==0) requirements="-";
     _requirements.setText(requirements);
     // Attributes
@@ -324,14 +314,14 @@ public class DeedDisplayPanelController implements NavigablePanelController
     if (isMonsterPlay)
     {
       if (sb.length()>0) sb.append(", ");
-      sb.append("Monster Play");
+      sb.append("Monster Play"); // 18n
     }
     // Hidden
     boolean hidden=_deed.isHidden();
     if (hidden)
     {
       if (sb.length()>0) sb.append(", ");
-      sb.append("Hidden");
+      sb.append("Hidden"); // 18n
     }
     String ret=sb.toString();
     return ret;
@@ -340,6 +330,7 @@ public class DeedDisplayPanelController implements NavigablePanelController
   @Override
   public void dispose()
   {
+    super.dispose();
     // Data
     _deed=null;
     // Controllers
@@ -358,7 +349,6 @@ public class DeedDisplayPanelController implements NavigablePanelController
       _worldEventConditions.dispose();
       _worldEventConditions=null;
     }
-    _parent=null;
     // UI
     _type=null;
     _category=null;
@@ -366,11 +356,6 @@ public class DeedDisplayPanelController implements NavigablePanelController
     _requirements=null;
     _attributes=null;
     _questPack=null;
-    if (_panel!=null)
-    {
-      _panel.removeAll();
-      _panel=null;
-    }
     _icon=null;
     _name=null;
     _details=null;

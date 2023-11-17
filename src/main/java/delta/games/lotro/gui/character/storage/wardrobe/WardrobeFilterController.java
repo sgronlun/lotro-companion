@@ -22,6 +22,7 @@ import delta.games.lotro.character.storage.wardrobe.WardrobeItem;
 import delta.games.lotro.common.enums.ItemClass;
 import delta.games.lotro.common.filters.NamedFilter;
 import delta.games.lotro.gui.lore.items.FilterUpdateListener;
+import delta.games.lotro.gui.utils.l10n.Labels;
 import delta.games.lotro.lore.items.EquipmentLocation;
 import delta.games.lotro.lore.items.Item;
 import delta.games.lotro.lore.items.filters.ItemClassFilter;
@@ -145,7 +146,7 @@ public class WardrobeFilterController implements ActionListener
     panel.add(filter,c);
 
     // Reset
-    _reset=GuiFactory.buildButton("Reset");
+    _reset=GuiFactory.buildButton(Labels.getLabel("shared.reset"));
     _reset.addActionListener(this);
     c=new GridBagConstraints(1,y,1,1,0.0,0,GridBagConstraints.SOUTHWEST,GridBagConstraints.NONE,new Insets(0,5,5,5),0,0);
     panel.add(_reset,c);
@@ -163,7 +164,7 @@ public class WardrobeFilterController implements ActionListener
     // Label filter
     {
       JPanel containsPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING,5,0));
-      containsPanel.add(GuiFactory.buildLabel("Name:"));
+      containsPanel.add(GuiFactory.buildLabel("Name:")); // I18n
       _contains=GuiFactory.buildTextField("");
       _contains.setColumns(10);
       containsPanel.add(_contains);
@@ -184,7 +185,7 @@ public class WardrobeFilterController implements ActionListener
     // Category
     {
       JPanel categoryPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING));
-      categoryPanel.add(GuiFactory.buildLabel("Category:"));
+      categoryPanel.add(GuiFactory.buildLabel("Category:")); // I18n
       _category=buildCategoryCombobox();
       categoryPanel.add(_category.getComboBox());
       line1Panel.add(categoryPanel);
@@ -192,7 +193,7 @@ public class WardrobeFilterController implements ActionListener
     // Location
     {
       JPanel slotPanel=GuiFactory.buildPanel(new FlowLayout(FlowLayout.LEADING));
-      slotPanel.add(GuiFactory.buildLabel("Slot:"));
+      slotPanel.add(GuiFactory.buildLabel("Slot:")); // I18n
       _slot=buildSlotCombobox();
       slotPanel.add(_slot.getComboBox());
       line1Panel.add(slotPanel);
@@ -235,7 +236,7 @@ public class WardrobeFilterController implements ActionListener
     List<EquipmentLocation> slots=_filter.getConfiguration().getSlots();
     for(EquipmentLocation slot : slots)
     {
-      ctrl.addItem(slot,slot.toString());
+      ctrl.addItem(slot,slot.getLabel());
     }
   }
 

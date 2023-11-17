@@ -12,18 +12,16 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import delta.common.ui.swing.GuiFactory;
-import delta.common.ui.swing.navigator.NavigatorWindowController;
 import delta.common.ui.swing.navigator.PageIdentifier;
 import delta.common.ui.swing.tables.GenericTableController;
 import delta.common.ui.swing.windows.DefaultWindowController;
 import delta.common.ui.swing.windows.WindowController;
-import delta.common.ui.swing.windows.WindowsManager;
 import delta.common.utils.misc.TypedProperties;
 import delta.games.lotro.gui.common.navigation.ReferenceConstants;
 import delta.games.lotro.gui.lore.quests.filter.QuestFilterController;
 import delta.games.lotro.gui.lore.quests.table.QuestsTableController;
 import delta.games.lotro.gui.main.GlobalPreferences;
-import delta.games.lotro.gui.navigation.NavigatorFactory;
+import delta.games.lotro.gui.utils.NavigationUtils;
 import delta.games.lotro.lore.quests.QuestDescription;
 import delta.games.lotro.lore.quests.filter.QuestFilter;
 
@@ -42,7 +40,6 @@ public class QuestsExplorerWindowController extends DefaultWindowController
   private QuestsExplorerPanelController _panelController;
   private QuestsTableController _tableController;
   private QuestFilter _filter;
-  private WindowsManager _questWindows;
 
   /**
    * Constructor.
@@ -52,14 +49,13 @@ public class QuestsExplorerWindowController extends DefaultWindowController
   {
     super(parent);
     _filter=new QuestFilter();
-    _questWindows=new WindowsManager();
   }
 
   @Override
   protected JFrame build()
   {
     JFrame frame=super.build();
-    frame.setTitle("Quests explorer");
+    frame.setTitle("Quests explorer"); // I18n
     frame.setMinimumSize(new Dimension(400,300));
     frame.setSize(950,700);
     return frame;
@@ -86,9 +82,9 @@ public class QuestsExplorerWindowController extends DefaultWindowController
     _panelController=new QuestsExplorerPanelController(this,_tableController);
     JPanel tablePanel=_panelController.getPanel();
     // Filter
-    _filterController=new QuestFilterController(_filter,_panelController,true);
+    _filterController=new QuestFilterController(this,_filter,_panelController,true);
     JPanel filterPanel=_filterController.getPanel();
-    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter");
+    TitledBorder filterBorder=GuiFactory.buildTitledBorder("Filter"); // I18n
     filterPanel.setBorder(filterBorder);
     // Whole panel
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(0,0,0,0),0,0);
@@ -101,7 +97,7 @@ public class QuestsExplorerWindowController extends DefaultWindowController
   private void initQuestsTable()
   {
     TypedProperties prefs=GlobalPreferences.getGlobalProperties("QuestsExplorer");
-    _tableController=new QuestsTableController(prefs,_filter);
+    _tableController=new QuestsTableController(this,prefs,_filter);
     ActionListener al=new ActionListener()
     {
       @Override
@@ -120,12 +116,8 @@ public class QuestsExplorerWindowController extends DefaultWindowController
 
   private void showQuest(QuestDescription quest)
   {
-    int id=_questWindows.getAll().size();
-    NavigatorWindowController window=NavigatorFactory.buildNavigator(QuestsExplorerWindowController.this,id);
     PageIdentifier ref=ReferenceConstants.getAchievableReference(quest);
-    window.navigateTo(ref);
-    window.show(false);
-    _questWindows.registerWindow(window);
+    NavigationUtils.navigateTo(ref,this);
   }
 
   /**
@@ -136,11 +128,6 @@ public class QuestsExplorerWindowController extends DefaultWindowController
   {
     saveBoundsPreferences();
     super.dispose();
-    if (_questWindows!=null)
-    {
-      _questWindows.disposeAll();
-      _questWindows=null;
-    }
     if (_tableController!=null)
     {
       _tableController.dispose();

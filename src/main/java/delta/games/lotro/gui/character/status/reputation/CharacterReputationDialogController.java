@@ -46,7 +46,7 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
   // UI
   private ReputationDeedsDisplayController _deedsDisplay;
   private ReputationRewardsDisplayController _rewardsDisplay;
-  private HashMap<Integer,FactionEditionPanelController> _editors;
+  private HashMap<Integer,FactionStatusEditionGagdgetsController> _editors;
 
   /**
    * Constructor.
@@ -58,14 +58,14 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
     super(parentController,null);
     _toon=toon;
     _data=_toon.getReputation();
-    _editors=new HashMap<Integer,FactionEditionPanelController>();
+    _editors=new HashMap<Integer,FactionStatusEditionGagdgetsController>();
   }
 
   @Override
   protected JDialog build()
   {
     JDialog dialog=super.build();
-    dialog.setTitle("Reputation editor");
+    dialog.setTitle("Reputation editor"); // I18n
     dialog.setResizable(false);
     return dialog;
   }
@@ -101,7 +101,7 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
       tabPanel.add(reputationPanel,BorderLayout.CENTER);
       tabs.add(category,tabPanel);
     }
-    TitledBorder factionsBorder=GuiFactory.buildTitledBorder("Factions");
+    TitledBorder factionsBorder=GuiFactory.buildTitledBorder("Factions"); // I18n
     tabs.setBorder(factionsBorder);
     panel.add(tabs,BorderLayout.CENTER);
     return panel;
@@ -126,14 +126,14 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
     // Deeds
     _deedsDisplay=new ReputationDeedsDisplayController(_data);
     JPanel deedsDisplayPanel=_deedsDisplay.getPanel();
-    TitledBorder deedsBorder=GuiFactory.buildTitledBorder("Deeds");
+    TitledBorder deedsBorder=GuiFactory.buildTitledBorder("Deeds"); // I18n
     deedsDisplayPanel.setBorder(deedsBorder);
     GridBagConstraints c=new GridBagConstraints(0,0,1,1,1.0,0.0,GridBagConstraints.WEST,GridBagConstraints.BOTH,new Insets(5,5,5,5),0,0);
     panel.add(deedsDisplayPanel,c);
     // Rewards
     _rewardsDisplay=new ReputationRewardsDisplayController(_data);
     JPanel rewardsDisplayPanel=_rewardsDisplay.getPanel();
-    TitledBorder rewardsBorder=GuiFactory.buildTitledBorder("Rewards");
+    TitledBorder rewardsBorder=GuiFactory.buildTitledBorder("Rewards"); // I18n
     rewardsDisplayPanel.setBorder(rewardsBorder);
     c=new GridBagConstraints(1,0,1,1,0.0,0.0,GridBagConstraints.WEST,GridBagConstraints.VERTICAL,new Insets(5,5,5,5),0,0);
     panel.add(rewardsDisplayPanel,c);
@@ -152,7 +152,7 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
     int y=0;
     for(Faction faction : factions)
     {
-      FactionEditionPanelController editionController=new FactionEditionPanelController(faction);
+      FactionStatusEditionGagdgetsController editionController=new FactionStatusEditionGagdgetsController(this,faction);
       Integer key=Integer.valueOf(faction.getIdentifier());
       _editors.put(key,editionController);
       // Label
@@ -192,7 +192,7 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
 
   private void initData()
   {
-    for(FactionEditionPanelController editor : _editors.values())
+    for(FactionStatusEditionGagdgetsController editor : _editors.values())
     {
       updateFactionDisplay(editor);
     }
@@ -205,7 +205,7 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
   {
     // +/- buttons
     Object source=event.getSource();
-    for(FactionEditionPanelController editor : _editors.values())
+    for(FactionStatusEditionGagdgetsController editor : _editors.values())
     {
       if (source==editor.getMinusButton())
       {
@@ -236,7 +236,7 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
     }
   }
 
-  private void updateFactionDisplay(FactionEditionPanelController editor)
+  private void updateFactionDisplay(FactionStatusEditionGagdgetsController editor)
   {
     Faction faction=editor.getFaction();
     FactionStatus factionStatus=_data.getFactionStatus(faction);
@@ -275,7 +275,7 @@ public class CharacterReputationDialogController extends DefaultFormDialogContro
     super.dispose();
     if (_editors!=null)
     {
-      for(FactionEditionPanelController editor : _editors.values())
+      for(FactionStatusEditionGagdgetsController editor : _editors.values())
       {
         editor.dispose();
       }
